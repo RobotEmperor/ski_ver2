@@ -1,0 +1,49 @@
+
+head :  # MX106 joint 1
+   return_delay_time     :  10
+   homing_offset         :   0
+waist_roll : # MX106 joint 10
+   return_delay_time     :  10
+   homing_offset         :   0
+
+l_hip_pitch :   # MX106 joint 11
+   return_delay_time     :  10
+   homing_offset         :   0
+r_hip_pitch :   # MX106 joint 12
+   return_delay_time     :  10
+   homing_offset         :   0
+l_hip_roll :    # MX106 joint 13
+   return_delay_time     :  10
+   homing_offset         :   0
+r_hip_roll :    # MX106 joint 14
+   return_delay_time     :  10
+   homing_offset         :   0
+l_hip_yaw :     # MX106 joint 15
+   return_delay_time     :  10
+   homing_offset         :   0
+r_hip_yaw :     # MX106 joint 16
+   return_delay_time     :  10
+   homing_offset         :   0
+   
+
+
+l_knee_pitch :   #MX106 joint 17
+   return_delay_time     :  10
+   homing_offset         :   0
+r_knee_pitch :   #MX106 joint 18
+   return_delay_time     :  10
+   homing_offset         :   0
+l_ankle_pitch :  #MX106 joint 19
+   return_delay_time     :  10
+   homing_offset         :   0
+r_ankle_pitch :  #MX106 joint 20
+   return_delay_time     :  10
+   homing_offset         :   0
+l_ankle_roll :   #MX106 joint 21
+   return_delay_time     :  10
+   homing_offset         :   0
+r_ankle_roll :   #MX106 joint 22
+   return_delay_time     :  10
+   homing_offset         :   0
+
+

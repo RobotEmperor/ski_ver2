@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+
+<launch>    
+
+    <param name="gazebo"                   value="true"     type="bool"/>
+    <param name="gazebo_robot_name"        value="ski_simulation_test" />
+
+    <param name="offset_table"             value="$(find ski_main_manager)/config/offset.yaml"/>
+    <param name="robot_file_path"          value="$(find ski_main_manager)/config/ski_robot.robot"/>
+    <param name="init_file_path"           value="$(find ski_main_manager)/config/dxl_init.yaml"/>
+      
+    <!-- ski_robot Manager -->
+    <node name="ski_main_manager_node" pkg="ski_main_manager" type="ski_main_manager_node" output="screen"/>
+    
+</launch>
+
