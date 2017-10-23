@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   robotis_math
   robotis_framework_common
   robotis_controller_msgs
+  heroehs_math
 )
 
 find_package(Eigen REQUIRED)

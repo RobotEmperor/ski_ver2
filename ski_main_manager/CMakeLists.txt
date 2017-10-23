@@ -10,7 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   robotis_controller
   robotis_controller_msgs
   cmake_modules
-  
+  heroehs_math 
   #add module package
   offset_module
   base_module

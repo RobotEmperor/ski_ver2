@@ -22,27 +22,35 @@ public:
 	FifthOrderTrajectory();
 	~FifthOrderTrajectory();
 
-	double fifth_order_traj_gen(double initial_pose_, double final_pose_,double initial_velocity, double final_velocity , double initial_time_, double final_time_);
+	double fifth_order_traj_gen(double initial_value_, double final_value_,
+			                        double initial_velocity_, double final_velocity_ ,
+			                        double initial_acc, double final_acc,
+			                        double initial_time_, double final_time_);
 
 
 	bool detect_change_trajectory_final_time(double time_);
 	bool detect_change_trajectory_final_pose(double pose);
 	bool detect_change_trajectory_final_velocity(double velocity_);
 
+	bool is_moving_traj;
+
 
 	double initial_time;
 	double initial_pose;
 	double initial_velocity;
+	double initial_acc;
 
 
 	double current_time;
 	double current_pose;
 	double current_velocity;
+	double current_acc;
 
 
 	double final_time;
 	double final_pose;
 	double final_velocity;
+	double final_acc;
 
 
 

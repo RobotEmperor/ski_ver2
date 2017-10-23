@@ -17,6 +17,7 @@
 #include <Eigen/Dense>
 #include <yaml-cpp/yaml.h>
 #include <fstream>
+#include <stdio.h>
 
 #include "robotis_framework_common/motion_module.h"
 
@@ -26,7 +27,12 @@
 
 #include "base_module/base_module_state.h"
 
+#include "heroehs_math/fifth_order_trajectory_generate.h"
+
+#include "heroehs_math/kinematics.h"
+
 using namespace base_module_state;
+using namespace heroehs_math;
 
 namespace base_module
 {
@@ -49,9 +55,13 @@ public:
   void initPoseMsgCallback(const std_msgs::String::ConstPtr& msg);
 
 
-  BaseModuleState *base_module_joint_state;
+  BaseModuleState *base_module_state;
+
+  FifthOrderTrajectory *motion_trajectory_11;
+  FifthOrderTrajectory *motion_trajectory_13;
 
 
+  //*motion_trajectory;
 
 
 private:

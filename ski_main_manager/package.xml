@@ -49,6 +49,8 @@
   <!-- add module package -->
   <build_depend>offset_module</build_depend>
   <build_depend>base_module</build_depend>
+  <build_depend>heroehs_math</build_depend>
+
 
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
