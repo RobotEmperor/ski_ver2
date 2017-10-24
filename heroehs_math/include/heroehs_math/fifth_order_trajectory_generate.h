@@ -5,6 +5,8 @@
  *  Created on: 2017. 10. 23.
  *      Author: RobotEmperor
  */
+#ifndef HEROEHS_MATH_FIFTH_ORDER_TRAJECTORY_GENERATE_H_
+#define HEROEHS_MATH_FIFTH_ORDER_TRAJECTORY_GENERATE_H_
 
 #include <ros/ros.h>
 #include <Eigen/Dense>
@@ -64,4 +66,7 @@ public:
 
 
 }
+
+#endif /* HEROEHS_MATH_FIFTH_ORDER_TRAJECTORY_GENERATE_H_ */
+
 

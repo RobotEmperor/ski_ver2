@@ -24,7 +24,6 @@ BaseModule::BaseModule()
 	result_["l_hip_pitch"] = new robotis_framework::DynamixelState();  // joint 11
 	result_["l_hip_roll"]  = new robotis_framework::DynamixelState();  // joint 13
 
-
 	result_["l_hip_yaw"]   = new robotis_framework::DynamixelState();  // joint 15
 	result_["l_knee_pitch"] = new robotis_framework::DynamixelState();  // joint 17
 	result_["l_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 19
@@ -37,18 +36,14 @@ BaseModule::BaseModule()
 	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
 	result_["r_ankle_roll"]  = new robotis_framework::DynamixelState();  // joint 22
 
-
-
 	///////////////////////////
 
 	base_module_state  = new BaseModuleState();
 
-	motion_trajectory_11 = new FifthOrderTrajectory();
-	motion_trajectory_13 = new FifthOrderTrajectory();
-
-
-
-
+	for(int i=1;i<23;i++)
+	{
+		motion_trajectory[i]= new heroehs_math::FifthOrderTrajectory();
+	}
 }
 
 BaseModule::~BaseModule()
@@ -74,15 +69,16 @@ void BaseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 		base_module_state->MAX_JOINT_ID_STATE ++; // joint 개수 확인
 	}
 	base_module_state->joint_ini_pose_state.resize(23,1);
+	base_module_state->joint_ini_pose_goal.resize(23,1);
 	base_module_state->joint_ini_pose_state.fill(0);
-	//	base_module_state->is_moving_state = motion_trajectory->is_moving_traj;
+	base_module_state->joint_ini_pose_goal.fill(0);
+
 	ROS_INFO("< -------  Initialize Module : Base Module !!  ------->");
 
 }
 
 void BaseModule::parse_init_pose_data_(const std::string &path)
 {
-
 	YAML::Node doc; // YAML file class 선언!
 	try
 	{
@@ -96,7 +92,6 @@ void BaseModule::parse_init_pose_data_(const std::string &path)
 	}
 	double mov_time_ = 0.0;
 
-
 	mov_time_= doc["mov_time"].as<double>(); // YAML 에 string "mov_time"을 읽어온다.
 	base_module_state->mov_time_state = mov_time_;
 
@@ -109,10 +104,8 @@ void BaseModule::parse_init_pose_data_(const std::string &path)
 		id = it->first.as<int>();
 		value = it->second.as<double>();
 
-		base_module_state->joint_ini_pose_state.coeffRef(id, 0) = value * DEGREE2RADIAN; // YAML에 로드된 초기 포즈 값을 라디안으로 바꾸고, eigen matrix 에 id 개수만큼 열을 생성한다.
-		//ROS_INFO("ID : %d, Value : %f", id, base_module_state->joint_ini_pose_state.coeffRef(id, 0)*RADIAN2DEGREE/0.088);
+		base_module_state->joint_ini_pose_goal.coeffRef(id, 0) = value * DEGREE2RADIAN; // YAML에 로드된 초기 포즈 값을 라디안으로 바꾸고, eigen matrix 에 id 개수만큼 열을 생성한다.
 	}
-
 }
 
 void BaseModule::initPoseMsgCallback(const std_msgs::String::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실
@@ -121,7 +114,6 @@ void BaseModule::initPoseMsgCallback(const std_msgs::String::ConstPtr& msg) // G
 	parse_init_pose_data_(init_pose_path); // YAML 파일 로드 및 값 저장.
 	base_module_state->is_moving_state = true;
 }
-
 void BaseModule::queueThread()
 {
 	ros::NodeHandle ros_node;
@@ -139,13 +131,10 @@ void BaseModule::queueThread()
 	while(ros_node.ok())
 		callback_queue.callAvailable(duration);
 }
-
-
 bool BaseModule::isRunning()
 {
 	return running_;
 }
-
 void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
 		std::map<std::string, double> sensors)
 {
@@ -153,7 +142,6 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	{
 		return;
 	}
-
 	//// read current position ////
 	if(base_module_state->is_moving_state == false)
 	{
@@ -161,42 +149,43 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 				state_iter != dxls.end(); state_iter++)
 		{
 			std::string joint_name = state_iter->first;
-			//result_[joint_name]->goal_position_ = dxls[joint_name]->dxl_state_->present_position_;
-		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
-	}
+			if(gazebo_check == true)
+				result_[joint_name]->goal_position_ = result_[joint_name]->present_position_; // 가제보 상 초기위치 0
+			else
+				result_[joint_name]->goal_position_ = dxls[joint_name]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
 
-	else // trajectory is working
+			base_module_state->joint_ini_pose_state.coeffRef(joint_name_to_id_[joint_name], 0) = dxls[joint_name]->dxl_state_->present_position_; // 초기위치 저장
+		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
+		ROS_INFO("stay");
+	}
+	else // trajectory is working joint space control
 	{
 		ROS_INFO("Trajectory start");
 
-		/*result_[joint_id_to_name_[1]]->goal_position_ = motion_trajectory->fifth_order_traj_gen(dxls[joint_id_to_name_[1]]->dxl_state_->present_position_ ,
-							base_module_state->joint_ini_pose_state(1,0) ,
-							0,0,0,0,0,base_module_state->mov_time_state);*/ // 머리
+		result_[joint_id_to_name_[1]]->goal_position_ = motion_trajectory[1]->fifth_order_traj_gen(base_module_state->joint_ini_pose_state(1,0) ,
+				base_module_state->joint_ini_pose_goal(1,0) ,
+				0,0,0,0,0,base_module_state->mov_time_state);// 머리
 
-
-		/*	for(int id=6;id<12;id++)
+		for(int id=10 ; id<23 ; id++)
 		{
-			result_[joint_id_to_name_[2*id-1]]->goal_position_ =  motion_trajectory->fifth_order_traj_gen(0 ,
-					base_module_state->joint_ini_pose_state(2*id-1,0) ,
-					0,0,0,0,0,base_module_state->mov_time_state);
-		}*/
-
-		result_[joint_id_to_name_[11]]->goal_position_ =  -motion_trajectory_11->fifth_order_traj_gen(0 ,
-				base_module_state->joint_ini_pose_state(11,0) ,
-				0,0,0,0,0,base_module_state->mov_time_state);
-
-		result_[joint_id_to_name_[13]]->goal_position_ =  motion_trajectory_13->fifth_order_traj_gen(0 ,
-									base_module_state->joint_ini_pose_state(13,0) ,
-									0,0,0,0,0,base_module_state->mov_time_state);
-
-
-
+			if(id == 10 || id ==11 || id ==17 || id ==19) // 방향 반대인 다이나믹셀
+			{
+				result_[joint_id_to_name_[id]]->goal_position_ = - motion_trajectory[id]->fifth_order_traj_gen(base_module_state->joint_ini_pose_state(id,0),
+						base_module_state->joint_ini_pose_goal(id,0) ,
+						0,0,0,0,0,base_module_state->mov_time_state);
+				result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
+			}
+			else
+			{
+				result_[joint_id_to_name_[id]]->goal_position_ =  motion_trajectory[id]->fifth_order_traj_gen(base_module_state->joint_ini_pose_state(id,0),
+						base_module_state->joint_ini_pose_goal(id,0) ,
+						0,0,0,0,0,base_module_state->mov_time_state);
+				result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
+			}
+		}
+		base_module_state->is_moving_state = motion_trajectory[1]->is_moving_traj;// trajectory end
 	}
-
-	//base_module_state->is_moving_state = motion_trajectory_11->is_moving_traj;
-	//base_module_state->is_moving_state = motion_trajectory_13->is_moving_traj;
 }
-
 void BaseModule::stop()
 {
 	return;

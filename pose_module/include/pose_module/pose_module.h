@@ -1,7 +1,7 @@
 /*
- * base_module.h
+ * pose_module.h
  *
- *  Created on: 2017. 10. 14.
+ *  Created on: Oct 24, 2017
  *      Author: robotemperor
  */
 #include <map>
@@ -20,26 +20,25 @@
 #include <stdio.h>
 
 #include "robotis_framework_common/motion_module.h"
-
 #include "robotis_controller_msgs/StatusMsg.h"
-
 #include "robotis_math/robotis_math.h"
 
-#include "base_module/base_module_state.h"
+
 
 #include "heroehs_math/fifth_order_trajectory_generate.h"
 #include "heroehs_math/kinematics.h"
 
-using namespace base_module_state;
 
-namespace base_module
+
+
+namespace pose_module
 {
 
-class BaseModule: public robotis_framework::MotionModule, public robotis_framework::Singleton<BaseModule>
+class PoseModule: public robotis_framework::MotionModule, public robotis_framework::Singleton<PoseModule>
 {
 public:
-	BaseModule();
-	virtual ~BaseModule();
+	PoseModule();
+	virtual ~PoseModule();
 
 	/* ROS Framework Functions */
 	void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
@@ -55,15 +54,24 @@ public:
 	void initPoseMsgCallback(const std_msgs::String::ConstPtr& msg);
 
 
-	BaseModuleState *base_module_state;
-	heroehs_math::FifthOrderTrajectory *motion_trajectory[23];
+	heroehs_math::FifthOrderTrajectory *pX_l_tra;
 
+	/*FifthOrderTrajectory *pY_l_tra;
+	FifthOrderTrajectory *pZ_l_tra;
+	FifthOrderTrajectory *alpha_l_tra;
+	FifthOrderTrajectory *kamma_l_tra;
+	FifthOrderTrajectory *betta_l_tra;
+
+	FifthOrderTrajectory *pX_r_tra;
+	FifthOrderTrajectory *pY_r_tra;
+	FifthOrderTrajectory *pZ_r_tra;
+	FifthOrderTrajectory *alpha_r_tra;
+	FifthOrderTrajectory *kamma_r_tra;
+	FifthOrderTrajectory *betta_r_tra;*/
 
 
 private:
 	void queueThread();
-	void parse_init_pose_data_(const std::string &path);
-	void init_pose_trajectory_();
 	bool running_;
 
 
@@ -80,5 +88,3 @@ private:
 };
 
 }
-
-

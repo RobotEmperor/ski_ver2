@@ -5,6 +5,8 @@
  *  Created on: 2017. 10. 23.
  *      Author: RobotEmperor
  */
+#ifndef HEROEHS_MATH_KINEMATICS_H_
+#define HEROEHS_MATH_KINEMATICS_H_
 
 #include <ros/ros.h>
 #include <Eigen/Dense>
@@ -53,3 +55,4 @@ private:
 
 };
 }
+#endif /* HEROEHS_MATH_KINEMATICS_H_ */

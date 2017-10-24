@@ -1,4 +1,3 @@
-
 /*
  * fifth_order_trajectory_generate.cpp
  *
@@ -89,7 +88,6 @@ double FifthOrderTrajectory::fifth_order_traj_gen(double initial_value_, double 
 
 	current_time = current_time + 0.008;
 
-  ROS_INFO("%f", current_time);
 
 	if(current_time > final_time)
 	{

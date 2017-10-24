@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>ski_main_manager</name>
+  <name>pose_module</name>
   <version>0.0.0</version>
-  <description>The ski_main_manager package</description>
+  <description>The pose_module package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/ski_main_manager</url> -->
+  <!-- <url type="website">http://wiki.ros.org/pose_module</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -39,22 +39,26 @@
   <!--   <run_depend>message_runtime</run_depend> -->
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
-  <buildtool_depend>catkin</buildtool_depend>
+<buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
-  <build_depend>robotis_framework_common</build_depend>
-  <build_depend>robotis_controller</build_depend>
-  <build_depend>robotis_controller_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
   <build_depend>cmake_modules</build_depend>
-  <!-- add module package -->
-  <build_depend>offset_module</build_depend>
-  <build_depend>base_module</build_depend>
-  <build_depend>pose_module</build_depend>
+  <build_depend>robotis_math</build_depend>
+  <build_depend>robotis_framework_common</build_depend>
+  <build_depend>robotis_controller_msgs</build_depend>
+  <build_depend>yaml-cpp</build_depend>
   <build_depend>heroehs_math</build_depend>
-
 
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>cmake_modules</run_depend>
+  <run_depend>robotis_math</run_depend>
+  <run_depend>robotis_framework_common</run_depend>
+  <run_depend>robotis_controller_msgs</run_depend>
+  <run_depend>yaml-cpp</run_depend>
+  <run_depend>heroehs_math</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

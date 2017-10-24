@@ -11,7 +11,7 @@ OffsetModule::OffsetModule()
 :control_cycle_msec_(8) // 제어주기 8ms
 {
 	// variables initialize ////
-	joint_select_ = 1;
+	joint_select_ = 15;
 
 	for(int i=0; i<30;i++)
 	{
@@ -28,6 +28,7 @@ OffsetModule::OffsetModule()
 	control_mode_ = robotis_framework::PositionControl;
 
 	// Dynamixel initialize ////
+
 	result_["head"]        = new robotis_framework::DynamixelState(); // joint 1
 	result_["waist_roll"]  = new robotis_framework::DynamixelState(); // joint 10
 
@@ -45,6 +46,8 @@ OffsetModule::OffsetModule()
 	result_["r_knee_pitch"] = new robotis_framework::DynamixelState();  // joint 18
 	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
 	result_["r_ankle_roll"]  = new robotis_framework::DynamixelState();  // joint 22
+
+
 
 
 	///////////////////////////

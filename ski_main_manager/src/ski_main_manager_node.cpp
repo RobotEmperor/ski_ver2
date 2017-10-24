@@ -8,6 +8,7 @@
 #include "robotis_controller/robotis_controller.h"
 #include "offset_module/offset_module.h"
 #include "base_module/base_module.h"
+#include "pose_module/pose_module.h"
 
 
 int main(int argc, char **argv)
@@ -33,7 +34,8 @@ int main(int argc, char **argv)
     ROS_WARN("GAZEBO_MODE!!!!!!!!!!!!!!!");
   }
 
-  //ski_body_main::BodyModule::getInstance()->gazebo_check = controller->gazebo_mode_;
+  base_module::BaseModule::getInstance()->gazebo_check = controller->gazebo_mode_;
+  pose_module::PoseModule::getInstance()->gazebo_check = controller->gazebo_mode_;
 
   if (robot_file == "")
   {
@@ -55,6 +57,7 @@ int main(int argc, char **argv)
   /* Add Motion Module */
   controller->addMotionModule((robotis_framework::MotionModule*) offset_module::OffsetModule::getInstance());
   controller->addMotionModule((robotis_framework::MotionModule*) base_module::BaseModule::getInstance());
+  controller->addMotionModule((robotis_framework::MotionModule*) pose_module::PoseModule::getInstance());
 
   controller->startTimer();
 
