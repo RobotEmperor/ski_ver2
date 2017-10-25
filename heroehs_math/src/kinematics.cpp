@@ -84,6 +84,14 @@ Kinematics::Kinematics()
 	real_theta[4] = 0;
 	real_theta[5] = 0;
 	real_theta[6] = 0;
+
+	for(int i=0; i<8;i++)
+	{
+		H[i].resize(4,4);
+		H[i].fill(0);
+	}
+	P.resize(4,4);
+	P.fill(0);
 }
 
 
@@ -92,9 +100,101 @@ Kinematics::~Kinematics()
 
 }
 
-void Kinematics::FowardKnematics()
+void Kinematics::FowardKnematics(double joint[7])
 {
+/*	double sum_theta[7] = {0,0,0,0,0,0,0};
+	double offset_theta[7] = {0, 0, (M_PI)/2, -(M_PI)/2, (M_PI)/2, 0, 0};
+	for(int i=1; i<7; i++)
+		{
+			sum_theta[i] = joint[i]+ offset_theta[i];
+		}
+		for(int i=1; i<7; i++)
+		{
 
+			H[i](0,0) = floor(100000.*(cos(sum_theta[i])+0.000005))/100000.;
+			H[i](0,1) = floor(100000.*(-cos(dh_alpha[i])*sin(sum_theta[i])+0.000005))/100000.;
+			H[i](0,2) = floor(100000.*(sin(dh_alpha[i])*sin(sum_theta[i])+0.000005))/100000.;
+			H[i](0,3) = floor(100000.*(dh_link[i]*cos(sum_theta[i])+0.000005))/100000.;
+
+			H[i](1,0) = floor(100000.*(sin(sum_theta[i])+0.000005))/100000.;
+			H[i](1,1) = floor(100000.*(cos(dh_alpha[i])*cos(sum_theta[i])+0.000005))/100000.;
+			H[i](1,2) = floor(100000.*(-sin(dh_alpha[i])*cos(sum_theta[i])+0.000005))/100000.;
+			H[i](1,3) = floor(100000.*(dh_link[i]*sin(sum_theta[i])+0.000005))/100000.;
+
+			H[i](2,0) =0;
+			H[i](2,1) = floor(100000.*(sin(dh_alpha[i])+0.000005))/100000.;
+			H[i](2,2) = floor(100000.*(cos(dh_alpha[i])+0.000005))/100000.;
+			H[i](2,3) = -dh_link_d[i];
+
+			H[i](3,0) =0;
+			H[i](3,1) =0;
+			H[i](3,2) =0;
+			H[i](3,3) =1;
+
+			H[i](0,0) = cos(sum_theta[i]);
+			H[i](0,1) = -cos(dh_alpha[i])*sin(sum_theta[i]);
+			H[i](0,2) = sin(dh_alpha[i])*sin(sum_theta[i]);
+			H[i](0,3) = dh_link[i]*cos(sum_theta[i]);
+
+			H[i](1,0) = sin(sum_theta[i]);
+			H[i](1,1) = cos(dh_alpha[i])*cos(sum_theta[i]);
+			H[i](1,2) = -sin(dh_alpha[i])*cos(sum_theta[i]);
+			H[i](1,3) = dh_link[i]*sin(sum_theta[i]);
+
+			H[i](2,0) =0;
+			H[i](2,1) = sin(dh_alpha[i]);
+			H[i](2,2) = cos(dh_alpha[i]);
+			H[i](2,3) = -dh_link_d[i];
+
+			H[i](3,0) =0;
+			H[i](3,1) =0;
+			H[i](3,2) =0;
+			H[i](3,3) =1;
+
+		}
+		//////// 베이스 좌표계와 일치시킨다.//////
+		H[0](0,0) = 0;
+		H[0](0,1) = -1;
+		H[0](0,2) = 0;
+		H[0](0,3) = 0;
+
+		H[0](1,0) = 0;
+		H[0](1,1) = 0;
+		H[0](1,2) = 1;
+		H[0](1,3) = 0;
+
+		H[0](2,0) = -1;
+		H[0](2,1) = 0;
+		H[0](2,2) = 0;
+		H[0](2,3) = 0;
+
+		H[0](3,0) = 0;
+		H[0](3,1) = 0;
+		H[0](3,2) = 0;
+		H[0](3,3) = 1;
+		//// foot frame 을 Global frame 과 일치 시킨다.
+		H[7](0,0) = 0;
+		H[7](0,1) = 0;
+		H[7](0,2) = -1;
+		H[7](0,3) = 0;
+
+		H[7](1,0) = 0;
+		H[7](1,1) = 1;
+		H[7](1,2) = 0;
+		H[7](1,3) = 0;
+
+		H[7](2,0) = 1;
+		H[7](2,1) = 0;
+		H[7](2,2) = 0;
+		H[7](2,3) = 0;
+
+		H[7](3,0) = 0;
+		H[7](3,1) = 0;
+		H[7](3,2) = 0;
+		H[7](3,3) = 1;
+		/////////////////////////////////
+
+		P = H[0]*H[1]*H[2]*H[3]*H[4]*H[5]*H[6]*H[7];*/
 }
 
 void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_alpha_, double y_betta_, double x_kamma_)

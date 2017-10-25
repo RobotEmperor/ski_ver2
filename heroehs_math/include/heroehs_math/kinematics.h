@@ -24,15 +24,21 @@ public:
 	Kinematics();
 	~Kinematics();
 
-	void FowardKnematics();
+	void FowardKnematics(double joint[7]);
 	void InverseKinematics(double pX_, double pY_, double pZ_, double z_alpha_, double y_betta_, double x_kamma_);
+
+	Eigen::MatrixXd P;
 
 
 	Eigen::MatrixXd joint_radian;
 
 private:
 
+	//forward_kinematics
+	Eigen::MatrixXd H[8];
 
+
+  // inverse_kinematics
 	double r11_,r12_,r13_,r21_,r22_,r23_,r31_,r32_,r33_; // euler angle
 	double real_theta[7] , dh_alpha[7] , dh_link[7] , dh_link_d[7]; // dh_convention variables
 

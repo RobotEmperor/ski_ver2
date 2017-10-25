@@ -69,7 +69,6 @@ void OffsetModule::queueThread()
 
 	ros_node.setCallbackQueue(&callback_queue);
 
-
 	// subsscriber definition ////
 	joint_select_sub_ = ros_node.subscribe("/joint_select",100, &OffsetModule::joint_select_sub_function, this);
 	change_joint_value_sub_ = ros_node.subscribe("/change_joint_value",100, &OffsetModule::change_joint_value_sub_function, this);
@@ -170,13 +169,9 @@ void OffsetModule::save_onoff_sub_function(const std_msgs::Bool::ConstPtr& msg)
 	{
 		// YAML SAVE
 		ROS_INFO("YAML_SAVE_READY");
-
-
 		YAML::Emitter yaml_out;
 		std::map<std::string, double> offset;
 		std::map<std::string, double> init_pose;
-
-
 
 		offset[joint_id_to_name_[1]] = offset_joint_value_[1];  // edit one of the nodes
 

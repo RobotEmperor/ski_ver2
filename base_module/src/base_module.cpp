@@ -13,6 +13,7 @@ BaseModule::BaseModule()
 {
 	running_ = false;
 	enable_       = false;
+	gazebo_check  = false;
 	module_name_  = "base_module";
 	control_mode_ = robotis_framework::PositionControl;
 

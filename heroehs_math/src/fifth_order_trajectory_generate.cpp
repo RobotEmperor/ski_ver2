@@ -24,26 +24,17 @@ FifthOrderTrajectory::~FifthOrderTrajectory()
 
 }
 
-bool FifthOrderTrajectory::detect_change_trajectory_final_pose(double pose_)
-{
-	if(pose_ != final_pose)
-		return true;
-	else
-		return false;
 
-}
-bool FifthOrderTrajectory::detect_change_trajectory_final_velocity(double velocity_)
+bool FifthOrderTrajectory::detect_change_final_value(double pose_, double velocity_, double time_)
 {
-	if(velocity_ != final_velocity)
-		return true;
-	else
-		return false;
-
-}
-bool FifthOrderTrajectory::detect_change_trajectory_final_time(double time_)
-{
-	if(time_ != final_time)
-		return true;
+	if(pose_ != final_pose || velocity_ != final_velocity || time_ != final_time  )
+	{
+		final_pose = pose_;
+		final_velocity = velocity_;
+		final_time = time_;
+		current_time = 0;
+				return true;
+	}
 	else
 		return false;
 
@@ -56,40 +47,9 @@ double FifthOrderTrajectory::fifth_order_traj_gen(double initial_value_, double 
 		double initial_time_, double final_time_)
 {
 
-	if(current_time == 0)
-	{
-
-		initial_pose = initial_value_;
-		initial_velocity = initial_velocity_;
-		initial_acc = initial_acc_;
-
-		final_pose = final_value_;
-		final_velocity = final_velocity_;
-		final_acc = final_acc_;
-
-		final_time = final_time_;
-
-		//ROS_INFO("1");
-	}
-
-	if(detect_change_trajectory_final_pose(final_value_)||detect_change_trajectory_final_velocity(final_velocity_)||detect_change_trajectory_final_time(final_time_))
-	{
-		initial_pose = current_pose;
-		initial_velocity = current_velocity;
-		initial_acc = current_acc;
-		final_time = final_time_;
-
-		current_time = 0;
-
-		//ROS_INFO("2");
-
-	}
-
-
 	current_time = current_time + 0.008;
 
-
-	if(current_time > final_time)
+	if(current_time > final_time_)
 	{
 		is_moving_traj = false;
 		return current_pose;

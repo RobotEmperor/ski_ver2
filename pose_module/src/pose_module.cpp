@@ -19,6 +19,8 @@ PoseModule::PoseModule()
 : control_cycle_msec_(8)
 {
 	running_ = false;
+	gazebo_check = false;
+	is_moving_ = false;
 	enable_       = false;
 	module_name_  = "pose_module";
 	control_mode_ = robotis_framework::PositionControl;
@@ -45,17 +47,15 @@ PoseModule::PoseModule()
 
 	///////////////////////////
 
-
+	end_to_rad_l_ = new heroehs_math::CalRad;
+	end_to_rad_r_ = new heroehs_math::CalRad;
 }
-
 PoseModule::~PoseModule()
 {
 	queue_thread_.join();
 }
-
 void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Robot *robot)
 {
-
 	control_cycle_msec_ = control_cycle_msec;
 	queue_thread_ = boost::thread(boost::bind(&PoseModule::queueThread, this));
 
@@ -68,13 +68,34 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 		joint_name_to_id_[joint_name] = dxl_info->id_;
 		joint_id_to_name_[dxl_info->id_] = joint_name;
 	}
+	traj_time_ = 4.0;
 
-	ROS_INFO("< -------  Initialize Module : Base Module !!  ------->");
+	leg_end_point_l_.resize(6,8);
+	leg_end_point_l_.fill(0);
+	leg_end_point_l_(2,0) = -0.52; // 초기값
+	leg_end_point_l_(2,1) = -0.52;
+	end_to_rad_r_->cal_end_point_tra_pz->current_pose = -0.52;
 
+
+	leg_end_point_r_.resize(6,8);
+	leg_end_point_r_.fill(0);
+	leg_end_point_r_(2,0) = -0.52;  // 초기값
+	leg_end_point_r_(2,1) = -0.52;
+	end_to_rad_r_->cal_end_point_tra_pz->current_pose = -0.52;
+
+	result_rad_l_.resize(7,1);
+	result_rad_r_.resize(7,1);
+	result_rad_l_.fill(0);
+	result_rad_r_.fill(0);
+
+	for(int joint_num_=0; joint_num_< 6 ; joint_num_ ++)
+	{
+		leg_end_point_l_(joint_num_, 7) = traj_time_;
+		leg_end_point_r_(joint_num_, 7) = traj_time_;
+	}
+
+	ROS_INFO("< -------  Initialize Module : Pose Module !!  ------->");
 }
-
-
-
 void PoseModule::queueThread()
 {
 	ros::NodeHandle ros_node;
@@ -84,6 +105,7 @@ void PoseModule::queueThread()
 
 	/* subscribe topics */
 	// for gui
+	ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/desired_pose", 5, &PoseModule::desiredPoseMsgCallback, this);
 
 
 	ros::WallDuration duration(control_cycle_msec_ / 1000.0);
@@ -95,6 +117,16 @@ bool PoseModule::isRunning()
 {
 	return running_;
 }
+void PoseModule::desiredPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실
+{
+	for(int joint_num_= 0; joint_num_< 6; joint_num_++)
+	{
+		leg_end_point_l_(joint_num_, 1) = msg->data[joint_num_]; // left leg
+		leg_end_point_r_(joint_num_, 1) = msg->data[joint_num_+6]; // right leg
+	}
+	desired_waist_roll_ = msg-> data[12];
+	is_moving_ = true;
+}
 
 void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
 		std::map<std::string, double> sensors)
@@ -105,38 +137,74 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	}
 	//// read current position ////
 
-	for (std::map<std::string, robotis_framework::Dynamixel*>::iterator state_iter = dxls.begin();
-			state_iter != dxls.end(); state_iter++)
+/*	if(is_moving_ == false)
 	{
-		std::string joint_name = state_iter->first;
-		if(gazebo_check == true)
-			result_[joint_name]->goal_position_ = result_[joint_name]->present_position_; // 가제보 상 초기위치 0
-		else
-			result_[joint_name]->goal_position_ = dxls[joint_name]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
-
+		for (std::map<std::string, robotis_framework::Dynamixel*>::iterator state_iter = dxls.begin();
+				state_iter != dxls.end(); state_iter++)
+		{
+			std::string joint_name = state_iter->first;
+			if(gazebo_check == true)
+				result_[joint_name]->goal_position_ = result_[joint_name]->present_position_; // 가제보 상 초기위치 0
+			else
+			{
+				result_[joint_name]->goal_position_ = dxls[joint_name]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
+			}
+		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
 		// 초기위치 저장
-	} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
-	ROS_INFO("stay");
+		ROS_INFO("stay");
+	}*/
 
-	// trajectory is working joint space control
 
-	ROS_INFO("Trajectory start");
-
-	result_[joint_id_to_name_[1]]->goal_position_ = 0;// 머리
-
-	for(int id=10 ; id<23 ; id++)
 	{
-		if(id == 10 || id ==11 || id ==17 || id ==19) // 방향 반대인 다이나믹셀
+		ROS_INFO("Trajectory start");
+
+		// trajectory is working cartesian space control
+		result_rad_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
+		result_rad_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
+
+
+
+	/*	ROS_INFO("11 :: %f",result_rad_l_(1,0));
+		ROS_INFO("13 :: %f",result_rad_l_(2,0));
+		ROS_INFO("15 :: %f",result_rad_l_(3,0));
+		ROS_INFO("17 :: %f",result_rad_l_(4,0));
+		ROS_INFO("19 :: %f",result_rad_l_(5,0));
+		ROS_INFO("21 :: %f",result_rad_l_(6,0));*/
+
+		//<---  joint space control --->
+		result_[joint_id_to_name_[1]]->goal_position_ = 0;// head
+		result_[joint_id_to_name_[10]]->goal_position_ = 0; // waist roll
+
+		//<---  cartesian space control  --->
+		result_[joint_id_to_name_[11]]->goal_position_ = -result_rad_l_(1,0);
+		result_[joint_id_to_name_[13]]->goal_position_ = result_rad_l_(2,0);
+		result_[joint_id_to_name_[15]]->goal_position_ = result_rad_l_(3,0);
+
+		result_[joint_id_to_name_[17]]->goal_position_ = -result_rad_l_(4,0);
+		result_[joint_id_to_name_[19]]->goal_position_ = -result_rad_l_(5,0);
+		result_[joint_id_to_name_[21]]->goal_position_ = result_rad_l_(6,0);
+
+		result_[joint_id_to_name_[12]]->goal_position_ = result_rad_r_(1,0);
+		result_[joint_id_to_name_[14]]->goal_position_ = result_rad_r_(2,0);
+		result_[joint_id_to_name_[16]]->goal_position_ = result_rad_r_(3,0);
+
+		result_[joint_id_to_name_[18]]->goal_position_ = result_rad_r_(4,0);
+		result_[joint_id_to_name_[20]]->goal_position_ = result_rad_r_(5,0);
+		result_[joint_id_to_name_[22]]->goal_position_ = result_rad_r_(6,0);
+
+		//<---  read for gazebo  --->
+		for(int id=10 ; id<23 ; id++)
 		{
-			result_[joint_id_to_name_[id]]->goal_position_ =0;
 			result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
 		}
-		else
-		{
-			result_[joint_id_to_name_[id]]->goal_position_ =  0;
-			result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
-		}
+
+		is_moving_ = end_to_rad_l_-> is_moving_check;
 	}
+
+
+
+
+
 
 
 }

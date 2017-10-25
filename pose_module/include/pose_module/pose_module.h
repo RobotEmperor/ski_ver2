@@ -10,6 +10,7 @@
 #include <ros/package.h>
 #include <std_msgs/Int16.h>
 #include <std_msgs/Float64.h>
+#include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/String.h>
 #include <geometry_msgs/Pose.h>
 #include <boost/thread.hpp>
@@ -27,7 +28,7 @@
 
 #include "heroehs_math/fifth_order_trajectory_generate.h"
 #include "heroehs_math/kinematics.h"
-
+#include "heroehs_math/end_point_to_rad_cal.h"
 
 
 
@@ -50,31 +51,13 @@ public:
 	bool gazebo_check;
 
 	/* ROS Topic Callback Functions */
+	void desiredPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
 
-	void initPoseMsgCallback(const std_msgs::String::ConstPtr& msg);
-
-
-	heroehs_math::FifthOrderTrajectory *pX_l_tra;
-
-	/*FifthOrderTrajectory *pY_l_tra;
-	FifthOrderTrajectory *pZ_l_tra;
-	FifthOrderTrajectory *alpha_l_tra;
-	FifthOrderTrajectory *kamma_l_tra;
-	FifthOrderTrajectory *betta_l_tra;
-
-	FifthOrderTrajectory *pX_r_tra;
-	FifthOrderTrajectory *pY_r_tra;
-	FifthOrderTrajectory *pZ_r_tra;
-	FifthOrderTrajectory *alpha_r_tra;
-	FifthOrderTrajectory *kamma_r_tra;
-	FifthOrderTrajectory *betta_r_tra;*/
 
 
 private:
 	void queueThread();
 	bool running_;
-
-
 	int control_cycle_msec_;
 
 	boost::thread queue_thread_;
@@ -82,6 +65,19 @@ private:
 	std::map<std::string, int> joint_name_to_id_;
 	std::map<int, std::string> joint_id_to_name_;
 
+	bool is_moving_;
+
+	double desired_waist_roll_;
+	double traj_time_;
+
+	Eigen::MatrixXd leg_end_point_l_;
+	Eigen::MatrixXd leg_end_point_r_;
+
+	heroehs_math::CalRad *end_to_rad_l_;
+	heroehs_math::CalRad *end_to_rad_r_;
+
+	Eigen::MatrixXd result_rad_l_;
+	Eigen::MatrixXd result_rad_r_;
 
 
 
