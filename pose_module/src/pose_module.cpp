@@ -20,7 +20,8 @@ PoseModule::PoseModule()
 {
 	running_ = false;
 	gazebo_check = false;
-	is_moving_ = false;
+	is_moving_l_ = false;
+	is_moving_r_ = false;
 	enable_       = false;
 	module_name_  = "pose_module";
 	control_mode_ = robotis_framework::PositionControl;
@@ -72,16 +73,18 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 
 	leg_end_point_l_.resize(6,8);
 	leg_end_point_l_.fill(0);
-	leg_end_point_l_(2,0) = -0.52; // 초기값
-	leg_end_point_l_(2,1) = -0.52;
-	end_to_rad_r_->cal_end_point_tra_pz->current_pose = -0.52;
+	leg_end_point_l_(2,0) = -0.55; // 초기값
+	leg_end_point_l_(2,1) = -0.55;
+	end_to_rad_l_->cal_end_point_tra_pz->current_pose = -0.55;
+	end_to_rad_l_->current_pose_change_(2,0) = -0.55;
 
 
 	leg_end_point_r_.resize(6,8);
 	leg_end_point_r_.fill(0);
-	leg_end_point_r_(2,0) = -0.52;  // 초기값
-	leg_end_point_r_(2,1) = -0.52;
-	end_to_rad_r_->cal_end_point_tra_pz->current_pose = -0.52;
+	leg_end_point_r_(2,0) = -0.55;  // 초기값
+	leg_end_point_r_(2,1) = -0.55;
+	end_to_rad_r_->cal_end_point_tra_pz->current_pose = -0.55;
+	end_to_rad_r_->current_pose_change_(2,0) = -0.55;
 
 	result_rad_l_.resize(7,1);
 	result_rad_r_.resize(7,1);
@@ -117,7 +120,7 @@ bool PoseModule::isRunning()
 {
 	return running_;
 }
-void PoseModule::desiredPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실
+void PoseModule::desiredPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실행
 {
 	for(int joint_num_= 0; joint_num_< 6; joint_num_++)
 	{
@@ -125,7 +128,8 @@ void PoseModule::desiredPoseMsgCallback(const std_msgs::Float64MultiArray::Const
 		leg_end_point_r_(joint_num_, 1) = msg->data[joint_num_+6]; // right leg
 	}
 	desired_waist_roll_ = msg-> data[12];
-	is_moving_ = true;
+	is_moving_l_ = true;
+	is_moving_r_ = true;
 }
 
 void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
@@ -137,7 +141,7 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	}
 	//// read current position ////
 
-/*	if(is_moving_ == false)
+		if(is_moving_l_ == false && is_moving_r_ == false)
 	{
 		for (std::map<std::string, robotis_framework::Dynamixel*>::iterator state_iter = dxls.begin();
 				state_iter != dxls.end(); state_iter++)
@@ -152,24 +156,16 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
 		// 초기위치 저장
 		ROS_INFO("stay");
-	}*/
+	}
 
 
+		else
 	{
 		ROS_INFO("Trajectory start");
 
 		// trajectory is working cartesian space control
 		result_rad_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
 		result_rad_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
-
-
-
-	/*	ROS_INFO("11 :: %f",result_rad_l_(1,0));
-		ROS_INFO("13 :: %f",result_rad_l_(2,0));
-		ROS_INFO("15 :: %f",result_rad_l_(3,0));
-		ROS_INFO("17 :: %f",result_rad_l_(4,0));
-		ROS_INFO("19 :: %f",result_rad_l_(5,0));
-		ROS_INFO("21 :: %f",result_rad_l_(6,0));*/
 
 		//<---  joint space control --->
 		result_[joint_id_to_name_[1]]->goal_position_ = 0;// head
@@ -198,7 +194,8 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 			result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
 		}
 
-		is_moving_ = end_to_rad_l_-> is_moving_check;
+		is_moving_l_ = end_to_rad_l_-> is_moving_check;
+		is_moving_r_ = end_to_rad_r_-> is_moving_check;
 	}
 
 

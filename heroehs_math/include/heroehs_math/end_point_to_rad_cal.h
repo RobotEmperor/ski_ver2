@@ -35,6 +35,7 @@ public:
 
 
 	Eigen::MatrixXd result_joint;
+	Eigen::MatrixXd current_pose_change_;
 
 };
 }

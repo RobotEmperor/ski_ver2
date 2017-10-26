@@ -24,7 +24,6 @@ FifthOrderTrajectory::~FifthOrderTrajectory()
 
 }
 
-
 bool FifthOrderTrajectory::detect_change_final_value(double pose_, double velocity_, double time_)
 {
 	if(pose_ != final_pose || velocity_ != final_velocity || time_ != final_time  )
@@ -33,19 +32,24 @@ bool FifthOrderTrajectory::detect_change_final_value(double pose_, double veloci
 		final_velocity = velocity_;
 		final_time = time_;
 		current_time = 0;
-				return true;
+		return true;
 	}
 	else
 		return false;
 
 }
 
-
 double FifthOrderTrajectory::fifth_order_traj_gen(double initial_value_, double final_value_,
 		double initial_velocity_, double final_velocity_ ,
 		double initial_acc_, double final_acc_,
 		double initial_time_, double final_time_)
 {
+	if(current_time == 0)
+	{
+		final_pose = final_value_;
+		final_velocity = final_velocity_;
+		final_time = final_time_;
+	}
 
 	current_time = current_time + 0.008;
 

@@ -65,7 +65,8 @@ private:
 	std::map<std::string, int> joint_name_to_id_;
 	std::map<int, std::string> joint_id_to_name_;
 
-	bool is_moving_;
+	bool is_moving_l_;
+	bool is_moving_r_;
 
 	double desired_waist_roll_;
 	double traj_time_;
