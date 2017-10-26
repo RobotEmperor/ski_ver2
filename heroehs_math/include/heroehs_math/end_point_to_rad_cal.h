@@ -22,6 +22,7 @@ public:
 	bool is_moving_check;
 
 	Eigen::MatrixXd cal_end_point_to_rad(Eigen::MatrixXd eP_);
+	double cal_one_joint_rad(Eigen::MatrixXd joint_);
 
 	FifthOrderTrajectory *cal_end_point_tra_px;
 	FifthOrderTrajectory *cal_end_point_tra_py;
@@ -31,11 +32,15 @@ public:
 	FifthOrderTrajectory *cal_end_point_tra_betta;
 	FifthOrderTrajectory *cal_end_point_tra_kamma;
 
+	FifthOrderTrajectory *cal_one_joint_traj_rad;
+
 	Kinematics *kinematics;
 
 
 	Eigen::MatrixXd result_joint;
-	Eigen::MatrixXd current_pose_change_;
+	Eigen::MatrixXd current_pose_change;
+	Eigen::MatrixXd current_one_joint_pose;
+
 
 };
 }

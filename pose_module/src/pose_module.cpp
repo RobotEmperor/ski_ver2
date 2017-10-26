@@ -22,6 +22,7 @@ PoseModule::PoseModule()
 	gazebo_check = false;
 	is_moving_l_ = false;
 	is_moving_r_ = false;
+	is_moving_one_joint_ = false;
 	enable_       = false;
 	module_name_  = "pose_module";
 	control_mode_ = robotis_framework::PositionControl;
@@ -50,6 +51,11 @@ PoseModule::PoseModule()
 
 	end_to_rad_l_ = new heroehs_math::CalRad;
 	end_to_rad_r_ = new heroehs_math::CalRad;
+	one_joint_ = new heroehs_math::CalRad;
+
+	//////////////////////////
+  result_rad_one_joint_= 0;
+	traj_time_ = 4.0;
 }
 PoseModule::~PoseModule()
 {
@@ -69,14 +75,14 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 		joint_name_to_id_[joint_name] = dxl_info->id_;
 		joint_id_to_name_[dxl_info->id_] = joint_name;
 	}
-	traj_time_ = 4.0;
+
 
 	leg_end_point_l_.resize(6,8);
 	leg_end_point_l_.fill(0);
 	leg_end_point_l_(2,0) = -0.55; // 초기값
 	leg_end_point_l_(2,1) = -0.55;
 	end_to_rad_l_->cal_end_point_tra_pz->current_pose = -0.55;
-	end_to_rad_l_->current_pose_change_(2,0) = -0.55;
+	end_to_rad_l_->current_pose_change(2,0) = -0.55;
 
 
 	leg_end_point_r_.resize(6,8);
@@ -84,18 +90,24 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 	leg_end_point_r_(2,0) = -0.55;  // 초기값
 	leg_end_point_r_(2,1) = -0.55;
 	end_to_rad_r_->cal_end_point_tra_pz->current_pose = -0.55;
-	end_to_rad_r_->current_pose_change_(2,0) = -0.55;
+	end_to_rad_r_->current_pose_change(2,0) = -0.55;
 
 	result_rad_l_.resize(7,1);
 	result_rad_r_.resize(7,1);
 	result_rad_l_.fill(0);
 	result_rad_r_.fill(0);
 
+	one_joint_ctrl_.resize(1,8);
+	one_joint_ctrl_.fill(0);
+	one_joint_ctrl_(0,1) = 0;
+	result_rad_one_joint_ = 0;
+
 	for(int joint_num_=0; joint_num_< 6 ; joint_num_ ++)
 	{
 		leg_end_point_l_(joint_num_, 7) = traj_time_;
 		leg_end_point_r_(joint_num_, 7) = traj_time_;
 	}
+	one_joint_ctrl_(0,7) = traj_time_;
 
 	ROS_INFO("< -------  Initialize Module : Pose Module !!  ------->");
 }
@@ -109,10 +121,7 @@ void PoseModule::queueThread()
 	/* subscribe topics */
 	// for gui
 	ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/desired_pose", 5, &PoseModule::desiredPoseMsgCallback, this);
-
-
 	ros::WallDuration duration(control_cycle_msec_ / 1000.0);
-
 	while(ros_node.ok())
 		callback_queue.callAvailable(duration);
 }
@@ -126,10 +135,14 @@ void PoseModule::desiredPoseMsgCallback(const std_msgs::Float64MultiArray::Const
 	{
 		leg_end_point_l_(joint_num_, 1) = msg->data[joint_num_]; // left leg
 		leg_end_point_r_(joint_num_, 1) = msg->data[joint_num_+6]; // right leg
+		//leg_end_point_l_(joint_num_, 7) = msg-> data[12]*RADIAN2DEGREE;
+		//leg_end_point_r_(joint_num_, 7) = msg-> data[12]*RADIAN2DEGREE;
 	}
-	desired_waist_roll_ = msg-> data[12];
+	one_joint_ctrl_(0,1) = msg-> data[12]; // waist roll
+
 	is_moving_l_ = true;
 	is_moving_r_ = true;
+	is_moving_one_joint_ = true;
 }
 
 void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
@@ -141,7 +154,7 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	}
 	//// read current position ////
 
-		if(is_moving_l_ == false && is_moving_r_ == false)
+	if(is_moving_l_ == false && is_moving_r_ == false && is_moving_one_joint_ == false)
 	{
 		for (std::map<std::string, robotis_framework::Dynamixel*>::iterator state_iter = dxls.begin();
 				state_iter != dxls.end(); state_iter++)
@@ -154,22 +167,20 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 				result_[joint_name]->goal_position_ = dxls[joint_name]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
 			}
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
-		// 초기위치 저장
 		ROS_INFO("stay");
 	}
-
-
-		else
+	else
 	{
 		ROS_INFO("Trajectory start");
 
 		// trajectory is working cartesian space control
 		result_rad_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
 		result_rad_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
+		result_rad_one_joint_ = one_joint_ -> cal_one_joint_rad(one_joint_ctrl_);
 
 		//<---  joint space control --->
 		result_[joint_id_to_name_[1]]->goal_position_ = 0;// head
-		result_[joint_id_to_name_[10]]->goal_position_ = 0; // waist roll
+		result_[joint_id_to_name_[10]]->goal_position_ = -result_rad_one_joint_; // waist roll
 
 		//<---  cartesian space control  --->
 		result_[joint_id_to_name_[11]]->goal_position_ = -result_rad_l_(1,0);
@@ -196,13 +207,8 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 
 		is_moving_l_ = end_to_rad_l_-> is_moving_check;
 		is_moving_r_ = end_to_rad_r_-> is_moving_check;
+		is_moving_one_joint_ = one_joint_ ->is_moving_check;
 	}
-
-
-
-
-
-
 
 }
 void PoseModule::stop()

@@ -67,18 +67,21 @@ private:
 
 	bool is_moving_l_;
 	bool is_moving_r_;
+	bool is_moving_one_joint_;
 
-	double desired_waist_roll_;
 	double traj_time_;
 
 	Eigen::MatrixXd leg_end_point_l_;
 	Eigen::MatrixXd leg_end_point_r_;
+	Eigen::MatrixXd one_joint_ctrl_;
 
 	heroehs_math::CalRad *end_to_rad_l_;
 	heroehs_math::CalRad *end_to_rad_r_;
+	heroehs_math::CalRad *one_joint_;
 
 	Eigen::MatrixXd result_rad_l_;
 	Eigen::MatrixXd result_rad_r_;
+	double result_rad_one_joint_;
 
 
 
