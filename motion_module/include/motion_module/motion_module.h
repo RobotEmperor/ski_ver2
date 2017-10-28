@@ -77,8 +77,8 @@ private:
 	bool is_moving_r_;
 	bool is_moving_one_joint_;
 
-	Eigen::MatrixXd leg_end_point_l_;
-	Eigen::MatrixXd leg_end_point_r_;
+	Eigen::MatrixXd leg_end_point_l_, leg_end_point_l_modified_;
+	Eigen::MatrixXd leg_end_point_r_, leg_end_point_r_modified_;
 	Eigen::MatrixXd one_joint_ctrl_;
 
 	heroehs_math::CalRad *end_to_rad_l_;

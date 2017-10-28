@@ -86,6 +86,9 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 	end_to_rad_r_->cal_end_point_tra_pz->current_pose = -0.55;
 	end_to_rad_r_->current_pose_change(2,0) = -0.55;
 
+	leg_end_point_l_modified_ = leg_end_point_l_;
+	leg_end_point_r_modified_ = leg_end_point_r_;
+
 	result_rad_l_.resize(7,1);
 	result_rad_r_.resize(7,1);
 	result_rad_l_.fill(0);
@@ -302,6 +305,13 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 
 
 		// trajectory is working cartesian space control
+
+
+		//balance
+		leg_end_point_l_modified_ = leg_end_point_l_;
+	  leg_end_point_r_modified_ = leg_end_point_r_;
+
+	  //IK
 		result_rad_l_ = end_to_rad_l_-> cal_end_point_to_rad(leg_end_point_l_);
 		result_rad_r_ = end_to_rad_r_-> cal_end_point_to_rad(leg_end_point_r_);
 		result_rad_one_joint_ = one_joint_ -> cal_one_joint_rad(one_joint_ctrl_);
