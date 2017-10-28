@@ -4,12 +4,6 @@
  *  Created on: Oct 24, 2017
  *      Author: robotemperor
  */
-/*
- * base_module.cpp
- *
- *  Created on: 2017. 10. 14.
- *      Author: robotemperor
- */
 #include <stdio.h>
 #include "pose_module/pose_module.h"
 
@@ -167,11 +161,11 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 				result_[joint_name]->goal_position_ = dxls[joint_name]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
 			}
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
-		ROS_INFO("stay");
+		ROS_INFO("Pose Stay");
 	}
 	else
 	{
-		ROS_INFO("Trajectory start");
+		ROS_INFO("Pose Trajectory Start");
 
 		// trajectory is working cartesian space control
 		result_rad_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
@@ -183,12 +177,12 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		result_[joint_id_to_name_[10]]->goal_position_ = -result_rad_one_joint_; // waist roll
 
 		//<---  cartesian space control  --->
-		result_[joint_id_to_name_[11]]->goal_position_ = -result_rad_l_(1,0);
+		result_[joint_id_to_name_[11]]->goal_position_ = -result_rad_l_(1,0);//
 		result_[joint_id_to_name_[13]]->goal_position_ = result_rad_l_(2,0);
 		result_[joint_id_to_name_[15]]->goal_position_ = result_rad_l_(3,0);
 
-		result_[joint_id_to_name_[17]]->goal_position_ = -result_rad_l_(4,0);
-		result_[joint_id_to_name_[19]]->goal_position_ = -result_rad_l_(5,0);
+		result_[joint_id_to_name_[17]]->goal_position_ = -result_rad_l_(4,0);//
+		result_[joint_id_to_name_[19]]->goal_position_ = -result_rad_l_(5,0);//
 		result_[joint_id_to_name_[21]]->goal_position_ = result_rad_l_(6,0);
 
 		result_[joint_id_to_name_[12]]->goal_position_ = result_rad_r_(1,0);
@@ -199,10 +193,13 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		result_[joint_id_to_name_[20]]->goal_position_ = result_rad_r_(5,0);
 		result_[joint_id_to_name_[22]]->goal_position_ = result_rad_r_(6,0);
 
-		//<---  read for gazebo  --->
+		//<---  read   --->
 		for(int id=10 ; id<23 ; id++)
 		{
+			if(gazebo_check == true)
 			result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
+			else
+				result_[joint_id_to_name_[id]]->present_position_ = dxls[joint_id_to_name_[id]]->dxl_state_->present_position_; // real robot
 		}
 
 		is_moving_l_ = end_to_rad_l_-> is_moving_check;

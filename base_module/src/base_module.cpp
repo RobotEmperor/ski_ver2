@@ -157,11 +157,11 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 
 			base_module_state->joint_ini_pose_state.coeffRef(joint_name_to_id_[joint_name], 0) = dxls[joint_name]->dxl_state_->present_position_; // 초기위치 저장
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
-		ROS_INFO("stay");
+		ROS_INFO("Base Stay");
 	}
 	else // trajectory is working joint space control
 	{
-		ROS_INFO("Trajectory start");
+		ROS_INFO("Base Trajectory Start");
 
 		result_[joint_id_to_name_[1]]->goal_position_ = motion_trajectory[1]->fifth_order_traj_gen(base_module_state->joint_ini_pose_state(1,0) ,
 				base_module_state->joint_ini_pose_goal(1,0) ,

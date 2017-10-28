@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   offset_module
   base_module
   pose_module
+  motion_module
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
