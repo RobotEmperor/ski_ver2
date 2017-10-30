@@ -47,6 +47,9 @@ public:
 
 	bool gazebo_check;
 
+	ros::Publisher state_end_point_pub;
+
+
 	/* ROS Topic Callback Functions */
 	void desiredMotionMsgCallback(const std_msgs::Int32::ConstPtr& msg);
 
@@ -55,6 +58,8 @@ private:
 	bool running_;
 	int control_cycle_msec_;
 
+	std_msgs::Float64 state_end_point_msg_;
+
 	boost::thread queue_thread_;
 
 	std::map<std::string, int> joint_name_to_id_;
@@ -62,9 +67,9 @@ private:
 
 	void parse_motion_data_(int motion_num_); // 모션 데이터 읽어온다.
 	void motion_vel_cal_leg_(int pose_num_ , int node_num_); // 속도 계산
-	void motion_generater_(double time_); // 모션 생성
+	void motion_generater_(); // 모션 생성
 	int motion_command_, pre_motion_command_ , motion_seq_;
-	int time_num_;
+	int pose_;
   double current_time_;
 	Eigen::MatrixXd change_desired_pose_;
 	Eigen::MatrixXd change_desired_final_vel_;

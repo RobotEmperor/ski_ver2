@@ -19,11 +19,9 @@ MotionModule::MotionModule()
 	enable_       = false;
 	module_name_  = "motion_module";
 	control_mode_ = robotis_framework::PositionControl;
-
-	time_num_ = 0;
+	pose_ = 0;
 	current_time_ = 0;
 	// Dynamixel initialize ////
-
 	result_["head"]        = new robotis_framework::DynamixelState(); // joint 1
 	result_["waist_roll"]  = new robotis_framework::DynamixelState(); // joint 10
 
@@ -49,7 +47,7 @@ MotionModule::MotionModule()
 	//////////////////////////
 	pre_motion_command_ = 0;
 	motion_command_ = 0;
-	motion_seq_ = 0;
+	motion_seq_ = 1;
 	//////////////////////////
 	result_rad_one_joint_= 0;
 	traj_time_ = 4.0;
@@ -72,19 +70,65 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 		joint_name_to_id_[joint_name] = dxl_info->id_;
 		joint_id_to_name_[dxl_info->id_] = joint_name;
 	}
+
+	//초기화 //
 	leg_end_point_l_.resize(6,8);
 	leg_end_point_l_.fill(0);
-	leg_end_point_l_(2,0) = -0.55; // 초기값
-	leg_end_point_l_(2,1) = -0.55;
-	end_to_rad_l_->cal_end_point_tra_pz->current_pose = -0.55;
-	end_to_rad_l_->current_pose_change(2,0) = -0.55;
+	leg_end_point_l_(0,0) = 0.1;
+	leg_end_point_l_(1,0) = 0.15;
+	leg_end_point_l_(2,0) = -0.52;
+	leg_end_point_l_(3,0) = -15*DEGREE2RADIAN;
+	leg_end_point_l_(4,0) = -10*DEGREE2RADIAN;
+	leg_end_point_l_(5,0) = 15*DEGREE2RADIAN;
+	for(int i=0;i<6;i++)
+	{
+		leg_end_point_l_(i,1) = leg_end_point_l_(i,0);
+	}
+	end_to_rad_l_->cal_end_point_tra_px->current_pose = 0.1;
+	end_to_rad_l_->cal_end_point_tra_py->current_pose = 0.15;
+	end_to_rad_l_->cal_end_point_tra_pz->current_pose = -0.52;
+
+	end_to_rad_l_->cal_end_point_tra_alpha->current_pose = -15*DEGREE2RADIAN;
+	end_to_rad_l_->cal_end_point_tra_betta->current_pose = -10*DEGREE2RADIAN;
+	end_to_rad_l_->cal_end_point_tra_kamma->current_pose = 15*DEGREE2RADIAN;
+
+	end_to_rad_l_->current_pose_change(0,0) = 0.1;
+	end_to_rad_l_->current_pose_change(1,0) = 0.15;
+	end_to_rad_l_->current_pose_change(2,0) = -0.52;
+
+	end_to_rad_l_->current_pose_change(3,0) = -15*DEGREE2RADIAN;
+	end_to_rad_l_->current_pose_change(4,0) = -10*DEGREE2RADIAN;
+	end_to_rad_l_->current_pose_change(5,0) = -15*DEGREE2RADIAN;
 
 	leg_end_point_r_.resize(6,8);
 	leg_end_point_r_.fill(0);
-	leg_end_point_r_(2,0) = -0.55;  // 초기값
-	leg_end_point_r_(2,1) = -0.55;
-	end_to_rad_r_->cal_end_point_tra_pz->current_pose = -0.55;
-	end_to_rad_r_->current_pose_change(2,0) = -0.55;
+
+	leg_end_point_r_(0,0) = 0.1;
+	leg_end_point_r_(1,0) = -0.15;
+	leg_end_point_r_(2,0) = -0.52;
+	leg_end_point_r_(3,0) = 15*DEGREE2RADIAN;
+	leg_end_point_r_(4,0) = -10*DEGREE2RADIAN;
+	leg_end_point_r_(5,0) = -15*DEGREE2RADIAN;
+
+	for(int i=0;i<6;i++)
+	{
+		leg_end_point_r_(i,1) = leg_end_point_r_(i,0);
+	}
+	end_to_rad_r_->cal_end_point_tra_px->current_pose = 0.1;
+	end_to_rad_r_->cal_end_point_tra_py->current_pose = -0.15;
+	end_to_rad_r_->cal_end_point_tra_pz->current_pose = -0.52;
+
+	end_to_rad_r_->cal_end_point_tra_alpha->current_pose = 15*DEGREE2RADIAN;
+	end_to_rad_r_->cal_end_point_tra_betta->current_pose = -10*DEGREE2RADIAN;
+	end_to_rad_r_->cal_end_point_tra_kamma->current_pose = -15*DEGREE2RADIAN;
+
+	end_to_rad_r_->current_pose_change(2,0) = 0.1;
+	end_to_rad_r_->current_pose_change(2,0) = -0.15;
+	end_to_rad_r_->current_pose_change(2,0) = -0.52;
+
+	end_to_rad_r_->current_pose_change(2,0) = 15*DEGREE2RADIAN;
+	end_to_rad_r_->current_pose_change(2,0) = -10*DEGREE2RADIAN;
+	end_to_rad_r_->current_pose_change(2,0) = -15*DEGREE2RADIAN;
 
 	leg_end_point_l_modified_ = leg_end_point_l_;
 	leg_end_point_r_modified_ = leg_end_point_r_;
@@ -105,18 +149,16 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 		leg_end_point_r_(joint_num_, 7) = traj_time_;
 	}
 	one_joint_ctrl_(0,7) = traj_time_;
-
+	//
 	ROS_INFO("< -------  Initialize Module : Motion Module !!  ------->");
 }
 void MotionModule::queueThread()
 {
 	ros::NodeHandle ros_node;
 	ros::CallbackQueue callback_queue;
-
 	ros_node.setCallbackQueue(&callback_queue);
 	/* publisher topics */
-
-
+	state_end_point_pub = ros_node.advertise<std_msgs::Float64>("/state_end_point",100);
 	/* subscribe topics */
 	// for gui
 	ros::Subscriber motion_num_msg_sub = ros_node.subscribe("/motion_num", 5, &MotionModule::desiredMotionMsgCallback, this);
@@ -130,19 +172,18 @@ bool MotionModule::isRunning()
 }
 void MotionModule::desiredMotionMsgCallback(const std_msgs::Int32::ConstPtr& msg) // GUI 에서 motion_num topic을 sub 받아 실행 모션 번호 디텍트
 {
-	motion_command_ = msg->data;
-
-	if(pre_motion_command_ == motion_command_)
-		return;
-	else
-	{
-		parse_motion_data_(msg->data);
-	}
-	pre_motion_command_ = motion_command_;
-
 	is_moving_l_ = true;
 	is_moving_r_ = true;
 	is_moving_one_joint_ = true;
+
+	motion_command_ = msg->data;
+	if(msg->data != 0)
+	{
+		parse_motion_data_(msg->data);
+		motion_seq_= 1;
+	}
+	pre_motion_command_ = motion_command_;
+	current_time_ = 0;
 }
 void MotionModule::parse_motion_data_(int motion_num_)
 {
@@ -171,24 +212,23 @@ void MotionModule::parse_motion_data_(int motion_num_)
 	{
 		change_desired_time_(i,0) = doc["motion_time"][i].as<double>();
 	}
-	time_num_ = size_num_;
 
 	// motion data load initialize//
-	YAML::Node pose_node = doc["motion"];// YAML 에 string "tar_pose"을 읽어온다.
+	YAML::Node pose_node = doc["motion"];// YAML 에 string "motion"을 읽어온다.
 	size_num_= doc["motion"].size();
-	change_desired_pose_.resize(size_num_,1);
+	YAML::iterator it = pose_node.begin();
+	node_size_ = it->second.size();
+	change_desired_pose_.resize(size_num_,node_size_);
 	change_desired_pose_.fill(0);
+	pose_ = size_num_;
 
 	// motion data load //
-	for (YAML::iterator it = pose_node.begin(); it != pose_node.end(); ++it) //tar_pose_node 벡터의 처음과 시작 끝까지 for 문으로 반복한다.
+	for (YAML::iterator it = pose_node.begin(); it != pose_node.end(); ++it) //motion_node 벡터의 처음과 시작 끝까지 for 문으로 반복한다.
 	{
 		int pose_;
 		double value_;
 		// 한 줄에서 int 와 double 을 분리한다.
 		pose_ = it->first.as<int>();
-		node_size_ = it->second.size();
-		change_desired_pose_.resize(size_num_, node_size_);
-		change_desired_pose_.fill(0);
 
 		for(int i=0; i<node_size_; i++)
 		{
@@ -202,72 +242,110 @@ void MotionModule::parse_motion_data_(int motion_num_)
 	change_desired_initial_vel_.resize(size_num_-1,node_size_);
 	change_desired_initial_vel_.fill(0);
 	motion_vel_cal_leg_(size_num_, node_size_); //(노드의 개수 = 포즈의 개수, 노드의 배열의 요소 개수)
+
+	for(int pose = 0; pose < size_num_ ; pose++)
+	{
+		for(int j=3;j<6;j++)
+		{
+			change_desired_pose_(pose,j) =	change_desired_pose_(pose,j)*DEGREE2RADIAN;
+		}
+		for(int j=9;j<12;j++)
+		{
+			change_desired_pose_(pose,j) =	change_desired_pose_(pose,j)*DEGREE2RADIAN;
+		}
+		change_desired_pose_(pose,12) = change_desired_pose_(pose,12)*DEGREE2RADIAN; //waist
+	}
+
 	//속도 계산 완료
 }
 void MotionModule::motion_vel_cal_leg_( int pose_num_, int node_num_)
 {
-	double motion_velocity[pose_num_][node_num_];
-
+	Eigen::MatrixXd motion_velocity_;
+	motion_velocity_.resize(pose_num_-1,node_num_);
+	motion_velocity_.fill(0);
 	for(int i=0; i<pose_num_-1;i++) //
 	{
 		for(int j=0;j<3;j++)
 		{
-			motion_velocity[i][j] = (change_desired_pose_(i+1,j) - change_desired_pose_(i,j))/change_desired_time_(i,0);
+			motion_velocity_(i,j) = (change_desired_pose_(i+1,j) - change_desired_pose_(i,j))/change_desired_time_(i,0);
 		}
 		for(int j=3;j<6;j++)
 		{
-			motion_velocity[i][j] = (change_desired_pose_(i+1,j)*DEGREE2RADIAN - change_desired_pose_(i,j)*DEGREE2RADIAN )/change_desired_time_(i,0);
+			motion_velocity_(i,j) = (change_desired_pose_(i+1,j)*DEGREE2RADIAN - change_desired_pose_(i,j)*DEGREE2RADIAN )/change_desired_time_(i,0);
 		}
 		for(int j=6;j<9;j++)
 		{
-			motion_velocity[i][j] = (change_desired_pose_(i+1,j) - change_desired_pose_(i,j))/change_desired_time_(i,0);
+			motion_velocity_(i,j) = (change_desired_pose_(i+1,j) - change_desired_pose_(i,j))/change_desired_time_(i,0);
 		}
 		for(int j=9;j<12;j++)
 		{
-			motion_velocity[i][j] = (change_desired_pose_(i+1,j)*DEGREE2RADIAN - change_desired_pose_(i,j)*DEGREE2RADIAN)/change_desired_time_(i,0);
+			motion_velocity_(i,j) = (change_desired_pose_(i+1,j)*DEGREE2RADIAN - change_desired_pose_(i,j)*DEGREE2RADIAN)/change_desired_time_(i,0);
 		}
-
 		for(int j=0; j<12; j++)
 		{
-			if(change_desired_pose_(i,j) == change_desired_pose_(i+1, j))
-				change_desired_final_vel_(i,j) = 0;
-			else
+			if(i < pose_num_-2)
 			{
-				if(motion_velocity[i][j]*motion_velocity[i+1][j] > 0)
-				{
-					change_desired_final_vel_(i,j) = motion_velocity[i+1][j];
-					change_desired_initial_vel_(i+1,j) = change_desired_final_vel_(i,j);
-				}
-				else
+				change_desired_initial_vel_(i+1,j) = change_desired_final_vel_(i,j);
+
+				if(change_desired_pose_(i,j) == change_desired_pose_(i+1, j))
 					change_desired_final_vel_(i,j) = 0;
+				else
+				{
+					if(motion_velocity_(i,j)*motion_velocity_(i+1,j) > 0)
+					{
+						change_desired_final_vel_(i,j) = motion_velocity_(i+1,j);
+					}
+					else
+						change_desired_final_vel_(i,j) = 0;
+				}
 			}
+			else
+				change_desired_final_vel_(i,j) = 0;
 		}
 	}//velocity_complete
 }
-void MotionModule::motion_generater_(double time_)
+void MotionModule::motion_generater_()
 {
-	for(int pose=0; pose<time_num_; pose++)
+	for(int pose=1; pose<pose_; pose++)
 	{
-		if(change_desired_time_(0,pose) > time_ && motion_seq_ == pose)
-		{
-			for(int m = 0 ; m<6 ; m++)
-			{
-				leg_end_point_l_(m,1) = change_desired_pose_(pose+1, m);
-				leg_end_point_r_(m,1) = change_desired_pose_(pose+1, m+6);
-				leg_end_point_l_(m,7) = change_desired_time_(0, pose);
-				leg_end_point_r_(m,7) = change_desired_time_(0, pose);
-			}
-			for(int m =0 ; m<6 ; m++)
-			{
-				leg_end_point_l_(m,2) = change_desired_initial_vel_(pose+1, m);
-				leg_end_point_r_(m,2) = change_desired_initial_vel_(pose+1, m+6);
-				leg_end_point_l_(m,3) = change_desired_final_vel_(pose+1, m);
-				leg_end_point_r_(m,3) = change_desired_final_vel_(pose+1, m+6);
-			}
-			one_joint_ctrl_(0,1) = change_desired_pose_(pose,12);
-			one_joint_ctrl_(0,7) = change_desired_time_(0,pose);
+		if(motion_seq_ >= pose_)
+			motion_seq_ = 0;
 
-			motion_seq_++;
+		if(motion_seq_ == pose)
+		{
+			ROS_INFO("real_ pose %d", motion_seq_);
+			if(change_desired_time_(pose-1,0) > current_time_)
+			{
+
+				is_moving_l_ = true;
+				is_moving_r_ = true;
+				is_moving_one_joint_ = true;
+				for(int m = 0 ; m<6 ; m++)
+				{
+					leg_end_point_l_(m,1) = change_desired_pose_(pose, m);
+					leg_end_point_r_(m,1) = change_desired_pose_(pose, m+6);
+					leg_end_point_l_(m,7) = change_desired_time_(pose-1, 0);
+					leg_end_point_r_(m,7) = change_desired_time_(pose-1, 0);
+				}
+				for(int m = 0 ; m<6 ; m++)
+				{
+					leg_end_point_l_(m,2) = change_desired_initial_vel_(pose-1, m);
+					leg_end_point_r_(m,2) = change_desired_initial_vel_(pose-1, m+6);
+					leg_end_point_l_(m,3) = change_desired_final_vel_(pose-1, m);
+					leg_end_point_r_(m,3) = change_desired_final_vel_(pose-1, m+6);
+				}
+				one_joint_ctrl_(0,1) = change_desired_pose_(pose,12);
+				one_joint_ctrl_(0,7) = change_desired_time_(pose-1,0);
+			}
+
+			else if(current_time_ > change_desired_time_(pose-1,0))
+			{
+				motion_seq_++;
+				current_time_ = 0;
+				ROS_INFO("pose :: change!!, %d", motion_seq_);
+			}
+			else
+				return;
 		}
 	}
 }
@@ -276,11 +354,13 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 		std::map<std::string, double> sensors)
 {
 
-
 	if (enable_ == false)
 	{
 		return;
 	}
+	current_time_ = current_time_+ 0.008;
+
+	motion_generater_();
 	//// read current position ////
 	if(is_moving_l_ == false && is_moving_r_ == false && is_moving_one_joint_ == false)
 	{
@@ -295,23 +375,16 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 				result_[joint_name]->goal_position_ = dxls[joint_name]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
 			}
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
-		ROS_INFO("Motion Stay");
+		//ROS_INFO("Motion Stay");
 	}
 	else
 	{
-		ROS_INFO("Motion Trajectory Start");
-		current_time_ = current_time_+0.008;
-
-
-
+		//ROS_INFO("Motion Trajectory Start");
 		// trajectory is working cartesian space control
-
-
 		//balance
 		leg_end_point_l_modified_ = leg_end_point_l_;
-	  leg_end_point_r_modified_ = leg_end_point_r_;
-
-	  //IK
+		leg_end_point_r_modified_ = leg_end_point_r_;
+		//IK
 		result_rad_l_ = end_to_rad_l_-> cal_end_point_to_rad(leg_end_point_l_);
 		result_rad_r_ = end_to_rad_r_-> cal_end_point_to_rad(leg_end_point_r_);
 		result_rad_one_joint_ = one_joint_ -> cal_one_joint_rad(one_joint_ctrl_);
@@ -336,6 +409,9 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 		result_[joint_id_to_name_[18]]->goal_position_ = result_rad_r_(4,0);
 		result_[joint_id_to_name_[20]]->goal_position_ = result_rad_r_(5,0);
 		result_[joint_id_to_name_[22]]->goal_position_ = result_rad_r_(6,0);
+
+		state_end_point_msg_.data = result_rad_l_(1,0);
+		state_end_point_pub.publish(state_end_point_msg_);
 
 		//<---  read   --->
 		for(int id=10 ; id<23 ; id++)
