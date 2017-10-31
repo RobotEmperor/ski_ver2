@@ -161,7 +161,7 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	}
 	else // trajectory is working joint space control
 	{
-		ROS_INFO("Base Trajectory Start");
+		//ROS_INFO("Base Trajectory Start");
 
 		result_[joint_id_to_name_[1]]->goal_position_ = motion_trajectory[1]->fifth_order_traj_gen(base_module_state->joint_ini_pose_state(1,0) ,
 				base_module_state->joint_ini_pose_goal(1,0) ,
@@ -172,16 +172,19 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 			if(id == 10 || id ==11 || id ==17 || id ==19) // 방향 반대인 다이나믹셀
 			{
 				result_[joint_id_to_name_[id]]->goal_position_ = - motion_trajectory[id]->fifth_order_traj_gen(base_module_state->joint_ini_pose_state(id,0),
-						base_module_state->joint_ini_pose_goal(id,0) ,
+						base_module_state->joint_ini_pose_goal(id,0),
 						0,0,0,0,0,base_module_state->mov_time_state);
 				result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
+				ROS_INFO("id :: %d , value %f", id , result_[joint_id_to_name_[id]]->goal_position_);
 			}
 			else
 			{
 				result_[joint_id_to_name_[id]]->goal_position_ =  motion_trajectory[id]->fifth_order_traj_gen(base_module_state->joint_ini_pose_state(id,0),
-						base_module_state->joint_ini_pose_goal(id,0) ,
+						base_module_state->joint_ini_pose_goal(id,0),
 						0,0,0,0,0,base_module_state->mov_time_state);
 				result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
+
+				ROS_INFO("id :: %d , value %f", id , result_[joint_id_to_name_[id]]->goal_position_);
 			}
 		}
 		base_module_state->is_moving_state = motion_trajectory[1]->is_moving_traj;// trajectory end

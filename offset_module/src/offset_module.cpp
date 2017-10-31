@@ -128,7 +128,6 @@ void OffsetModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 			ROS_INFO("%d :: %f", joint_name_to_id_[joint_name], change_joint_value_[joint_name_to_id_[joint_name]]);
 			result_[joint_id_to_name_[dxl_info->id_]]->goal_position_ = change_joint_value_[joint_name_to_id_[joint_name]]; // 지정된 조인트에 목표 위치 입력
 		}
-
 	} // 등록된 다이나믹셀의 위치값을 읽어옴
 
 
@@ -147,8 +146,6 @@ void OffsetModule::change_joint_value_sub_function(const std_msgs::Int16MultiArr
 }
 void OffsetModule::offset_joint_value_sub_function(const std_msgs::Float64MultiArray::ConstPtr& msg)
 {
-
-
 	for(int i=0; i<30;i++)
 	{
 		offset_joint_value_[i] = msg->data[i];
@@ -168,7 +165,7 @@ void OffsetModule::save_onoff_sub_function(const std_msgs::Bool::ConstPtr& msg)
 	if(msg->data == true)
 	{
 		// YAML SAVE
-		ROS_INFO("YAML_SAVE_READY");
+		ROS_INFO("YAML_SAVE");
 		YAML::Emitter yaml_out;
 		std::map<std::string, double> offset;
 		std::map<std::string, double> init_pose;

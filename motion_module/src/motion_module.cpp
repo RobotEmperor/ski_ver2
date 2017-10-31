@@ -212,7 +212,6 @@ void MotionModule::parse_motion_data_(int motion_num_)
 	{
 		change_desired_time_(i,0) = doc["motion_time"][i].as<double>();
 	}
-
 	// motion data load initialize//
 	YAML::Node pose_node = doc["motion"];// YAML 에 string "motion"을 읽어온다.
 	size_num_= doc["motion"].size();
