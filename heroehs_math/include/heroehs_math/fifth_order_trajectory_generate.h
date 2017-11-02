@@ -25,14 +25,18 @@ public:
 	~FifthOrderTrajectory();
 
 	double fifth_order_traj_gen(double initial_value_, double final_value_,
-			                        double initial_velocity_, double final_velocity_ ,
-			                        double initial_acc, double final_acc,
-			                        double initial_time_, double final_time_);
+			double initial_velocity_, double final_velocity_ ,
+			double initial_acc, double final_acc,
+			double initial_time_, double final_time_);
 
 
 	bool detect_change_final_value(double pose, double velocity_, double time_);
 
 	bool is_moving_traj;
+
+	double a[6];
+	double d_t;
+	double trajectory_final_value;
 
 
 	double initial_time;

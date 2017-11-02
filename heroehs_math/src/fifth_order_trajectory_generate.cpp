@@ -17,6 +17,15 @@ FifthOrderTrajectory::FifthOrderTrajectory()
 	current_time = 0;
 	is_moving_traj = false;
 
+	a[0] = 0;
+	a[1] = 0;
+	a[2] = 0;
+	a[3] = 0;
+	a[4] = 0;
+	a[5] = 0;
+	d_t = 0;
+	trajectory_final_value = 0;
+
 }
 
 FifthOrderTrajectory::~FifthOrderTrajectory()
@@ -49,6 +58,14 @@ double FifthOrderTrajectory::fifth_order_traj_gen(double initial_value_, double 
 		final_pose = final_value_;
 		final_velocity = final_velocity_;
 		final_time = final_time_;
+
+		d_t = final_time_ - initial_time_;
+		a[0] = initial_value_;
+		a[1] = initial_velocity_;
+		a[2] = initial_acc_/2;
+		a[3] = (20*(final_value_ - initial_value_) - (8*final_velocity_ + 12*initial_velocity_)*d_t - (3*final_acc_ - initial_acc_)*pow(d_t,2))/(2*pow(d_t,3));
+		a[4] = (30*(initial_value_ - final_value_) + (14*final_velocity_ + 16*initial_velocity_)*d_t + (3*final_acc_ - 2*initial_acc_)*pow(d_t,2))/(2*pow(d_t,4));
+		a[5] = (12*(final_value_ - initial_value_) - 6*(final_velocity_ + initial_velocity_)*d_t - (final_acc_ - initial_acc_)*pow(d_t,2))/(2*pow(d_t,5));
 	}
 
 	current_time = current_time + 0.008;
@@ -61,18 +78,6 @@ double FifthOrderTrajectory::fifth_order_traj_gen(double initial_value_, double 
 
 	else
 	{
-		double a[6] = {0,0,0,0,0,0};
-		double d_t = 0;
-		double trajectory_final_value = 0;
-
-		d_t = final_time_ - initial_time_;
-		a[0] = initial_value_;
-		a[1] = initial_velocity_;
-		a[2] = initial_acc_/2;
-		a[3] = (20*(final_value_ - initial_value_) - (8*final_velocity_ + 12*initial_velocity_)*d_t - (3*final_acc_ - initial_acc_)*pow(d_t,2))/(2*pow(d_t,3));
-		a[4] = (30*(initial_value_ - final_value_) + (14*final_velocity_ + 16*initial_velocity_)*d_t + (3*final_acc_ - 2*initial_acc_)*pow(d_t,2))/(2*pow(d_t,4));
-		a[5] = (12*(final_value_ - initial_value_) - 6*(final_velocity_ + initial_velocity_)*d_t - (final_acc_ - initial_acc_)*pow(d_t,2))/(2*pow(d_t,5));
-
 		trajectory_final_value = a[0] + a[1]*current_time + a[2]*(pow(current_time,2)) + a[3]*(pow(current_time,3)) + a[4]*(pow(current_time,4)) + a[5]*(pow(current_time,5));
 
 		current_pose = trajectory_final_value;

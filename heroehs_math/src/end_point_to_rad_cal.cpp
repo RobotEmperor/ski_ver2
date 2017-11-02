@@ -21,9 +21,6 @@ CalRad::CalRad()
 
 	cal_one_joint_traj_rad = new FifthOrderTrajectory;
 
-
-	kinematics = new Kinematics;
-
 	current_pose_change.resize(6,2);
 	current_pose_change.fill(0);
 
@@ -39,7 +36,7 @@ CalRad::~CalRad()
 }
 Eigen::MatrixXd CalRad::cal_end_point_to_rad(Eigen::MatrixXd eP_) // end point 6 X 8 행렬을 생 6은 xyz roll pitch yaw 8은 trajectory 입력
 {
-	result_joint.resize(7,1); // 6DOF LEG
+	result_joint.resize(6,1); // 6DOF LEG
 	result_joint.fill(0);
 
 	Eigen::MatrixXd end_point_;
@@ -89,9 +86,7 @@ Eigen::MatrixXd CalRad::cal_end_point_to_rad(Eigen::MatrixXd eP_) // end point 6
 	end_point_(4,0) = cal_end_point_tra_betta -> fifth_order_traj_gen(current_pose_change(4,0), eP_(4,1), current_pose_change(4,1), eP_(4,3), eP_(4,4), eP_(4,5), eP_(4,6), eP_(4,7));
 	end_point_(5,0) = cal_end_point_tra_kamma -> fifth_order_traj_gen(current_pose_change(5,0), eP_(5,1), current_pose_change(5,1), eP_(5,3), eP_(5,4), eP_(5,5), eP_(5,6), eP_(5,7));
 
-	kinematics->InverseKinematics(end_point_(0,0), end_point_(1,0), end_point_(2,0), end_point_(3,0), end_point_(4,0), end_point_(5,0)); // pX pY pZ alpha betta kamma
-
-	result_joint = kinematics->joint_radian;
+	result_joint = end_point_;
 	is_moving_check = cal_end_point_tra_px->is_moving_traj;
 
 	return result_joint;
