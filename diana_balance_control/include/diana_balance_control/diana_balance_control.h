@@ -36,6 +36,11 @@ public:
 
   void process(int *balance_error, Eigen::MatrixXd *robot_to_cob_modified, Eigen::MatrixXd *robot_to_right_foot_modified, Eigen::MatrixXd *robot_to_left_foot_modified);
 
+  void calcGyroBalance();
+
+  void sumBalanceResults();
+
+  void checkBalanceLimit();
 
   // all arguments are with respect to robot coordinate.
   void setDesiredPose(const Eigen::MatrixXd &robot_to_cob, const Eigen::MatrixXd &robot_to_right_foot, const Eigen::MatrixXd &robot_to_left_foot);
@@ -58,6 +63,9 @@ public:
   double getCOBManualAdjustmentZ();
 
 private:
+  BalancePDController foot_roll_gyro_ctrl_;
+  BalancePDController foot_pitch_gyro_ctrl_;
+
   int balance_control_error_;
   double control_cycle_sec_;
 
@@ -65,9 +73,9 @@ private:
   double gyro_enable_;
 
   // desired pose
-  Eigen::MatrixXd desired_robot_to_cob_;
-  Eigen::MatrixXd desired_robot_to_right_foot_;
-  Eigen::MatrixXd desired_robot_to_left_foot_;
+  Eigen::Matrix4d desired_robot_to_cob_;
+  Eigen::Matrix4d desired_robot_to_right_foot_;
+  Eigen::Matrix4d desired_robot_to_left_foot_;
 
   // sensed values
   double current_gyro_roll_rad_per_sec_, current_gyro_pitch_rad_per_sec_;
@@ -87,24 +95,14 @@ private:
   Eigen::VectorXd pose_right_foot_adjustment_;
   Eigen::VectorXd pose_left_foot_adjustment_;
 
-  Eigen::MatrixXd mat_robot_to_cob_modified_;
-  Eigen::MatrixXd mat_robot_to_right_foot_modified_;
-  Eigen::MatrixXd mat_robot_to_left_foot_modified_;
+  Eigen::Matrix4d mat_robot_to_cob_modified_;
+  Eigen::Matrix4d mat_robot_to_right_foot_modified_;
+  Eigen::Matrix4d mat_robot_to_left_foot_modified_;
 
   // maximum adjustment
-  double cob_x_adjustment_abs_max_m_;
-  double cob_y_adjustment_abs_max_m_;
-  double cob_z_adjustment_abs_max_m_;
-  double cob_roll_adjustment_abs_max_rad_;
-  double cob_pitch_adjustment_abs_max_rad_;
-  double cob_yaw_adjustment_abs_max_rad_;
+  Eigen::VectorXd cob_adjustment_abs_max_m_rad_;
+  Eigen::VectorXd foot_adjustment_abs_max_m_rad_;
 
-  double foot_x_adjustment_abs_max_m_;
-  double foot_y_adjustment_abs_max_m_;
-  double foot_z_adjustment_abs_max_m_;
-  double foot_roll_adjustment_abs_max_rad_;
-  double foot_pitch_adjustment_abs_max_rad_;
-  double foot_yaw_adjustment_abs_max_rad_;
 };
 
 }
