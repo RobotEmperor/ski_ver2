@@ -58,6 +58,8 @@ private:
 	bool running_;
 	int control_cycle_msec_;
 
+	int new_count_;
+
 	std_msgs::Float64 state_end_point_msg_;
 
 	boost::thread queue_thread_;
@@ -70,7 +72,7 @@ private:
 	void motion_generater_(); // 모션 생성
 	int motion_command_, pre_motion_command_ , motion_seq_;
 	int pose_;
-  double current_time_;
+	double current_time_;
 	Eigen::MatrixXd change_desired_pose_;
 	Eigen::MatrixXd change_desired_final_vel_;
 	Eigen::MatrixXd change_desired_initial_vel_;
@@ -86,12 +88,14 @@ private:
 	Eigen::MatrixXd leg_end_point_r_, leg_end_point_r_modified_;
 	Eigen::MatrixXd one_joint_ctrl_;
 
+	heroehs_math::Kinematics *l_kinematics_;
+	heroehs_math::Kinematics *r_kinematics_;
 	heroehs_math::CalRad *end_to_rad_l_;
 	heroehs_math::CalRad *end_to_rad_r_;
 	heroehs_math::CalRad *one_joint_;
 
-	Eigen::MatrixXd result_rad_l_;
-	Eigen::MatrixXd result_rad_r_;
+	Eigen::MatrixXd result_end_l_;
+	Eigen::MatrixXd result_end_r_;
 	double result_rad_one_joint_;
 
 

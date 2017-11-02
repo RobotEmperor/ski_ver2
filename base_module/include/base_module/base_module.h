@@ -66,7 +66,7 @@ private:
 	void init_pose_trajectory_();
 	bool running_;
 
-
+	int new_count_;
 	int control_cycle_msec_;
 
 	boost::thread queue_thread_;

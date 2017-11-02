@@ -3,7 +3,7 @@ control_cycle = 8   # milliseconds
 
 [ port info ]
 # PORT NAME  | BAUDRATE
-/dev/ttyUSB0| 1000000  | head
+/dev/ttyUSB0| 1000000  | l_hip_pitch
 
 
 

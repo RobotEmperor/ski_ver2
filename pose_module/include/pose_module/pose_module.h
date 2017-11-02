@@ -65,6 +65,8 @@ private:
 	std::map<std::string, int> joint_name_to_id_;
 	std::map<int, std::string> joint_id_to_name_;
 
+	int new_count_;
+
 	bool is_moving_l_;
 	bool is_moving_r_;
 	bool is_moving_one_joint_;
@@ -79,8 +81,11 @@ private:
 	heroehs_math::CalRad *end_to_rad_r_;
 	heroehs_math::CalRad *one_joint_;
 
-	Eigen::MatrixXd result_rad_l_;
-	Eigen::MatrixXd result_rad_r_;
+	heroehs_math::Kinematics *l_kinematics_;
+	heroehs_math::Kinematics *r_kinematics_;
+
+	Eigen::MatrixXd result_end_l_;
+	Eigen::MatrixXd result_end_r_;
 	double result_rad_one_joint_;
 
 

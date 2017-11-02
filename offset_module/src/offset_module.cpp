@@ -95,6 +95,8 @@ void OffsetModule::initialize(const int control_cycle_msec, robotis_framework::R
 	control_cycle_msec_ = control_cycle_msec;
 	queue_thread_ = boost::thread(boost::bind(&OffsetModule::queueThread, this));
 
+	new_count_ = 1;
+
 	for (std::map<std::string, robotis_framework::Dynamixel*>::iterator it = robot->dxls_.begin();
 			it != robot->dxls_.end(); it++)
 	{
@@ -113,22 +115,24 @@ void OffsetModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	if (enable_ == false)
 		return;
 
-	for (std::map<std::string, robotis_framework::Dynamixel*>::iterator state_iter = dxls.begin();
-			state_iter != dxls.end(); state_iter++)
-	{
-		std::string joint_name = state_iter->first;
-		robotis_framework::Dynamixel* dxl_info = state_iter->second;
-
-		joint_name_to_id_[joint_name] = dxl_info->id_;
-		read_joint_value_[joint_name_to_id_[joint_name]] = dxls[joint_name]->dxl_state_->present_position_;
-
-		if(offset_start_ == false)
+		for (std::map<std::string, robotis_framework::Dynamixel*>::iterator state_iter = dxls.begin();
+				state_iter != dxls.end(); state_iter++)
 		{
-			change_joint_value_[joint_name_to_id_[joint_name]] = dxls[joint_name]->dxl_state_->present_position_;
-			ROS_INFO("%d :: %f", joint_name_to_id_[joint_name], change_joint_value_[joint_name_to_id_[joint_name]]);
-			result_[joint_id_to_name_[dxl_info->id_]]->goal_position_ = change_joint_value_[joint_name_to_id_[joint_name]]; // 지정된 조인트에 목표 위치 입력
-		}
-	} // 등록된 다이나믹셀의 위치값을 읽어옴
+			std::string joint_name = state_iter->first;
+			robotis_framework::Dynamixel* dxl_info = state_iter->second;
+
+			joint_name_to_id_[joint_name] = dxl_info->id_;
+			read_joint_value_[joint_name_to_id_[joint_name]] = dxls[joint_name]->dxl_state_->present_position_;
+
+			if(offset_start_ == false)
+			{
+				change_joint_value_[joint_name_to_id_[joint_name]] = dxls[joint_name]->dxl_state_->present_position_;
+				ROS_INFO("%d :: %f", joint_name_to_id_[joint_name], change_joint_value_[joint_name_to_id_[joint_name]]);
+				result_[joint_id_to_name_[dxl_info->id_]]->goal_position_ = change_joint_value_[joint_name_to_id_[joint_name]]; // 지정된 조인트에 목표 위치 입력
+			}
+		} // 등록된 다이나믹셀의 위치값을 읽어옴
+
+
 
 
 	result_[joint_id_to_name_[joint_select_]]->goal_position_ = change_joint_value_[joint_select_]; // 지정된 조인트에 목표 위치 입력
