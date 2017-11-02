@@ -64,6 +64,8 @@ private:
 	boost::thread queue_thread_;
 	void queueThread();
 
+	int new_count_;
+
 	bool running_;
 
 
