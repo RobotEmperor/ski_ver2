@@ -28,6 +28,7 @@
 #include "heroehs_math/fifth_order_trajectory_generate.h"
 #include "heroehs_math/kinematics.h"
 #include "heroehs_math/end_point_to_rad_cal.h"
+#include "diana_balance_control/diana_balance_control.h"
 
 namespace motion_module
 {
@@ -84,8 +85,8 @@ private:
 	bool is_moving_r_;
 	bool is_moving_one_joint_;
 
-	Eigen::MatrixXd leg_end_point_l_, leg_end_point_l_modified_;
-	Eigen::MatrixXd leg_end_point_r_, leg_end_point_r_modified_;
+	Eigen::MatrixXd leg_end_point_l_;
+	Eigen::MatrixXd leg_end_point_r_;
 	Eigen::MatrixXd one_joint_ctrl_;
 
 	heroehs_math::Kinematics *l_kinematics_;
@@ -96,10 +97,14 @@ private:
 
 	Eigen::MatrixXd result_end_l_;
 	Eigen::MatrixXd result_end_r_;
+	Eigen::Matrix4d result_mat_cob_, result_mat_cob_modified_;
+	Eigen::Matrix4d result_mat_l_, result_mat_l_modified_;
+  Eigen::Matrix4d result_mat_r_, result_mat_r_modified_;
+  robotis_framework::Pose3D result_pose_l_modified_;
+  robotis_framework::Pose3D result_pose_r_modified_;
+
 	double result_rad_one_joint_;
-
-
-
+  diana::BalanceControlUsingPDController balance_ctrl_;
 };
 
 }

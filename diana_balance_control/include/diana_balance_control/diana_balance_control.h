@@ -34,7 +34,7 @@ public:
 
   void setGyroBalanceEnable(bool enable);
 
-  void process(int *balance_error, Eigen::MatrixXd *robot_to_cob_modified, Eigen::MatrixXd *robot_to_right_foot_modified, Eigen::MatrixXd *robot_to_left_foot_modified);
+  void process(int *balance_error, Eigen::Matrix4d *robot_to_cob_modified, Eigen::Matrix4d *robot_to_right_foot_modified, Eigen::Matrix4d *robot_to_left_foot_modified);
 
   void calcGyroBalance();
 
@@ -43,7 +43,7 @@ public:
   void checkBalanceLimit();
 
   // all arguments are with respect to robot coordinate.
-  void setDesiredPose(const Eigen::MatrixXd &robot_to_cob, const Eigen::MatrixXd &robot_to_right_foot, const Eigen::MatrixXd &robot_to_left_foot);
+  void setDesiredPose(const Eigen::Matrix4d &robot_to_cob, const Eigen::Matrix4d &robot_to_right_foot, const Eigen::Matrix4d &robot_to_left_foot);
   void setDesiredCOBGyro(double gyro_roll, double gyro_pitch);
 
   // with respect to robot coordinate.

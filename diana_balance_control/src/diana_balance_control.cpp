@@ -84,7 +84,7 @@ void BalanceControlUsingPDController::setGyroBalanceEnable(bool enable)
     gyro_enable_ = 0.0;
 }
 
-void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixXd *robot_to_cob_modified, Eigen::MatrixXd *robot_to_right_foot_modified, Eigen::MatrixXd *robot_to_left_foot_modified)
+void BalanceControlUsingPDController::process(int *balance_error, Eigen::Matrix4d *robot_to_cob_modified, Eigen::Matrix4d *robot_to_right_foot_modified, Eigen::Matrix4d *robot_to_left_foot_modified)
 {
   balance_control_error_ = BalanceControlError::NoError;
 
@@ -98,7 +98,8 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
 
   checkBalanceLimit();
 
-  *balance_error = balance_control_error_;
+  if(balance_error != 0)
+    *balance_error = balance_control_error_;
 
   *robot_to_cob_modified        = mat_robot_to_cob_modified_;
   *robot_to_right_foot_modified = mat_robot_to_right_foot_modified_;
@@ -173,7 +174,7 @@ void BalanceControlUsingPDController::checkBalanceLimit()
     balance_control_error_ &= BalanceControlError::BalanceLimit;
 }
 
-void BalanceControlUsingPDController::setDesiredPose(const Eigen::MatrixXd &robot_to_cob, const Eigen::MatrixXd &robot_to_right_foot, const Eigen::MatrixXd &robot_to_left_foot)
+void BalanceControlUsingPDController::setDesiredPose(const Eigen::Matrix4d &robot_to_cob, const Eigen::Matrix4d &robot_to_right_foot, const Eigen::Matrix4d &robot_to_left_foot)
 {
   desired_robot_to_cob_        = robot_to_cob;
   desired_robot_to_right_foot_ = robot_to_right_foot;

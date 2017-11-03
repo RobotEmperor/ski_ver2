@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   base_module
   pose_module
   motion_module
+  diana_balance_control
 )
 
 find_package(Boost REQUIRED COMPONENTS system)

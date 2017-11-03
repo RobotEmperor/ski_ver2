@@ -53,6 +53,38 @@ MotionModule::MotionModule()
 	//////////////////////////
 	result_rad_one_joint_= 0;
 	traj_time_ = 4.0;
+
+
+  result_end_l_.resize(6,1);
+  result_end_r_.resize(6,1);
+  result_end_l_.fill(0);
+  result_end_r_.fill(0);
+
+
+
+  result_end_l_.coeffRef(0,0) = 0.1;
+  result_end_l_.coeffRef(1,0) = 0.15;
+  result_end_l_.coeffRef(2,0) = -0.52;
+  result_end_l_.coeffRef(3,0) = -15*DEGREE2RADIAN;
+  result_end_l_.coeffRef(4,0) = -10*DEGREE2RADIAN;
+  result_end_l_.coeffRef(5,0) = 15*DEGREE2RADIAN;
+
+  result_end_r_.coeffRef(0,0) = 0.1;
+  result_end_r_.coeffRef(1,0) = -0.15;
+  result_end_r_.coeffRef(2,0) = -0.52;
+  result_end_r_.coeffRef(3,0) = 15*DEGREE2RADIAN;
+  result_end_r_.coeffRef(4,0) = -10*DEGREE2RADIAN;
+  result_end_r_.coeffRef(5,0) = -15*DEGREE2RADIAN;
+
+  result_mat_cob_ = result_mat_cob_modified_ = Eigen::Matrix4d::Identity();
+
+  result_mat_l_ = robotis_framework::getTransformationXYZRPY(result_end_l_.coeff(0,0), result_end_l_.coeff(1,0), result_end_l_.coeff(2,0),
+      result_end_l_.coeff(3,0), result_end_l_.coeff(4,0), result_end_l_.coeff(5,0));
+  result_mat_r_ = robotis_framework::getTransformationXYZRPY(result_end_r_.coeff(0,0), result_end_r_.coeff(1,0), result_end_r_.coeff(2,0),
+      result_end_r_.coeff(3,0), result_end_r_.coeff(4,0), result_end_r_.coeff(5,0));
+
+  result_mat_l_modified_ = result_mat_l_;
+  result_mat_r_modified_ = result_mat_r_;
 }
 MotionModule::~MotionModule()
 {
@@ -134,13 +166,7 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 	end_to_rad_r_->current_pose_change(2,0) = -10*DEGREE2RADIAN;
 	end_to_rad_r_->current_pose_change(2,0) = -15*DEGREE2RADIAN;
 
-	leg_end_point_l_modified_ = leg_end_point_l_;
-	leg_end_point_r_modified_ = leg_end_point_r_;
 
-	result_end_l_.resize(6,1);
-	result_end_r_.resize(6,1);
-	result_end_l_.fill(0);
-	result_end_r_.fill(0);
 
 	one_joint_ctrl_.resize(1,8);
 	one_joint_ctrl_.fill(0);
@@ -154,6 +180,8 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 	}
 	one_joint_ctrl_(0,7) = traj_time_;
 	//
+
+	balance_ctrl_.initialize(control_cycle_msec);
 	ROS_INFO("< -------  Initialize Module : Motion Module !!  ------->");
 }
 void MotionModule::queueThread()
@@ -388,43 +416,11 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	{
 		ROS_INFO("Motion Trajectory Start");
 		// trajectory is working cartesian space control
-		//balance
-		leg_end_point_l_modified_ = leg_end_point_l_;
-		leg_end_point_r_modified_ = leg_end_point_r_;
-
 		result_end_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
 		result_end_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
 		result_rad_one_joint_ = one_joint_ -> cal_one_joint_rad(one_joint_ctrl_);
 
-		//IK
 
-		l_kinematics_->InverseKinematics(result_end_l_(0,0), result_end_l_(1,0), result_end_l_(2,0), result_end_l_(3,0), result_end_l_(4,0), result_end_l_(5,0)); // pX pY pZ alpha betta kamma
-		r_kinematics_->InverseKinematics(result_end_r_(0,0), result_end_r_(1,0), result_end_r_(2,0), result_end_r_(3,0), result_end_r_(4,0), result_end_r_(5,0)); // pX pY pZ alpha betta kamma
-
-
-		//<---  joint space control --->
-		result_[joint_id_to_name_[1]]->goal_position_ = 0;// head
-		result_[joint_id_to_name_[10]]->goal_position_ = -result_rad_one_joint_; // waist roll
-
-		//<---  cartesian space control  --->
-		result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);//
-		result_[joint_id_to_name_[13]]->goal_position_ = l_kinematics_->joint_radian(2,0);
-		result_[joint_id_to_name_[15]]->goal_position_ = l_kinematics_->joint_radian(3,0);
-
-		result_[joint_id_to_name_[17]]->goal_position_ = -l_kinematics_->joint_radian(4,0);//
-		result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);//
-		result_[joint_id_to_name_[21]]->goal_position_ = l_kinematics_->joint_radian(6,0);
-
-		result_[joint_id_to_name_[12]]->goal_position_ = r_kinematics_->joint_radian(1,0);
-		result_[joint_id_to_name_[14]]->goal_position_ = r_kinematics_->joint_radian(2,0);
-		result_[joint_id_to_name_[16]]->goal_position_ = r_kinematics_->joint_radian(3,0);
-
-		result_[joint_id_to_name_[18]]->goal_position_ = r_kinematics_->joint_radian(4,0);
-		result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
-		result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
-
-		state_end_point_msg_.data = -l_kinematics_->joint_radian(1,0);
-		state_end_point_pub.publish(state_end_point_msg_);
 
 		//<---  read   --->
 		for(int id=10 ; id<23 ; id++)
@@ -439,6 +435,56 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 		is_moving_r_ = end_to_rad_r_-> is_moving_check;
 		is_moving_one_joint_ = one_joint_ ->is_moving_check;
 	}
+
+  //////balance
+  result_mat_l_ = robotis_framework::getTransformationXYZRPY(result_end_l_.coeff(0,0), result_end_l_.coeff(1,0), result_end_l_.coeff(2,0),
+      result_end_l_.coeff(3,0), result_end_l_.coeff(4,0), result_end_l_.coeff(5,0));
+  result_mat_r_ = robotis_framework::getTransformationXYZRPY(result_end_r_.coeff(0,0), result_end_r_.coeff(1,0), result_end_r_.coeff(2,0),
+      result_end_r_.coeff(3,0), result_end_r_.coeff(4,0), result_end_r_.coeff(5,0));
+
+  //future work : cob must be calculated.
+  result_mat_cob_modified_ = result_mat_cob_;
+  result_mat_l_modified_ = result_mat_l_;
+  result_mat_r_modified_ = result_mat_r_;
+
+  balance_ctrl_.setDesiredPose(result_mat_cob_, result_mat_r_, result_mat_l_);
+  balance_ctrl_.process(0, &result_mat_cob_modified_, &result_mat_r_modified_, &result_mat_l_modified_);
+
+  result_pose_l_modified_ = robotis_framework::getPose3DfromTransformMatrix(result_mat_l_modified_);
+  result_pose_r_modified_ = robotis_framework::getPose3DfromTransformMatrix(result_mat_r_modified_);
+
+  //IK
+//    l_kinematics_->InverseKinematics(result_end_l_(0,0), result_end_l_(1,0), result_end_l_(2,0), result_end_l_(3,0), result_end_l_(4,0), result_end_l_(5,0)); // pX pY pZ alpha betta kamma
+//    r_kinematics_->InverseKinematics(result_end_r_(0,0), result_end_r_(1,0), result_end_r_(2,0), result_end_r_(3,0), result_end_r_(4,0), result_end_r_(5,0)); // pX pY pZ alpha betta kamma
+  l_kinematics_->InverseKinematics(result_pose_l_modified_.x, result_pose_l_modified_.y, result_pose_l_modified_.z,
+      result_pose_l_modified_.roll, result_pose_l_modified_.pitch, result_pose_l_modified_.yaw); // pX pY pZ alpha betta kamma
+  r_kinematics_->InverseKinematics(result_pose_r_modified_.x, result_pose_r_modified_.y, result_pose_r_modified_.z,
+      result_pose_r_modified_.roll, result_pose_r_modified_.pitch, result_pose_r_modified_.yaw); // pX pY pZ alpha betta kamma
+
+
+  //<---  joint space control --->
+  result_[joint_id_to_name_[1]]->goal_position_ = 0;// head
+  result_[joint_id_to_name_[10]]->goal_position_ = -result_rad_one_joint_; // waist roll
+
+  //<---  cartesian space control  --->
+  result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);//
+  result_[joint_id_to_name_[13]]->goal_position_ = l_kinematics_->joint_radian(2,0);
+  result_[joint_id_to_name_[15]]->goal_position_ = l_kinematics_->joint_radian(3,0);
+
+  result_[joint_id_to_name_[17]]->goal_position_ = -l_kinematics_->joint_radian(4,0);//
+  result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);//
+  result_[joint_id_to_name_[21]]->goal_position_ = l_kinematics_->joint_radian(6,0);
+
+  result_[joint_id_to_name_[12]]->goal_position_ = r_kinematics_->joint_radian(1,0);
+  result_[joint_id_to_name_[14]]->goal_position_ = r_kinematics_->joint_radian(2,0);
+  result_[joint_id_to_name_[16]]->goal_position_ = r_kinematics_->joint_radian(3,0);
+
+  result_[joint_id_to_name_[18]]->goal_position_ = r_kinematics_->joint_radian(4,0);
+  result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
+  result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
+
+  state_end_point_msg_.data = -l_kinematics_->joint_radian(1,0);
+  state_end_point_pub.publish(state_end_point_msg_);
 }
 void MotionModule::stop()
 {
