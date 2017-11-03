@@ -209,7 +209,7 @@ void MotionModule::queueThread()
 	/* publisher topics */
 	state_end_point_pub = ros_node.advertise<std_msgs::Float64>("/state_end_point",100);
 	/* subscribe topics */
-	get_imu_data_sub_ = ros_node.subscribe("/imu", 100, &MotionModule::imuDataMsgCallback, this);
+	get_imu_data_sub_ = ros_node.subscribe("/imu/data", 100, &MotionModule::imuDataMsgCallback, this);
 	set_balance_param_sub_ = ros_node.subscribe("/diana/balance_parameter", 5, &MotionModule::setBalanceParameterCallback, this);
 
 	// for gui
@@ -255,6 +255,8 @@ void MotionModule::setBalanceParameterCallback(const diana_msgs::BalanceParam::C
     return;
   }
 
+  ROS_INFO("SET BALANCE_PARAM");
+
   balance_updating_duration_sec_ = 2.0;
   if(msg->updating_duration < 0)
     balance_updating_duration_sec_ = 2.0;
@@ -292,6 +294,7 @@ void MotionModule::updateBalanceParameter()
     balance_ctrl_.foot_pitch_gyro_ctrl_.p_gain_ = desired_balance_param_.foot_pitch_gyro_p_gain;
     balance_ctrl_.foot_pitch_gyro_ctrl_.d_gain_ = desired_balance_param_.foot_pitch_gyro_d_gain;
 
+    previous_balance_param_ = desired_balance_param_;
     balance_update_ = false;
   }
   else

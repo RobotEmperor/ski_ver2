@@ -127,8 +127,8 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::Matrix4
 
 void BalanceControlUsingPDController::calcGyroBalance()
 {
-  foot_roll_adjustment_by_gyro_roll_   = -0.1*gyro_enable_*foot_roll_gyro_ctrl_.getFeedBack(current_gyro_roll_rad_per_sec_);
-  foot_pitch_adjustment_by_gyro_pitch_ = -0.1*gyro_enable_*foot_pitch_gyro_ctrl_.getFeedBack(current_gyro_pitch_rad_per_sec_);
+  foot_roll_adjustment_by_gyro_roll_   = -1.0*gyro_enable_*foot_roll_gyro_ctrl_.getFeedBack(current_gyro_roll_rad_per_sec_);
+  foot_pitch_adjustment_by_gyro_pitch_ = -1.0*gyro_enable_*foot_pitch_gyro_ctrl_.getFeedBack(current_gyro_pitch_rad_per_sec_);
 }
 
 void BalanceControlUsingPDController::sumBalanceResults()

@@ -160,7 +160,7 @@ bool OffsetModule::read_joint_value_srv_function(offset_module::command::Request
 {
 	for(int i =1; i<30; i++)
 	{
-		res.angle[i] = static_cast<int16_t>(((read_joint_value_[i]*RADIAN2DEGREE))/0.088); // GUI 에서 요청한 모든 조인트의 위치값을 저장함.
+		res.angle[i] = static_cast<int16_t>(((read_joint_value_[i]*RADIAN2DEGREE))/(0.088/3.0)); // GUI 에서 요청한 모든 조인트의 위치값을 저장함.
 	}
 	return true;
 }
