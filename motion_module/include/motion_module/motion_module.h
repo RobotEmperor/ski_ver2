@@ -15,6 +15,7 @@
 #include <std_msgs/String.h>
 #include <geometry_msgs/Pose.h>
 #include <boost/thread.hpp>
+#include <sensor_msgs/Imu.h>
 
 #include <Eigen/Dense>
 #include <yaml-cpp/yaml.h>
@@ -49,10 +50,11 @@ public:
 	bool gazebo_check;
 
 	ros::Publisher state_end_point_pub;
-
+	ros::Subscriber get_imu_data_sub_;
 
 	/* ROS Topic Callback Functions */
 	void desiredMotionMsgCallback(const std_msgs::Int32::ConstPtr& msg);
+	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
 
 private:
 	void queueThread();
@@ -105,6 +107,7 @@ private:
 
 	double result_rad_one_joint_;
   diana::BalanceControlUsingPDController balance_ctrl_;
+  double currentGyroX,currentGyroY,currentGyroZ;
 };
 
 }
