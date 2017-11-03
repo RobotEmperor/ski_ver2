@@ -30,6 +30,7 @@
 #include "heroehs_math/kinematics.h"
 #include "heroehs_math/end_point_to_rad_cal.h"
 #include "diana_balance_control/diana_balance_control.h"
+#include "diana_msgs/BalanceParam.h"
 
 namespace motion_module
 {
@@ -51,10 +52,12 @@ public:
 
 	ros::Publisher state_end_point_pub;
 	ros::Subscriber get_imu_data_sub_;
+  ros::Subscriber set_balance_param_sub_;
 
 	/* ROS Topic Callback Functions */
 	void desiredMotionMsgCallback(const std_msgs::Int32::ConstPtr& msg);
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
+  void setBalanceParameterCallback(const diana_msgs::BalanceParam::ConstPtr& msg);
 
 private:
 	void queueThread();
@@ -108,6 +111,15 @@ private:
 	double result_rad_one_joint_;
   diana::BalanceControlUsingPDController balance_ctrl_;
   double currentGyroX,currentGyroY,currentGyroZ;
+
+  void updateBalanceParameter();
+  diana_msgs::BalanceParam previous_balance_param_, desired_balance_param_;
+  robotis_framework::FifthOrderPolynomialTrajectory balance_param_update_coeff_;
+  double balance_updating_duration_sec_;
+  double balance_updating_sys_time_sec_;
+  bool balance_update_;
+
+
 };
 
 }

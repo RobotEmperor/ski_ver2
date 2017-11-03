@@ -62,9 +62,10 @@ public:
   double getCOBManualAdjustmentY();
   double getCOBManualAdjustmentZ();
 
-private:
   BalancePDController foot_roll_gyro_ctrl_;
   BalancePDController foot_pitch_gyro_ctrl_;
+
+private:
 
   int balance_control_error_;
   double control_cycle_sec_;

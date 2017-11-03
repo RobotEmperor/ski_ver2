@@ -91,6 +91,10 @@ MotionModule::MotionModule()
 
 	result_mat_l_modified_ = result_mat_l_;
 	result_mat_r_modified_ = result_mat_r_;
+
+  balance_updating_duration_sec_ = 2.0;
+  balance_updating_sys_time_sec_ = 2.0;
+  balance_update_= false;
 }
 MotionModule::~MotionModule()
 {
@@ -188,6 +192,13 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 	//
 
 	balance_ctrl_.initialize(control_cycle_msec);
+	previous_balance_param_.cob_x_offset_m = 0;
+	previous_balance_param_.cob_y_offset_m = 0;
+	previous_balance_param_.foot_roll_gyro_p_gain = 0;
+	previous_balance_param_.foot_roll_gyro_d_gain = 0;
+	previous_balance_param_.foot_pitch_gyro_p_gain = 0;
+	previous_balance_param_.foot_pitch_gyro_d_gain = 0;
+
 	ROS_INFO("< -------  Initialize Module : Motion Module !!  ------->");
 }
 void MotionModule::queueThread()
@@ -199,6 +210,7 @@ void MotionModule::queueThread()
 	state_end_point_pub = ros_node.advertise<std_msgs::Float64>("/state_end_point",100);
 	/* subscribe topics */
 	get_imu_data_sub_ = ros_node.subscribe("/imu", 100, &MotionModule::imuDataMsgCallback, this);
+	set_balance_param_sub_ = ros_node.subscribe("/diana/balance_parameter", 5, &MotionModule::setBalanceParameterCallback, this);
 
 	// for gui
 	ros::Subscriber motion_num_msg_sub = ros_node.subscribe("/motion_num", 5, &MotionModule::desiredMotionMsgCallback, this);
@@ -231,7 +243,73 @@ void MotionModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg)
 	currentGyroX = (double) msg->angular_velocity.x;
 	currentGyroY = (double) msg->angular_velocity.y;
 	currentGyroZ = (double) msg->angular_velocity.z;
+
+	balance_ctrl_.setCurrentGyroSensorOutput(currentGyroY, currentGyroX);
 }
+
+void MotionModule::setBalanceParameterCallback(const diana_msgs::BalanceParam::ConstPtr& msg)
+{
+  if(balance_update_ == true)
+  {
+    ROS_ERROR("the previous task is not finished");
+    return;
+  }
+
+  balance_updating_duration_sec_ = 2.0;
+  if(msg->updating_duration < 0)
+    balance_updating_duration_sec_ = 2.0;
+  else
+    balance_updating_duration_sec_ = msg->updating_duration;
+
+  desired_balance_param_.cob_x_offset_m         = msg->cob_x_offset_m        ;
+  desired_balance_param_.cob_y_offset_m         = msg->cob_y_offset_m        ;
+  desired_balance_param_.foot_roll_gyro_p_gain  = msg->foot_roll_gyro_p_gain ;
+  desired_balance_param_.foot_roll_gyro_d_gain  = msg->foot_roll_gyro_d_gain ;
+  desired_balance_param_.foot_pitch_gyro_p_gain = msg->foot_pitch_gyro_p_gain;
+  desired_balance_param_.foot_pitch_gyro_d_gain = msg->foot_pitch_gyro_d_gain;
+
+  balance_param_update_coeff_.changeTrajectory(0,0,0,0, balance_updating_duration_sec_, 1, 0, 0);
+
+  balance_update_ = true;
+  balance_updating_sys_time_sec_ = 0;
+}
+
+void MotionModule::updateBalanceParameter()
+{
+  if(balance_update_ == false)
+    return;
+
+  double coeff = 0.0;
+  balance_updating_sys_time_sec_ += control_cycle_msec_ * 0.001;
+  if(balance_updating_sys_time_sec_ > balance_updating_duration_sec_)
+  {
+    balance_updating_sys_time_sec_ = balance_updating_duration_sec_;
+
+    balance_ctrl_.setCOBManualAdjustment(desired_balance_param_.cob_x_offset_m, desired_balance_param_.cob_y_offset_m, 0);
+    balance_ctrl_.foot_roll_gyro_ctrl_.p_gain_ = desired_balance_param_.foot_roll_gyro_p_gain;
+    balance_ctrl_.foot_roll_gyro_ctrl_.d_gain_ = desired_balance_param_.foot_roll_gyro_d_gain;
+
+    balance_ctrl_.foot_pitch_gyro_ctrl_.p_gain_ = desired_balance_param_.foot_pitch_gyro_p_gain;
+    balance_ctrl_.foot_pitch_gyro_ctrl_.d_gain_ = desired_balance_param_.foot_pitch_gyro_d_gain;
+
+    balance_update_ = false;
+  }
+  else
+  {
+    coeff = balance_param_update_coeff_.getPosition(balance_updating_sys_time_sec_);
+
+    balance_ctrl_.setCOBManualAdjustment((desired_balance_param_.cob_x_offset_m - previous_balance_param_.cob_x_offset_m)*coeff + previous_balance_param_.cob_x_offset_m,
+                                         (desired_balance_param_.cob_y_offset_m - previous_balance_param_.cob_y_offset_m)*coeff + previous_balance_param_.cob_y_offset_m, 0);
+
+    balance_ctrl_.foot_roll_gyro_ctrl_.p_gain_ = (desired_balance_param_.foot_roll_gyro_p_gain - previous_balance_param_.foot_roll_gyro_p_gain)*coeff + previous_balance_param_.foot_roll_gyro_p_gain;
+    balance_ctrl_.foot_roll_gyro_ctrl_.d_gain_ = (desired_balance_param_.foot_roll_gyro_d_gain - previous_balance_param_.foot_roll_gyro_d_gain)*coeff + previous_balance_param_.foot_roll_gyro_d_gain;
+
+    balance_ctrl_.foot_pitch_gyro_ctrl_.p_gain_ = (desired_balance_param_.foot_pitch_gyro_p_gain - previous_balance_param_.foot_pitch_gyro_p_gain)*coeff + previous_balance_param_.foot_pitch_gyro_p_gain;
+    balance_ctrl_.foot_pitch_gyro_ctrl_.d_gain_ = (desired_balance_param_.foot_pitch_gyro_d_gain - previous_balance_param_.foot_pitch_gyro_d_gain)*coeff + previous_balance_param_.foot_pitch_gyro_d_gain;
+  }
+
+}
+
 void MotionModule::parse_motion_data_(int motion_num_)
 {
 	int size_num_ = 0;
@@ -404,6 +482,9 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	{
 		return;
 	}
+
+  updateBalanceParameter();
+
 	current_time_ = current_time_+ 0.008;
 	motion_generater_();
 	//// read current position ////

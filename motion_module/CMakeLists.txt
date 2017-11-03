@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   robotis_controller_msgs
   heroehs_math
   diana_balance_control
+  diana_msgs
 )
 
 find_package(Eigen REQUIRED)
