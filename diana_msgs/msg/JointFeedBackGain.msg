@@ -1,0 +1,27 @@
+float32 r_leg_hip_p_p_gain
+float32 r_leg_hip_r_p_gain
+float32 r_leg_hip_y_p_gain
+float32 r_leg_kn_p_p_gain
+float32 r_leg_an_p_p_gain
+float32 r_leg_an_r_p_gain
+
+float32 l_leg_hip_p_p_gain
+float32 l_leg_hip_r_p_gain
+float32 l_leg_hip_y_p_gain
+float32 l_leg_kn_p_p_gain
+float32 l_leg_an_p_p_gain
+float32 l_leg_an_r_p_gain
+
+float32 r_leg_hip_p_d_gain
+float32 r_leg_hip_r_d_gain
+float32 r_leg_hip_y_d_gain
+float32 r_leg_kn_p_d_gain
+float32 r_leg_an_p_d_gain
+float32 r_leg_an_r_d_gain
+
+float32 l_leg_hip_p_d_gain
+float32 l_leg_hip_r_d_gain
+float32 l_leg_hip_y_d_gain
+float32 l_leg_kn_p_d_gain
+float32 l_leg_an_p_d_gain
+float32 l_leg_an_r_d_gain
