@@ -65,7 +65,7 @@ Kinematics::Kinematics()
 	dh_link[1] = 0;
 	dh_link[2] = 0;
 	dh_link[3] = 0;
-	dh_link[4] = 0.235;
+	dh_link[4] = 0.225;
 	dh_link[5] = 0;
 	dh_link[6] = 0.12;
 

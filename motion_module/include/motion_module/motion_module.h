@@ -13,7 +13,7 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/String.h>
-#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/Vector3.h>
 #include <boost/thread.hpp>
 #include <sensor_msgs/Imu.h>
 
@@ -50,7 +50,11 @@ public:
 
 	bool gazebo_check;
 
-	ros::Publisher state_end_point_pub;
+	// paper messages
+	ros::Publisher state_end_point_pose_pub;
+	ros::Publisher state_end_point_orientation_pub;
+
+	// sensor data & balance on off
 	ros::Subscriber get_imu_data_sub_;
   ros::Subscriber set_balance_param_sub_;
 
@@ -66,7 +70,8 @@ private:
 
 	int new_count_;
 
-	std_msgs::Float64 state_end_point_msg_;
+	geometry_msgs::Vector3 state_end_point_pose_msg_;
+	geometry_msgs::Vector3 state_end_point_orientation_msg_;
 
 	boost::thread queue_thread_;
 

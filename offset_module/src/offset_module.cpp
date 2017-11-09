@@ -132,9 +132,6 @@ void OffsetModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 			}
 		} // 등록된 다이나믹셀의 위치값을 읽어옴
 
-
-
-
 	result_[joint_id_to_name_[joint_select_]]->goal_position_ = change_joint_value_[joint_select_]; // 지정된 조인트에 목표 위치 입력
 
 }
