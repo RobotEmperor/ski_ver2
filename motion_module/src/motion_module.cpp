@@ -284,6 +284,7 @@ void MotionModule::updateBalanceParameter()
 
 	double coeff = 0.0;
 	balance_updating_sys_time_sec_ += control_cycle_msec_ * 0.001;
+
 	if(balance_updating_sys_time_sec_ > balance_updating_duration_sec_)
 	{
 		balance_updating_sys_time_sec_ = balance_updating_duration_sec_;
@@ -552,8 +553,6 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	result_pose_r_modified_ = robotis_framework::getPose3DfromTransformMatrix(result_mat_r_modified_);
 
 	//IK
-	//    l_kinematics_->InverseKinematics(result_end_l_(0,0), result_end_l_(1,0), result_end_l_(2,0), result_end_l_(3,0), result_end_l_(4,0), result_end_l_(5,0)); // pX pY pZ alpha betta kamma
-	//    r_kinematics_->InverseKinematics(result_end_r_(0,0), result_end_r_(1,0), result_end_r_(2,0), result_end_r_(3,0), result_end_r_(4,0), result_end_r_(5,0)); // pX pY pZ alpha betta kamma
 	l_kinematics_->InverseKinematics(result_pose_l_modified_.x, result_pose_l_modified_.y, result_pose_l_modified_.z,
 			result_pose_l_modified_.roll, result_pose_l_modified_.pitch, result_pose_l_modified_.yaw); // pX pY pZ alpha betta kamma
 	r_kinematics_->InverseKinematics(result_pose_r_modified_.x, result_pose_r_modified_.y, result_pose_r_modified_.z,
@@ -581,7 +580,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
 	result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
 
-/*	// l_ endpoint xyz
+	/*	// l_ endpoint xyz
 	state_end_point_pose_msg_.x=  result_pose_l_modified_.x;
 	state_end_point_pose_msg_.y=  result_pose_l_modified_.y;
 	state_end_point_pose_msg_.z=  result_pose_l_modified_.z;
