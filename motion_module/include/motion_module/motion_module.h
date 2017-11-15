@@ -14,6 +14,7 @@
 #include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/String.h>
 #include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/PointStamped.h>
 #include <boost/thread.hpp>
 #include <sensor_msgs/Imu.h>
 
@@ -30,7 +31,9 @@
 #include "heroehs_math/kinematics.h"
 #include "heroehs_math/end_point_to_rad_cal.h"
 #include "diana_balance_control/diana_balance_control.h"
+#include "diana_balance_control/zmp_calculation_function.h"
 #include "diana_msgs/BalanceParam.h"
+#include "diana_msgs/ForceTorque.h"
 
 namespace motion_module
 {
@@ -53,14 +56,17 @@ public:
 	// paper messages
 	ros::Publisher state_end_point_pose_pub;
 	ros::Publisher state_end_point_orientation_pub;
+	ros::Publisher zmp_point_pub;
 
 	// sensor data & balance on off
 	ros::Subscriber get_imu_data_sub_;
+	ros::Subscriber get_ft_data_sub_;
   ros::Subscriber set_balance_param_sub_;
 
 	/* ROS Topic Callback Functions */
 	void desiredMotionMsgCallback(const std_msgs::Int32::ConstPtr& msg);
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
+	void ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg);
   void setBalanceParameterCallback(const diana_msgs::BalanceParam::ConstPtr& msg);
 
 private:
@@ -72,6 +78,7 @@ private:
 
 	geometry_msgs::Vector3 state_end_point_pose_msg_;
 	geometry_msgs::Vector3 state_end_point_orientation_msg_;
+	geometry_msgs::PointStamped zmp_point_msg_;
 
 	boost::thread queue_thread_;
 
@@ -116,13 +123,21 @@ private:
 	double result_rad_one_joint_;
   diana::BalanceControlUsingPDController balance_ctrl_;
   double currentGyroX,currentGyroY,currentGyroZ;
+  double currentFX_l,currentFY_l,currentFZ_l,currentTX_l,currentTY_l,currentTZ_l;
+  double currentFX_r,currentFY_r,currentFZ_r,currentTX_r,currentTY_r,currentTZ_r;
 
+  // balance gyro
   void updateBalanceParameter();
   diana_msgs::BalanceParam previous_balance_param_, desired_balance_param_;
   robotis_framework::FifthOrderPolynomialTrajectory balance_param_update_coeff_;
   double balance_updating_duration_sec_;
   double balance_updating_sys_time_sec_;
   bool balance_update_;
+
+  // zmp
+  diana::ZmpCalculationFunc zmp_cal;
+
+
 
 
 };

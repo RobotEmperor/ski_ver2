@@ -23,6 +23,7 @@ add_message_files(
   FILES
   BalanceParam.msg
   JointFeedBackGain.msg
+  ForceTorque.msg
 )
 
 generate_messages(

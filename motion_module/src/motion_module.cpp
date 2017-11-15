@@ -66,17 +66,15 @@ MotionModule::MotionModule()
 	result_end_l_.fill(0);
 	result_end_r_.fill(0);
 
-
-
 	result_end_l_.coeffRef(0,0) = 0.1;
-	result_end_l_.coeffRef(1,0) = 0.15;
+	result_end_l_.coeffRef(1,0) = 0.255;
 	result_end_l_.coeffRef(2,0) = -0.52;
 	result_end_l_.coeffRef(3,0) = -15*DEGREE2RADIAN;
 	result_end_l_.coeffRef(4,0) = -10*DEGREE2RADIAN;
 	result_end_l_.coeffRef(5,0) = 15*DEGREE2RADIAN;
 
 	result_end_r_.coeffRef(0,0) = 0.1;
-	result_end_r_.coeffRef(1,0) = -0.15;
+	result_end_r_.coeffRef(1,0) = -0.255;
 	result_end_r_.coeffRef(2,0) = -0.52;
 	result_end_r_.coeffRef(3,0) = 15*DEGREE2RADIAN;
 	result_end_r_.coeffRef(4,0) = -10*DEGREE2RADIAN;
@@ -95,6 +93,7 @@ MotionModule::MotionModule()
 	balance_updating_duration_sec_ = 2.0;
 	balance_updating_sys_time_sec_ = 2.0;
 	balance_update_= false;
+
 }
 MotionModule::~MotionModule()
 {
@@ -116,12 +115,11 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 		joint_name_to_id_[joint_name] = dxl_info->id_;
 		joint_id_to_name_[dxl_info->id_] = joint_name;
 	}
-
 	//초기화 //
 	leg_end_point_l_.resize(6,8);
 	leg_end_point_l_.fill(0);
 	leg_end_point_l_(0,0) = 0.1;
-	leg_end_point_l_(1,0) = 0.15;
+	leg_end_point_l_(1,0) = 0.255;
 	leg_end_point_l_(2,0) = -0.52;
 	leg_end_point_l_(3,0) = -15*DEGREE2RADIAN;
 	leg_end_point_l_(4,0) = -10*DEGREE2RADIAN;
@@ -131,7 +129,7 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 		leg_end_point_l_(i,1) = leg_end_point_l_(i,0);
 	}
 	end_to_rad_l_->cal_end_point_tra_px->current_pose = 0.1;
-	end_to_rad_l_->cal_end_point_tra_py->current_pose = 0.15;
+	end_to_rad_l_->cal_end_point_tra_py->current_pose = 0.255;
 	end_to_rad_l_->cal_end_point_tra_pz->current_pose = -0.52;
 
 	end_to_rad_l_->cal_end_point_tra_alpha->current_pose = -15*DEGREE2RADIAN;
@@ -139,7 +137,7 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 	end_to_rad_l_->cal_end_point_tra_kamma->current_pose = 15*DEGREE2RADIAN;
 
 	end_to_rad_l_->current_pose_change(0,0) = 0.1;
-	end_to_rad_l_->current_pose_change(1,0) = 0.15;
+	end_to_rad_l_->current_pose_change(1,0) = 0.255;
 	end_to_rad_l_->current_pose_change(2,0) = -0.52;
 
 	end_to_rad_l_->current_pose_change(3,0) = -15*DEGREE2RADIAN;
@@ -150,7 +148,7 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 	leg_end_point_r_.fill(0);
 
 	leg_end_point_r_(0,0) = 0.1;
-	leg_end_point_r_(1,0) = -0.15;
+	leg_end_point_r_(1,0) = -0.255;
 	leg_end_point_r_(2,0) = -0.52;
 	leg_end_point_r_(3,0) = 15*DEGREE2RADIAN;
 	leg_end_point_r_(4,0) = -10*DEGREE2RADIAN;
@@ -161,7 +159,7 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 		leg_end_point_r_(i,1) = leg_end_point_r_(i,0);
 	}
 	end_to_rad_r_->cal_end_point_tra_px->current_pose = 0.1;
-	end_to_rad_r_->cal_end_point_tra_py->current_pose = -0.15;
+	end_to_rad_r_->cal_end_point_tra_py->current_pose = -0.255;
 	end_to_rad_r_->cal_end_point_tra_pz->current_pose = -0.52;
 
 	end_to_rad_r_->cal_end_point_tra_alpha->current_pose = 15*DEGREE2RADIAN;
@@ -169,14 +167,12 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 	end_to_rad_r_->cal_end_point_tra_kamma->current_pose = -15*DEGREE2RADIAN;
 
 	end_to_rad_r_->current_pose_change(2,0) = 0.1;
-	end_to_rad_r_->current_pose_change(2,0) = -0.15;
+	end_to_rad_r_->current_pose_change(2,0) = -0.255;
 	end_to_rad_r_->current_pose_change(2,0) = -0.52;
 
 	end_to_rad_r_->current_pose_change(2,0) = 15*DEGREE2RADIAN;
 	end_to_rad_r_->current_pose_change(2,0) = -10*DEGREE2RADIAN;
 	end_to_rad_r_->current_pose_change(2,0) = -15*DEGREE2RADIAN;
-
-
 
 	one_joint_ctrl_.resize(1,8);
 	one_joint_ctrl_.fill(0);
@@ -209,11 +205,12 @@ void MotionModule::queueThread()
 	/* publisher topics */
 	state_end_point_pose_pub = ros_node.advertise<geometry_msgs::Vector3>("/state_end_point_pose",100);
 	state_end_point_orientation_pub = ros_node.advertise<geometry_msgs::Vector3>("/state_end_point_orientation",100);
+	zmp_point_pub = ros_node.advertise<geometry_msgs::PointStamped>("/zmp_point",100);
 	/* subscribe topics */
 	get_imu_data_sub_ = ros_node.subscribe("/imu/data", 100, &MotionModule::imuDataMsgCallback, this);
-	set_balance_param_sub_ = ros_node.subscribe("/diana/balance_parameter", 5, &MotionModule::setBalanceParameterCallback, this);
-
+	get_ft_data_sub_ = ros_node.subscribe("/diana/force_torque_data", 100, &MotionModule::ftDataMsgCallback, this);
 	// for gui
+	set_balance_param_sub_ = ros_node.subscribe("/diana/balance_parameter", 5, &MotionModule::setBalanceParameterCallback, this);
 	ros::Subscriber motion_num_msg_sub = ros_node.subscribe("/motion_num", 5, &MotionModule::desiredMotionMsgCallback, this);
 	ros::WallDuration duration(control_cycle_msec_ / 1000.0);
 	while(ros_node.ok())
@@ -239,15 +236,36 @@ void MotionModule::desiredMotionMsgCallback(const std_msgs::Int32::ConstPtr& msg
 	current_time_ = 0;
 }
 
-void MotionModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg)
+void MotionModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) // gyro data get
 {
 	currentGyroX = (double) msg->angular_velocity.x;
-	currentGyroY = (double) msg->angular_velocity.y;
+	currentGyroY = (double) -msg->angular_velocity.y;
 	currentGyroZ = (double) msg->angular_velocity.z;
 
 	balance_ctrl_.setCurrentGyroSensorOutput(currentGyroY, currentGyroX);
 }
+void MotionModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg)// force torque sensor data get
+{
+	currentFX_l = (double) msg->fx_raw_l;
+	currentFY_l = (double) msg->fy_raw_l;
+	currentFZ_l = (double) msg->fz_raw_l;
 
+	currentTX_l = (double) msg->torque_x_raw_l;
+	currentTY_l = (double) msg->torque_y_raw_l;
+	currentTZ_l = (double) msg->torque_z_raw_l;
+
+	currentFX_r = (double) msg->fx_raw_r;
+	currentFY_r = (double) msg->fy_raw_r;
+	currentFZ_r = (double) msg->fz_raw_r;
+
+	currentTX_r = (double) msg->torque_x_raw_r;
+	currentTY_r = (double) msg->torque_y_raw_r;
+	currentTZ_r = (double) msg->torque_z_raw_r;
+
+	zmp_cal.ftSensorDataLeftGet(currentFX_l, currentFY_l, currentFZ_l, currentTX_l, currentTY_l, currentTZ_l);
+	zmp_cal.ftSensorDataRightGet(currentFX_r, currentFY_r, currentFZ_r, currentTX_r, currentTY_r, currentTZ_r);
+
+}
 void MotionModule::setBalanceParameterCallback(const diana_msgs::BalanceParam::ConstPtr& msg)
 {
 	if(balance_update_ == true)
@@ -314,7 +332,6 @@ void MotionModule::updateBalanceParameter()
 	}
 
 }
-
 void MotionModule::parse_motion_data_(int motion_num_)
 {
 	int size_num_ = 0;
@@ -532,7 +549,6 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 		is_moving_l_ = end_to_rad_l_-> is_moving_check;
 		is_moving_r_ = end_to_rad_r_-> is_moving_check;
 		is_moving_one_joint_ = one_joint_ ->is_moving_check;
-
 	}
 
 	//////balance
@@ -553,10 +569,24 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	result_pose_r_modified_ = robotis_framework::getPose3DfromTransformMatrix(result_mat_r_modified_);
 
 	//IK
-	l_kinematics_->InverseKinematics(result_pose_l_modified_.x, result_pose_l_modified_.y, result_pose_l_modified_.z,
+	l_kinematics_->InverseKinematics(result_pose_l_modified_.x, result_pose_l_modified_.y - 0.105, result_pose_l_modified_.z,
 			result_pose_l_modified_.roll, result_pose_l_modified_.pitch, result_pose_l_modified_.yaw); // pX pY pZ alpha betta kamma
-	r_kinematics_->InverseKinematics(result_pose_r_modified_.x, result_pose_r_modified_.y, result_pose_r_modified_.z,
+	r_kinematics_->InverseKinematics(result_pose_r_modified_.x, result_pose_r_modified_.y + 0.105, result_pose_r_modified_.z,
 			result_pose_r_modified_.roll, result_pose_r_modified_.pitch, result_pose_r_modified_.yaw); // pX pY pZ alpha betta kamma
+
+	// zmp
+	zmp_cal.jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
+	zmp_cal.zmpCalculationResult();
+
+	// display zmp
+	zmp_point_msg_.header.stamp = ros::Time();
+	std::string frame = "/pelvis";
+	zmp_point_msg_.header.frame_id = frame.c_str();
+
+	zmp_point_msg_.point.x = zmp_cal.cf_zmp_point(0,0);
+	zmp_point_msg_.point.y = zmp_cal.cf_zmp_point(1,0);
+	zmp_point_msg_.point.z = zmp_cal.cf_zmp_point(2,0);
+	zmp_point_pub.publish(zmp_point_msg_);
 
 
 	//<---  joint space control --->
@@ -580,7 +610,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
 	result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
 
-	/*	// l_ endpoint xyz
+		// l_ endpoint xyz
 	state_end_point_pose_msg_.x=  result_pose_l_modified_.x;
 	state_end_point_pose_msg_.y=  result_pose_l_modified_.y;
 	state_end_point_pose_msg_.z=  result_pose_l_modified_.z;
@@ -589,7 +619,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	state_end_point_orientation_msg_.x=  result_pose_l_modified_.roll;
 	state_end_point_orientation_msg_.y=  result_pose_l_modified_.pitch;
 	state_end_point_orientation_msg_.z=  result_pose_l_modified_.yaw;
-	state_end_point_orientation_pub.publish(state_end_point_orientation_msg_);*/
+	state_end_point_orientation_pub.publish(state_end_point_orientation_msg_);
 
 	/*	// r_ endpoint xyz
 	state_end_point_pose_msg_.x=  result_pose_r_modified_.x;

@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   cmake_modules
   robotis_math
+  heroehs_math
 )
 
 find_package(Eigen REQUIRED)
@@ -46,6 +47,7 @@ add_library(diana_balance_control
   src/diana_balance_control.cpp
   src/balance_pd_control.cpp
   src/balance_pid_control.cpp
+  src/zmp_calculation_function.cpp
 )
 
 add_dependencies(diana_balance_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

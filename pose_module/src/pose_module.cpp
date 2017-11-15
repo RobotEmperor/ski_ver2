@@ -77,16 +77,24 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 
 	leg_end_point_l_.resize(6,8);
 	leg_end_point_l_.fill(0);
-	leg_end_point_l_(2,0) = -0.55; // 초기값
+	leg_end_point_l_(1,0) = 0.105; // y 초기값
+	leg_end_point_l_(1,1) = 0.105;
+	leg_end_point_l_(2,0) = -0.55; // z 초기값
 	leg_end_point_l_(2,1) = -0.55;
+	end_to_rad_l_->cal_end_point_tra_py->current_pose = 0.105;
+	end_to_rad_l_->current_pose_change(1,0) = 0.105;
 	end_to_rad_l_->cal_end_point_tra_pz->current_pose = -0.55;
 	end_to_rad_l_->current_pose_change(2,0) = -0.55;
 
 
 	leg_end_point_r_.resize(6,8);
 	leg_end_point_r_.fill(0);
+	leg_end_point_r_(1,0) = -0.105;  // 초기값
+	leg_end_point_r_(1,1) = -0.105;
 	leg_end_point_r_(2,0) = -0.55;  // 초기값
 	leg_end_point_r_(2,1) = -0.55;
+	end_to_rad_r_->cal_end_point_tra_py->current_pose = -0.105;
+	end_to_rad_r_->current_pose_change(1,0) = -0.105;
 	end_to_rad_r_->cal_end_point_tra_pz->current_pose = -0.55;
 	end_to_rad_r_->current_pose_change(2,0) = -0.55;
 
@@ -180,8 +188,8 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		result_end_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
 		result_rad_one_joint_ = one_joint_ -> cal_one_joint_rad(one_joint_ctrl_);
 
-		l_kinematics_->InverseKinematics(result_end_l_(0,0), result_end_l_(1,0), result_end_l_(2,0), result_end_l_(3,0), result_end_l_(4,0), result_end_l_(5,0)); // pX pY pZ alpha betta kamma
-		r_kinematics_->InverseKinematics(result_end_r_(0,0), result_end_r_(1,0), result_end_r_(2,0), result_end_r_(3,0), result_end_r_(4,0), result_end_r_(5,0)); // pX pY pZ alpha betta kamma
+		l_kinematics_->InverseKinematics(result_end_l_(0,0), result_end_l_(1,0) - 0.105, result_end_l_(2,0), result_end_l_(3,0), result_end_l_(4,0), result_end_l_(5,0)); // pX pY pZ alpha betta kamma
+		r_kinematics_->InverseKinematics(result_end_r_(0,0), result_end_r_(1,0) + 0.105, result_end_r_(2,0), result_end_r_(3,0), result_end_r_(4,0), result_end_r_(5,0)); // pX pY pZ alpha betta kamma
 
 
 		//<---  joint space control --->
@@ -205,7 +213,23 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
 		result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
 
-		ROS_INFO("Result :: %f",result_[joint_id_to_name_[17]]->goal_position_ = -l_kinematics_->joint_radian(4,0));
+		ROS_INFO("Result 11:: %f",result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0));
+		ROS_INFO("Result 13:: %f",result_[joint_id_to_name_[13]]->goal_position_ = l_kinematics_->joint_radian(2,0));
+		ROS_INFO("Result 15:: %f",result_[joint_id_to_name_[15]]->goal_position_ = l_kinematics_->joint_radian(3,0));
+
+		ROS_INFO("Result 17:: %f",result_[joint_id_to_name_[17]]->goal_position_ = -l_kinematics_->joint_radian(4,0));
+		ROS_INFO("Result 19:: %f",result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0));
+		ROS_INFO("Result 21:: %f",result_[joint_id_to_name_[21]]->goal_position_ = l_kinematics_->joint_radian(6,0));
+
+		ROS_INFO("Result 12:: %f",result_[joint_id_to_name_[12]]->goal_position_ = r_kinematics_->joint_radian(1,0));
+		ROS_INFO("Result 14:: %f",result_[joint_id_to_name_[14]]->goal_position_ = r_kinematics_->joint_radian(2,0));
+		ROS_INFO("Result 16:: %f",result_[joint_id_to_name_[16]]->goal_position_ = r_kinematics_->joint_radian(3,0));
+
+		ROS_INFO("Result 18:: %f",result_[joint_id_to_name_[18]]->goal_position_ = r_kinematics_->joint_radian(4,0));
+		ROS_INFO("Result 20:: %f",result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0));
+		ROS_INFO("Result 21:: %f",result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0));
+
+
 
 		//<---  read   --->
 		for(int id=10 ; id<23 ; id++)

@@ -23,7 +23,6 @@ public:
   static const int BalanceLimit = 2;
 };
 
-
 class BalanceControlUsingPDController
 {
 public:
