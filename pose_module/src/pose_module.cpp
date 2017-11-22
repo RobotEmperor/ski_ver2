@@ -141,8 +141,6 @@ void PoseModule::desiredPoseMsgCallback(const std_msgs::Float64MultiArray::Const
 	{
 		leg_end_point_l_(joint_num_, 1) = msg->data[joint_num_]; // left leg
 		leg_end_point_r_(joint_num_, 1) = msg->data[joint_num_+6]; // right leg
-		//leg_end_point_l_(joint_num_, 7) = msg-> data[12]*RADIAN2DEGREE;
-		//leg_end_point_r_(joint_num_, 7) = msg-> data[12]*RADIAN2DEGREE;
 	}
 	one_joint_ctrl_(0,1) = msg-> data[12]; // waist roll
 
@@ -174,6 +172,12 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 			}
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
 		ROS_INFO("Pose module :: Read position and Send goal position");
+		result_end_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
+		result_end_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
+		result_rad_one_joint_ = one_joint_ -> cal_one_joint_rad(one_joint_ctrl_);
+
+		l_kinematics_->InverseKinematics(result_end_l_(0,0), result_end_l_(1,0) - 0.105, result_end_l_(2,0), result_end_l_(3,0), result_end_l_(4,0), result_end_l_(5,0)); // pX pY pZ alpha betta kamma
+		r_kinematics_->InverseKinematics(result_end_r_(0,0), result_end_r_(1,0) + 0.105, result_end_r_(2,0), result_end_r_(3,0), result_end_r_(4,0), result_end_r_(5,0)); // pX pY pZ alpha betta kamma
 	}
 
 	if(is_moving_l_ == false && is_moving_r_ == false && is_moving_one_joint_ == false)
@@ -183,6 +187,7 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	else
 	{
 		ROS_INFO("Pose Trajectory Start");
+
 		// trajectory is working cartesian space control
 		result_end_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
 		result_end_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
@@ -213,21 +218,21 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
 		result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
 
-		ROS_INFO("Result 11:: %f",result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0));
-		ROS_INFO("Result 13:: %f",result_[joint_id_to_name_[13]]->goal_position_ = l_kinematics_->joint_radian(2,0));
-		ROS_INFO("Result 15:: %f",result_[joint_id_to_name_[15]]->goal_position_ = l_kinematics_->joint_radian(3,0));
+		ROS_INFO("Result 11:: %f",result_[joint_id_to_name_[11]]->goal_position_ );
+		ROS_INFO("Result 13:: %f",result_[joint_id_to_name_[13]]->goal_position_ );
+		ROS_INFO("Result 15:: %f",result_[joint_id_to_name_[15]]->goal_position_ );
 
-		ROS_INFO("Result 17:: %f",result_[joint_id_to_name_[17]]->goal_position_ = -l_kinematics_->joint_radian(4,0));
-		ROS_INFO("Result 19:: %f",result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0));
-		ROS_INFO("Result 21:: %f",result_[joint_id_to_name_[21]]->goal_position_ = l_kinematics_->joint_radian(6,0));
+		ROS_INFO("Result 17:: %f",result_[joint_id_to_name_[17]]->goal_position_ );
+		ROS_INFO("Result 19:: %f",result_[joint_id_to_name_[19]]->goal_position_ );
+		ROS_INFO("Result 21:: %f",result_[joint_id_to_name_[21]]->goal_position_ );
 
-		ROS_INFO("Result 12:: %f",result_[joint_id_to_name_[12]]->goal_position_ = r_kinematics_->joint_radian(1,0));
-		ROS_INFO("Result 14:: %f",result_[joint_id_to_name_[14]]->goal_position_ = r_kinematics_->joint_radian(2,0));
-		ROS_INFO("Result 16:: %f",result_[joint_id_to_name_[16]]->goal_position_ = r_kinematics_->joint_radian(3,0));
+		ROS_INFO("Result 12:: %f",result_[joint_id_to_name_[12]]->goal_position_ );
+		ROS_INFO("Result 14:: %f",result_[joint_id_to_name_[14]]->goal_position_ );
+		ROS_INFO("Result 16:: %f",result_[joint_id_to_name_[16]]->goal_position_ );
 
-		ROS_INFO("Result 18:: %f",result_[joint_id_to_name_[18]]->goal_position_ = r_kinematics_->joint_radian(4,0));
-		ROS_INFO("Result 20:: %f",result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0));
-		ROS_INFO("Result 21:: %f",result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0));
+		ROS_INFO("Result 18:: %f",result_[joint_id_to_name_[18]]->goal_position_ );
+		ROS_INFO("Result 20:: %f",result_[joint_id_to_name_[20]]->goal_position_ );
+		ROS_INFO("Result 21:: %f",result_[joint_id_to_name_[22]]->goal_position_ );
 
 
 

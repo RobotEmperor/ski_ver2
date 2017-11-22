@@ -371,12 +371,17 @@ void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_
 
 	if((pow(l05_xz_,2) - pow(dh_link_d[3],2) - pow(dh_link[4],2))/(2*dh_link_d[3]*dh_link[4]) > 1.0 || (pow(l05_xz_,2) - pow(dh_link_d[3],2) - pow(dh_link[4],2))/(2*dh_link_d[3]*dh_link[4]) < -1.0)
 	{
-		real_theta[4] = 0;
+		//real_theta[4] = 0;
+		return;
 	}
 	else
 	{
-		real_theta[4] = acos((pow(l05_xz_,2) - pow(dh_link_d[3],2) - pow(dh_link[4],2))/(2*dh_link_d[3]*dh_link[4])); //get theta 4
+		if(isnan(acos((pow(l05_xz_,2) - pow(dh_link_d[3],2) - pow(dh_link[4],2))/(2*dh_link_d[3]*dh_link[4]))))
+			return;
+		else
+			real_theta[4] = acos((pow(l05_xz_,2) - pow(dh_link_d[3],2) - pow(dh_link[4],2))/(2*dh_link_d[3]*dh_link[4])); //get theta 4
 	}
+
 	real_theta[4] = floor(100000.*(real_theta[4]+0.000005))/100000.;
 
 	/////////////
@@ -387,7 +392,8 @@ void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_
 
 	if((pow(l06_yz_,2) - pow(l05_yz_,2) - pow(dh_link[6],2))/ (2*l05_yz_*dh_link[6]) > 1.0 || (pow(l06_yz_,2) - pow(l05_yz_,2) - pow(dh_link[6],2))/ (2*l05_yz_*dh_link[6]) < -1.0)
 	{
-		real_theta[6] = 0;
+	//	real_theta[6] = 0;
+		return;
 
 	}
 	else
@@ -398,6 +404,9 @@ void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_
 			real_theta[6] = 0;
 		else if (P_inverse_(1,3) < 0)
 			real_theta[6] =  -acos((pow(l06_yz_,2) - pow(l05_yz_,2) - pow(dh_link[6],2))/ (2*l05_yz_*dh_link[6])); // get theta 6;
+
+		if(isnan(real_theta[6]))
+			return;
 	}
 	real_theta[6] = floor(100000.*(real_theta[6]+0.000005))/100000.;
 
@@ -412,7 +421,11 @@ void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_
 	sin_theta5_ = (((-pZ_- r33_*dh_link[6])*kamma_5_) - ((-pX_- r13_*dh_link[6])*alpha_5_))/(betta_5_*kamma_5_ - alpha_5_*csai_5_);
 	cos_theta5_ = (((-pZ_- r33_*dh_link[6])*csai_5_) - ((-pX_- r13_*dh_link[6])*betta_5_))/( -betta_5_*kamma_5_ + alpha_5_*csai_5_);
 
-	real_theta[5] = floor(100000.*(atan2(sin_theta5_,cos_theta5_)+0.000005))/100000.;
+	if(isnan(floor(100000.*(atan2(sin_theta5_,cos_theta5_)+0.000005))/100000.))
+		return;
+	else
+		real_theta[5] = floor(100000.*(atan2(sin_theta5_,cos_theta5_)+0.000005))/100000.;
+
 
 	/////////////
 	// theta 1 //
@@ -420,7 +433,10 @@ void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_
 	sin_theta1_ = - (r11_*cos(real_theta[4])*sin(real_theta[5]) + r11_*cos(real_theta[5])*sin(real_theta[4]) - r13_*cos(real_theta[6])*cos(real_theta[4])*cos(real_theta[5]) + r13_*cos(real_theta[6])*sin(real_theta[4])*sin(real_theta[5]) - r12_*sin(real_theta[6])*cos(real_theta[4])*cos(real_theta[5]) + r12_*sin(real_theta[6])*sin(real_theta[4])*sin(real_theta[5]));
 	cos_theta1_ = - (r31_*cos(real_theta[4])*sin(real_theta[5]) + r31_*cos(real_theta[5])*sin(real_theta[4]) - r33_*cos(real_theta[6])*cos(real_theta[4])*cos(real_theta[5]) + r33_*cos(real_theta[6])*sin(real_theta[4])*sin(real_theta[5]) - r32_*sin(real_theta[6])*cos(real_theta[4])*cos(real_theta[5]) + r32_*sin(real_theta[6])*sin(real_theta[4])*sin(real_theta[5]));
 
-	real_theta[1] = floor(100000.*(atan2(sin_theta1_,cos_theta1_)+0.000005))/100000.;
+	if(isnan(floor(100000.*(atan2(sin_theta1_,cos_theta1_)+0.000005))/100000.))
+			return;
+		else
+			real_theta[1] = floor(100000.*(atan2(sin_theta1_,cos_theta1_)+0.000005))/100000.;
 
 	/////////////
 	// theta 2 //
@@ -433,7 +449,10 @@ void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_
 	//cos_theta2_ = (cos(real_theta[6])*((r33_*cos(real_theta[1])) + (r13_*sin(real_theta[1])))*(cos(real_theta[4])*cos(real_theta[5]) - sin(real_theta[4])*sin(real_theta[5]))) - (((r31_*cos(real_theta[1])) + (r11_*sin(real_theta[1])))*(cos(real_theta[4])*sin(real_theta[5]) + cos(real_theta[5])*sin(real_theta[4]))) + (sin(real_theta[6])*((r32_*cos(real_theta[1])) + (r12_*sin(real_theta[1])))*(cos(real_theta[4])*cos(real_theta[5]) - sin(real_theta[4])*sin(real_theta[5])));
 	cos_theta2_ = cos_theta2_temp_1_  + cos_theta2_temp_2_ + cos_theta2_temp_3_;
 
-	real_theta[2] = floor(100000.*(atan2(sin_theta2_,cos_theta2_)+0.000005))/100000.;
+	if(isnan(floor(100000.*(atan2(sin_theta2_,cos_theta2_)+0.000005))/100000.))
+		return;
+	else
+		real_theta[2] = floor(100000.*(atan2(sin_theta2_,cos_theta2_)+0.000005))/100000.;
 
 	/////////////
 	// theta 3 //
@@ -441,7 +460,10 @@ void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_
 	sin_theta3_ = r21_*cos(real_theta[4]+real_theta[5]) + r23_*cos(real_theta[6])*sin(real_theta[4]+real_theta[5]) + r22_*sin(real_theta[6])*sin(real_theta[4]+real_theta[5]);
 	cos_theta3_ = r22_*cos(real_theta[6]) - r23_*sin(real_theta[6]);
 
-	real_theta[3] = floor(100000.*(atan2(sin_theta3_,cos_theta3_)+0.000005))/100000.;
+  if(isnan(floor(100000.*(atan2(sin_theta3_,cos_theta3_)+0.000005))/100000.))
+  	return;
+  else
+  	real_theta[3] = floor(100000.*(atan2(sin_theta3_,cos_theta3_)+0.000005))/100000.;
 
 
 	joint_radian << 0 , real_theta[1], real_theta[2] , real_theta[3] , real_theta[4] , real_theta[5] , real_theta[6];

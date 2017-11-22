@@ -19,7 +19,7 @@ int main(int argc, char **argv)
   ROS_INFO("ski_main_manager_ver2->init !! start!");
   robotis_framework::RobotisController *controller = robotis_framework::RobotisController::getInstance();
 
-  controller->DEBUG_PRINT = true;
+  //controller->DEBUG_PRINT = true;
   /* Load ROS Parameter */
   std::string offset_file = nh.param<std::string>("offset_table", "");
   std::string robot_file  = nh.param<std::string>("robot_file_path", "");

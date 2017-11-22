@@ -8,6 +8,8 @@
 #include "motion_module/motion_module.h"
 
 using namespace motion_module;
+using namespace diana;
+
 MotionModule::MotionModule()
 : control_cycle_msec_(8)
 {
@@ -60,7 +62,6 @@ MotionModule::MotionModule()
 	result_rad_one_joint_= 0;
 	traj_time_ = 4.0;
 
-
 	result_end_l_.resize(6,1);
 	result_end_r_.resize(6,1);
 	result_end_l_.fill(0);
@@ -68,14 +69,14 @@ MotionModule::MotionModule()
 
 	result_end_l_.coeffRef(0,0) = 0.1;
 	result_end_l_.coeffRef(1,0) = 0.255;
-	result_end_l_.coeffRef(2,0) = -0.52;
+	result_end_l_.coeffRef(2,0) = -0.51;
 	result_end_l_.coeffRef(3,0) = -15*DEGREE2RADIAN;
 	result_end_l_.coeffRef(4,0) = -10*DEGREE2RADIAN;
 	result_end_l_.coeffRef(5,0) = 15*DEGREE2RADIAN;
 
 	result_end_r_.coeffRef(0,0) = 0.1;
 	result_end_r_.coeffRef(1,0) = -0.255;
-	result_end_r_.coeffRef(2,0) = -0.52;
+	result_end_r_.coeffRef(2,0) = -0.51;
 	result_end_r_.coeffRef(3,0) = 15*DEGREE2RADIAN;
 	result_end_r_.coeffRef(4,0) = -10*DEGREE2RADIAN;
 	result_end_r_.coeffRef(5,0) = -15*DEGREE2RADIAN;
@@ -93,6 +94,8 @@ MotionModule::MotionModule()
 	balance_updating_duration_sec_ = 2.0;
 	balance_updating_sys_time_sec_ = 2.0;
 	balance_update_= false;
+
+	center_change_ = new CenterChange;
 
 }
 MotionModule::~MotionModule()
@@ -120,17 +123,17 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 	leg_end_point_l_.fill(0);
 	leg_end_point_l_(0,0) = 0.1;
 	leg_end_point_l_(1,0) = 0.255;
-	leg_end_point_l_(2,0) = -0.52;
+	leg_end_point_l_(2,0) = -0.51;
 	leg_end_point_l_(3,0) = -15*DEGREE2RADIAN;
 	leg_end_point_l_(4,0) = -10*DEGREE2RADIAN;
 	leg_end_point_l_(5,0) = 15*DEGREE2RADIAN;
 	for(int i=0;i<6;i++)
 	{
-		leg_end_point_l_(i,1) = leg_end_point_l_(i,0);
+		leg_end_point_l_(i,1) = leg_end_point_l_(i,0); // final value
 	}
 	end_to_rad_l_->cal_end_point_tra_px->current_pose = 0.1;
 	end_to_rad_l_->cal_end_point_tra_py->current_pose = 0.255;
-	end_to_rad_l_->cal_end_point_tra_pz->current_pose = -0.52;
+	end_to_rad_l_->cal_end_point_tra_pz->current_pose = -0.51;
 
 	end_to_rad_l_->cal_end_point_tra_alpha->current_pose = -15*DEGREE2RADIAN;
 	end_to_rad_l_->cal_end_point_tra_betta->current_pose = -10*DEGREE2RADIAN;
@@ -138,7 +141,7 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 
 	end_to_rad_l_->current_pose_change(0,0) = 0.1;
 	end_to_rad_l_->current_pose_change(1,0) = 0.255;
-	end_to_rad_l_->current_pose_change(2,0) = -0.52;
+	end_to_rad_l_->current_pose_change(2,0) = -0.51;
 
 	end_to_rad_l_->current_pose_change(3,0) = -15*DEGREE2RADIAN;
 	end_to_rad_l_->current_pose_change(4,0) = -10*DEGREE2RADIAN;
@@ -149,18 +152,18 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 
 	leg_end_point_r_(0,0) = 0.1;
 	leg_end_point_r_(1,0) = -0.255;
-	leg_end_point_r_(2,0) = -0.52;
+	leg_end_point_r_(2,0) = -0.51;
 	leg_end_point_r_(3,0) = 15*DEGREE2RADIAN;
 	leg_end_point_r_(4,0) = -10*DEGREE2RADIAN;
 	leg_end_point_r_(5,0) = -15*DEGREE2RADIAN;
 
 	for(int i=0;i<6;i++)
 	{
-		leg_end_point_r_(i,1) = leg_end_point_r_(i,0);
+		leg_end_point_r_(i,1) = leg_end_point_r_(i,0);// final value
 	}
 	end_to_rad_r_->cal_end_point_tra_px->current_pose = 0.1;
 	end_to_rad_r_->cal_end_point_tra_py->current_pose = -0.255;
-	end_to_rad_r_->cal_end_point_tra_pz->current_pose = -0.52;
+	end_to_rad_r_->cal_end_point_tra_pz->current_pose = -0.51;
 
 	end_to_rad_r_->cal_end_point_tra_alpha->current_pose = 15*DEGREE2RADIAN;
 	end_to_rad_r_->cal_end_point_tra_betta->current_pose = -10*DEGREE2RADIAN;
@@ -168,7 +171,7 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 
 	end_to_rad_r_->current_pose_change(2,0) = 0.1;
 	end_to_rad_r_->current_pose_change(2,0) = -0.255;
-	end_to_rad_r_->current_pose_change(2,0) = -0.52;
+	end_to_rad_r_->current_pose_change(2,0) = -0.51;
 
 	end_to_rad_r_->current_pose_change(2,0) = 15*DEGREE2RADIAN;
 	end_to_rad_r_->current_pose_change(2,0) = -10*DEGREE2RADIAN;
@@ -206,12 +209,16 @@ void MotionModule::queueThread()
 	state_end_point_pose_pub = ros_node.advertise<geometry_msgs::Vector3>("/state_end_point_pose",100);
 	state_end_point_orientation_pub = ros_node.advertise<geometry_msgs::Vector3>("/state_end_point_orientation",100);
 	zmp_point_pub = ros_node.advertise<geometry_msgs::PointStamped>("/zmp_point",100);
+
 	/* subscribe topics */
 	get_imu_data_sub_ = ros_node.subscribe("/imu/data", 100, &MotionModule::imuDataMsgCallback, this);
 	get_ft_data_sub_ = ros_node.subscribe("/diana/force_torque_data", 100, &MotionModule::ftDataMsgCallback, this);
+
 	// for gui
 	set_balance_param_sub_ = ros_node.subscribe("/diana/balance_parameter", 5, &MotionModule::setBalanceParameterCallback, this);
 	ros::Subscriber motion_num_msg_sub = ros_node.subscribe("/motion_num", 5, &MotionModule::desiredMotionMsgCallback, this);
+	ros::Subscriber center_change_msg_sub = ros_node.subscribe("/diana/center_change", 5, &MotionModule::desiredCenterChangeMsgCallback, this);
+
 	ros::WallDuration duration(control_cycle_msec_ / 1000.0);
 	while(ros_node.ok())
 		callback_queue.callAvailable(duration);
@@ -235,7 +242,23 @@ void MotionModule::desiredMotionMsgCallback(const std_msgs::Int32::ConstPtr& msg
 	pre_motion_command_ = motion_command_;
 	current_time_ = 0;
 }
+void MotionModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg) // GUI 에서 motion_num topic을 sub 받아 실행 모션 번호 디텍트
+{
+	is_moving_l_ = true;
+	is_moving_r_ = true;
+	is_moving_one_joint_ = true;
 
+	center_change_->calculateStepEndPointValue(msg->center_change,100); // 0.01 단위로 조정 가능.
+	center_change_->parseMotionData("pflug_bogen");
+
+	for(int m = 0 ; m<6 ; m++)
+	{
+		leg_end_point_l_(m,1) = center_change_->step_end_point_value[1][m];
+		leg_end_point_r_(m,1) = center_change_->step_end_point_value[2][m];
+		leg_end_point_l_(m,7) = msg->time_change;
+		leg_end_point_r_(m,7) = msg->time_change;
+	}
+}
 void MotionModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) // gyro data get
 {
 	currentGyroX = (double) msg->angular_velocity.x;
@@ -508,7 +531,9 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	updateBalanceParameter();
 
 	current_time_ = current_time_+ 0.008;
-	motion_generater_();
+
+
+	//motion_generater_();
 	//// read current position ////
 	if(new_count_ == 1)
 	{
@@ -526,13 +551,13 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
 
 	}
-	if(is_moving_l_ == false && is_moving_r_ == false && is_moving_one_joint_ == false)
+	if(is_moving_l_ == false && is_moving_r_ == false && is_moving_one_joint_ == false) // desired pose
 	{
-		ROS_INFO("Motion Stay");
+		//ROS_INFO("Motion Stay");
 	}
 	else
 	{
-		ROS_INFO("Motion Trajectory Start");
+		//ROS_INFO("Motion Trajectory Start");
 		// trajectory is working cartesian space control
 		result_end_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
 		result_end_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
@@ -549,8 +574,9 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 		is_moving_l_ = end_to_rad_l_-> is_moving_check;
 		is_moving_r_ = end_to_rad_r_-> is_moving_check;
 		is_moving_one_joint_ = one_joint_ ->is_moving_check;
-	}
 
+	}
+	///////////////////////////////////////////////////// control //////////////////////////////////////////////////////////
 	//////balance
 	result_mat_l_ = robotis_framework::getTransformationXYZRPY(result_end_l_.coeff(0,0), result_end_l_.coeff(1,0), result_end_l_.coeff(2,0),
 			result_end_l_.coeff(3,0), result_end_l_.coeff(4,0), result_end_l_.coeff(5,0));
@@ -574,11 +600,12 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	r_kinematics_->InverseKinematics(result_pose_r_modified_.x, result_pose_r_modified_.y + 0.105, result_pose_r_modified_.z,
 			result_pose_r_modified_.roll, result_pose_r_modified_.pitch, result_pose_r_modified_.yaw); // pX pY pZ alpha betta kamma
 
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// zmp
 	zmp_cal.jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
 	zmp_cal.zmpCalculationResult();
 
-	// display zmp
+	// display zmp to rviz
 	zmp_point_msg_.header.stamp = ros::Time();
 	std::string frame = "/pelvis";
 	zmp_point_msg_.header.frame_id = frame.c_str();
@@ -610,7 +637,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
 	result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
 
-		// l_ endpoint xyz
+	// l_ endpoint xyz
 	state_end_point_pose_msg_.x=  result_pose_l_modified_.x;
 	state_end_point_pose_msg_.y=  result_pose_l_modified_.y;
 	state_end_point_pose_msg_.z=  result_pose_l_modified_.z;

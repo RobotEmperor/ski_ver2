@@ -1,0 +1,11 @@
+updating_duration: 1.0 
+
+cob_x_offset_m: 0
+cob_y_offset_m: 0
+
+
+foot_roll_gyro_p_gain: 0.015
+foot_roll_gyro_d_gain: 0 
+
+foot_pitch_gyro_p_gain: 0.015
+foot_pitch_gyro_d_gain: 0

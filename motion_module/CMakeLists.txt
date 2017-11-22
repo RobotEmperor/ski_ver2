@@ -55,6 +55,7 @@ include_directories(
 
 add_library(motion_module
   src/motion_module.cpp
+  src/center_change_lib.cpp
 )
 
 add_dependencies(motion_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

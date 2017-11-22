@@ -1,0 +1,17 @@
+-I/home/robot11/catkin_ws/src/atest_gui/build/devel/include
+-I/opt/ros/kinetic/include
+-I/opt/ros/kinetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp
+-I/usr/include
+-I/usr/include/qt4
+-I/usr/include/qt4/QtGui
+-I/usr/include/qt4/QtCore
+-I/home/robot11/catkin_ws/src/atest_gui/build
+-DROS_PACKAGE_NAME="atest_gui"
+-DROSCONSOLE_BACKEND_LOG4CXX
+-D$<$<NOT:$<CONFIG:Debug>>:QT_NO_DEBUG>
+-DQT_GUI_LIB
+-DQT_CORE_LIB
+-DQT_NO_KEYWORDS
+-o
+/home/robot11/catkin_ws/src/atest_gui/build/include/atest_gui/moc_main_window.cxx
+/home/robot11/catkin_ws/src/atest_gui/include/atest_gui/main_window.hpp

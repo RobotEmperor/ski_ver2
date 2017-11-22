@@ -8,15 +8,7 @@
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
 #include <ros/package.h>
-#include <std_msgs/Int16.h>
-#include <std_msgs/Int32.h>
-#include <std_msgs/Float64.h>
-#include <std_msgs/Float64MultiArray.h>
-#include <std_msgs/String.h>
-#include <geometry_msgs/Vector3.h>
-#include <geometry_msgs/PointStamped.h>
 #include <boost/thread.hpp>
-#include <sensor_msgs/Imu.h>
 
 #include <Eigen/Dense>
 #include <yaml-cpp/yaml.h>
@@ -24,16 +16,33 @@
 #include <stdio.h>
 
 #include "robotis_framework_common/motion_module.h"
-#include "robotis_controller_msgs/StatusMsg.h"
+//library
 #include "robotis_math/robotis_math.h"
-
 #include "heroehs_math/fifth_order_trajectory_generate.h"
 #include "heroehs_math/kinematics.h"
 #include "heroehs_math/end_point_to_rad_cal.h"
 #include "diana_balance_control/diana_balance_control.h"
+#include "motion_module/center_change_lib.h"
+
+//message
+//m - standard
+#include <std_msgs/Int16.h>
+#include <std_msgs/Int32.h>
+#include <std_msgs/Float64.h>
+#include <std_msgs/Float64MultiArray.h>
+#include <std_msgs/String.h>
+#include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/PointStamped.h>
+#include <sensor_msgs/Imu.h>
+
+//m - personal
 #include "diana_balance_control/zmp_calculation_function.h"
 #include "diana_msgs/BalanceParam.h"
 #include "diana_msgs/ForceTorque.h"
+#include "robotis_controller_msgs/StatusMsg.h"
+#include "diana_msgs/CenterChange.h"
+
+using namespace diana;
 
 namespace motion_module
 {
@@ -68,6 +77,7 @@ public:
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
 	void ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg);
   void setBalanceParameterCallback(const diana_msgs::BalanceParam::ConstPtr& msg);
+  void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg);
 
 private:
 	void queueThread();
@@ -123,8 +133,6 @@ private:
 	double result_rad_one_joint_;
   diana::BalanceControlUsingPDController balance_ctrl_;
   double currentGyroX,currentGyroY,currentGyroZ;
-  double currentFX_l,currentFY_l,currentFZ_l,currentTX_l,currentTY_l,currentTZ_l;
-  double currentFX_r,currentFY_r,currentFZ_r,currentTX_r,currentTY_r,currentTZ_r;
 
   // balance gyro
   void updateBalanceParameter();
@@ -136,6 +144,11 @@ private:
 
   // zmp
   diana::ZmpCalculationFunc zmp_cal;
+  double currentFX_l,currentFY_l,currentFZ_l,currentTX_l,currentTY_l,currentTZ_l;
+  double currentFX_r,currentFY_r,currentFZ_r,currentTX_r,currentTY_r,currentTZ_r;
+
+  //center change lib
+  CenterChange *center_change_;
 
 
 

@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/robot11/catkin_ws/src/atest_gui/build/devel/setup.sh
