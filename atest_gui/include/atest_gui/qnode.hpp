@@ -23,6 +23,7 @@
 #include <std_msgs/Bool.h>
 #include <atest_gui/dynamixel_info.h>
 #include "diana_msgs/BalanceParam.h"
+#include "diana_msgs/ForceTorque.h"
 #include "diana_msgs/CenterChange.h"
 #include <atest_gui/command.h>
 #include <std_msgs/Float32MultiArray.h>
@@ -32,6 +33,7 @@
 #include <std_msgs/Int32.h>
 #include <std_msgs/Int8.h>
 #include <std_msgs/Int16.h>
+#include <sensor_msgs/Imu.h>
 #include <ros/package.h>
 
 #include <fstream>
@@ -56,7 +58,8 @@ public:
 	virtual ~QNode();
         bool init();
         void run();
-
+        void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
+        void forceTorqueDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg);
 
 
         ros::Publisher pattern_pub; // motion_pattern 입력
@@ -81,6 +84,15 @@ public:
 
         // center change topic //
         ros::Publisher center_change_pub;
+
+        // sensor value
+        ros::Subscriber imu_data_sub;
+        ros::Subscriber diana_force_torque_data_sub;
+        double currentGyroX_gui, currentGyroY_gui, currentGyroZ_gui;
+        double currentForceX_l_gui, currentForceY_l_gui, currentForceZ_l_gui;
+        double currentForceX_r_gui, currentForceY_r_gui, currentForceZ_r_gui;
+        double currentTorqueX_l_gui, currentTorqueY_l_gui, currentTorqueZ_l_gui;
+        double currentTorqueX_r_gui, currentTorqueY_r_gui, currentTorqueZ_r_gui;
 
 
 

@@ -269,17 +269,17 @@ void MotionModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) // 
 }
 void MotionModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg)// force torque sensor data get
 {
-	currentFX_l = (double) msg->fx_raw_l;
-	currentFY_l = (double) msg->fy_raw_l;
-	currentFZ_l = (double) msg->fz_raw_l;
+	currentFX_l = (double) msg->force_x_raw_l;
+	currentFY_l = (double) msg->force_y_raw_l;
+	currentFZ_l = (double) msg->force_z_raw_l;
 
 	currentTX_l = (double) msg->torque_x_raw_l;
 	currentTY_l = (double) msg->torque_y_raw_l;
 	currentTZ_l = (double) msg->torque_z_raw_l;
 
-	currentFX_r = (double) msg->fx_raw_r;
-	currentFY_r = (double) msg->fy_raw_r;
-	currentFZ_r = (double) msg->fz_raw_r;
+	currentFX_r = (double) msg->force_x_raw_r;
+	currentFY_r = (double) msg->force_y_raw_r;
+	currentFZ_r = (double) msg->force_z_raw_r;
 
 	currentTX_r = (double) msg->torque_x_raw_r;
 	currentTY_r = (double) msg->torque_y_raw_r;

@@ -19,6 +19,7 @@
 #include <math.h>
 #include <ros/package.h>
 #include <yaml-cpp/yaml.h>
+#include <QString>
 #include "diana_msgs/BalanceParam.h"
 #endif
 
@@ -43,11 +44,24 @@ public:
 
 
 
+
 	public Q_SLOTS:
+	void graph_draw(QCustomPlot *ui_graph, const QString title, const QString unit, int min_value, int max_value, int tick_count);
+	void graph_draw_updata(QCustomPlot *ui_graph, double valueX, double valueY, double valueZ);
+	void graph_draw_clean(QCustomPlot *ui_graph);
+  void realtimeDataSlot();
+
+  //slot
+  void on_graph_stop_button_1_clicked();
+  void on_graph_start_button_1_clicked();
+
+  // control
 	void center_change(int k);
-	void on_read_data_clicked();
 
 	// off set module ////
+	void on_read_data_clicked();
+
+
 	void on_plus_button_clicked();
 	void on_minus_button_clicked();
 	void on_read_data_one_clicked();
@@ -101,8 +115,6 @@ public:
 
 
 
-
-
 	private:
 	Ui::MainWindowDesign ui;
 	QNode qnode;
@@ -143,11 +155,18 @@ public:
 	//<------------------------------------------------------------------- pose module -->
 	std_msgs::Float64MultiArray desired_pose_msg; // desired_pose command msg
 
+	//<------------------------------------------------------------------- motion module -->
 	// balance on off msg
 	diana_msgs::BalanceParam diana_balance_parameter_msg;
 
 	// center_change msg
 	diana_msgs::CenterChange center_change_msg;
+
+	// graph variables
+	QTimer *dataTimer;
+	QFont legendFont;
+	double key;
+
 
 	double updating_duration;
 

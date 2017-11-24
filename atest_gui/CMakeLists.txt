@@ -36,6 +36,7 @@ add_service_files(FILES command.srv)
 
 generate_messages(DEPENDENCIES std_msgs)
 include_directories(
+include/atest_gui
 ${catkin_INCLUDE_DIRS} 
 ${yaml_cpp_INCLUDE_DIRS}
 )
@@ -61,13 +62,14 @@ ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
 file(GLOB QT_FORMS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ui/*.ui)
 file(GLOB QT_RESOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} resources/*.qrc)
 file(GLOB_RECURSE QT_MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/atest_gui/*.hpp)
-#file(GLOB_RECURSE QT_MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/qcustomplot/*.h)
+file(GLOB_RECURSE QT_MOCH RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/atest_gui/*.h)
 
 
 
 QT4_ADD_RESOURCES(QT_RESOURCES_CPP ${QT_RESOURCES})
 QT4_WRAP_UI(QT_FORMS_HPP ${QT_FORMS})
 QT4_WRAP_CPP(QT_MOC_HPP ${QT_MOC})
+QT4_WRAP_CPP(QT_MOCH_H ${QT_MOCH})
 
 
 
@@ -77,16 +79,18 @@ QT4_WRAP_CPP(QT_MOC_HPP ${QT_MOC})
 
 
 file(GLOB_RECURSE QT_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.cpp)
-#file(GLOB_RECURSE QT_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/qcustomplot/*.cpp)
 
 
 ##############################################################################
 # Binaries
 ##############################################################################
 
-add_executable(atest_gui ${QT_SOURCES} ${QT_RESOURCES_CPP} ${QT_FORMS_HPP} ${QT_MOC_HPP})
-#add_dependencies(atest_gui atest_gui_generate_messages_cpp)
+
+add_executable(atest_gui ${QT_SOURCES} ${QT_RESOURCES_CPP} ${QT_FORMS_HPP} ${QT_MOC_HPP} ${CMAKE_CURRENT_SOURCE_DIR}/src/qcustomplot/qcustomplot.cpp  ${QT_MOCH_H})
+
 add_dependencies(atest_gui ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 target_link_libraries(atest_gui ${QT_LIBRARIES} ${catkin_LIBRARIES} ${yaml_cpp_LIBRARIES})
+
 install(TARGETS atest_gui RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 

@@ -11,7 +11,7 @@ OffsetModule::OffsetModule()
 :control_cycle_msec_(8) // 제어주기 8ms
 {
 	// variables initialize ////
-	joint_select_ = 15;
+	joint_select_ = 1;
 
 	for(int i=0; i<30;i++)
 	{
@@ -37,13 +37,16 @@ OffsetModule::OffsetModule()
 
 	result_["l_hip_yaw"]   = new robotis_framework::DynamixelState();  // joint 15
 	result_["l_knee_pitch"] = new robotis_framework::DynamixelState();  // joint 17
+
 	result_["l_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 19
 	result_["l_ankle_roll"]  = new robotis_framework::DynamixelState();  // joint 21
 
 	result_["r_hip_pitch"] = new robotis_framework::DynamixelState();  // joint 12
 	result_["r_hip_roll"]  = new robotis_framework::DynamixelState();  // joint 14
+
 	result_["r_hip_yaw"]   = new robotis_framework::DynamixelState();  // joint 16
 	result_["r_knee_pitch"] = new robotis_framework::DynamixelState();  // joint 18
+
 	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
 	result_["r_ankle_roll"]  = new robotis_framework::DynamixelState();  // joint 22
 
@@ -142,7 +145,7 @@ void OffsetModule::joint_select_sub_function(const std_msgs::Int8::ConstPtr& msg
 }
 void OffsetModule::change_joint_value_sub_function(const std_msgs::Int16MultiArray::ConstPtr& msg)
 {
-	change_joint_value_[joint_select_] = static_cast<double>(msg->data[0]*0.088*DEGREE2RADIAN); // GUI에서 변경할 조인트의 값을 받아옴.
+	change_joint_value_[joint_select_] = static_cast<double>(msg->data[0]*(0.088/3)*DEGREE2RADIAN); // GUI에서 변경할 조인트의 값을 받아옴.
 	offset_start_ = true;
 }
 void OffsetModule::offset_joint_value_sub_function(const std_msgs::Float64MultiArray::ConstPtr& msg)

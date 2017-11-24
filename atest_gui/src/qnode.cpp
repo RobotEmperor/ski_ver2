@@ -85,6 +85,10 @@ bool QNode::init() {
 
 	/////////////////////////////////////
 
+	// sensor data //
+	imu_data_sub = n.subscribe("/imu/data", 100, &QNode::imuDataMsgCallback, this);
+	diana_force_torque_data_sub = n.subscribe("/diana/force_torque_data", 100, &QNode::forceTorqueDataMsgCallback, this);
+
 
 
 	Q_EMIT rosShutdown(); // used to signal the gui for a shutdown (useful to roslaunch)
@@ -96,6 +100,32 @@ void QNode::run() {
 		ros::spinOnce();
 
 	}
+}
+
+void QNode::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg)
+{
+	currentGyroX_gui = (double) msg->angular_velocity.x;
+	currentGyroY_gui = (double) -msg->angular_velocity.y;
+	currentGyroZ_gui = (double) msg->angular_velocity.z;
+}
+
+void QNode::forceTorqueDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg)
+{
+	currentForceX_l_gui = (double) msg->force_x_raw_l;
+	currentForceY_l_gui = (double) msg->force_y_raw_l;
+	currentForceZ_l_gui = (double) msg->force_z_raw_l;
+
+	currentForceX_r_gui = (double) msg->force_x_raw_r;
+	currentForceY_r_gui = (double) msg->force_y_raw_r;
+	currentForceZ_r_gui = (double) msg->force_z_raw_r;
+
+	currentTorqueX_l_gui = (double) msg->torque_x_raw_l;
+	currentTorqueY_l_gui = (double) msg->torque_y_raw_l;
+	currentTorqueZ_l_gui = (double) msg->torque_z_raw_l;
+
+	currentTorqueX_r_gui = (double) msg->torque_x_raw_r;
+	currentTorqueY_r_gui = (double) msg->torque_y_raw_r;
+	currentTorqueZ_r_gui = (double) msg->torque_z_raw_r;
 }
 
 }  // namespace atest_gui
