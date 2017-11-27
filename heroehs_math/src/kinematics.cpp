@@ -97,18 +97,20 @@ Kinematics::Kinematics()
 	ground_to_sensor_transform_right.fill(0);
 	ground_to_sensor_transform_left.resize(4,4);
 	ground_to_sensor_transform_left.fill(0);
+	center_to_foot_transform_leg.resize(4,4);
+	center_to_foot_transform_leg.fill(0);
 	H_ground_to_center.resize(4,4);
 	H_ground_to_center.fill(0);
 
 	H[7] << 0 , 0, -1, 0,
-			    0 , 1,  0, 0,
-				  1 , 0,  0, 0,
-					0 , 0,  0, 1;
+			0 , 1,  0, 0,
+			1 , 0,  0, 0,
+			0 , 0,  0, 1;
 
 	H_ground_to_center << 1 , 0, 0, 0,
-	                      0 , 1, 0, 0,
-		                    0 , 0, 1, total_length_,
-			                  0 , 0, 0, 1;
+			0 , 1, 0, 0,
+			0 , 0, 1, total_length_,
+			0 , 0, 0, 1;
 }
 
 
@@ -117,16 +119,92 @@ Kinematics::~Kinematics()
 
 }
 
-void Kinematics::FowardKnematics(double joint[7])
-{
-}
-
-void Kinematics::FowardKnematicsGroundToSensorRight(double joint[7])
+void Kinematics::FowardKnematics(double joint[7], std::string left_right)
 {
 	double sum_theta[7] = {0,0,0,0,0,0,0};
 	double offset_theta[7] = {0, 0, (M_PI)/2, -(M_PI)/2, (M_PI)/2, 0, 0};
 
+	for(int i=1; i<7; i++)
+	{
+		sum_theta[i] = joint[i]+ offset_theta[i];
+	}
+	for(int i=1; i<7; i++)
+	{
 
+		H[i](0,0) = floor(100000.*(cos(sum_theta[i])+0.000005))/100000.;
+		H[i](0,1) = floor(100000.*(-cos(dh_alpha[i])*sin(sum_theta[i])+0.000005))/100000.;
+		H[i](0,2) = floor(100000.*(sin(dh_alpha[i])*sin(sum_theta[i])+0.000005))/100000.;
+		H[i](0,3) = floor(100000.*(dh_link[i]*cos(sum_theta[i])+0.000005))/100000.;
+
+		H[i](1,0) = floor(100000.*(sin(sum_theta[i])+0.000005))/100000.;
+		H[i](1,1) = floor(100000.*(cos(dh_alpha[i])*cos(sum_theta[i])+0.000005))/100000.;
+		H[i](1,2) = floor(100000.*(-sin(dh_alpha[i])*cos(sum_theta[i])+0.000005))/100000.;
+		H[i](1,3) = floor(100000.*(dh_link[i]*sin(sum_theta[i])+0.000005))/100000.;
+
+		H[i](2,0) =0;
+		H[i](2,1) = floor(100000.*(sin(dh_alpha[i])+0.000005))/100000.;
+		H[i](2,2) = floor(100000.*(cos(dh_alpha[i])+0.000005))/100000.;
+		H[i](2,3) = -dh_link_d[i];
+
+		H[i](3,0) =0;
+		H[i](3,1) =0;
+		H[i](3,2) =0;
+		H[i](3,3) =1;
+
+		H[i](0,0) = cos(sum_theta[i]);
+		H[i](0,1) = -cos(dh_alpha[i])*sin(sum_theta[i]);
+		H[i](0,2) = sin(dh_alpha[i])*sin(sum_theta[i]);
+		H[i](0,3) = dh_link[i]*cos(sum_theta[i]);
+
+		H[i](1,0) = sin(sum_theta[i]);
+		H[i](1,1) = cos(dh_alpha[i])*cos(sum_theta[i]);
+		H[i](1,2) = -sin(dh_alpha[i])*cos(sum_theta[i]);
+		H[i](1,3) = dh_link[i]*sin(sum_theta[i]);
+
+		H[i](2,0) =0;
+		H[i](2,1) = sin(dh_alpha[i]);
+		H[i](2,2) = cos(dh_alpha[i]);
+		H[i](2,3) = -dh_link_d[i];
+
+		H[i](3,0) =0;
+		H[i](3,1) =0;
+		H[i](3,2) =0;
+		H[i](3,3) =1;
+	}
+
+	H[0](0,0) = 0;
+	H[0](0,1) = -1;
+	H[0](0,2) = 0;
+	H[0](0,3) = 0;
+
+	H[0](1,0) = 0;
+	H[0](1,1) = 0;
+	H[0](1,2) = 1;
+	H[0](1,3) = -0.105;
+
+	H[0](2,0) = -1;
+	H[0](2,1) = 0;
+	H[0](2,2) = 0;
+	H[0](2,3) = 0;
+
+	H[0](3,0) = 0;
+	H[0](3,1) = 0;
+	H[0](3,2) = 0;
+	H[0](3,3) = 1;
+	//// foot frame 을 Global frame 과 일치 시킨다.
+	if(!left_right.compare("left")) // left
+		H[0](1,3) = 0.105;
+	else // right
+		H[0](1,3) = -0.105;
+	// H[7]
+	/////////////////////////////////
+
+	center_to_foot_transform_leg = H[0]*H[1]*H[2]*H[3]*H[4]*H[5]*H[6]*H[7];
+}
+void Kinematics::FowardKnematicsGroundToSensorRight(double joint[7])
+{
+	double sum_theta[7] = {0,0,0,0,0,0,0};
+	double offset_theta[7] = {0, 0, (M_PI)/2, -(M_PI)/2, (M_PI)/2, 0, 0};
 
 	for(int i=1; i<7; i++)
 	{
@@ -191,7 +269,7 @@ void Kinematics::FowardKnematicsGroundToSensorRight(double joint[7])
 	H[0](1,0) = 0;
 	H[0](1,1) = 0;
 	H[0](1,2) = 1;
-	H[0](1,3) = 0;
+	H[0](1,3) = -0.105;
 
 	H[0](2,0) = -1;
 	H[0](2,1) = 0;
@@ -199,11 +277,11 @@ void Kinematics::FowardKnematicsGroundToSensorRight(double joint[7])
 	H[0](2,3) = 0;
 
 	H[0](3,0) = 0;
-	H[0](3,1) = -0.105;
+	H[0](3,1) = 0;
 	H[0](3,2) = 0;
 	H[0](3,3) = 1;
 	//// foot frame 을 Global frame 과 일치 시킨다.
-	// H[7]
+
 	/////////////////////////////////
 
 	ground_to_sensor_transform_right = H_ground_to_center*H[0]*H[1]*H[2]*H[3]*H[4]*H[5]*H[6]*H[7];
@@ -278,7 +356,7 @@ void Kinematics::FowardKnematicsGroundToSensorLeft(double joint[7])
 	H[0](1,0) = 0;
 	H[0](1,1) = 0;
 	H[0](1,2) = 1;
-	H[0](1,3) = 0;
+	H[0](1,3) = 0.105;
 
 	H[0](2,0) = -1;
 	H[0](2,1) = 0;
@@ -286,7 +364,7 @@ void Kinematics::FowardKnematicsGroundToSensorLeft(double joint[7])
 	H[0](2,3) = 0;
 
 	H[0](3,0) = 0;
-	H[0](3,1) = 0.105;
+	H[0](3,1) = 0;
 	H[0](3,2) = 0;
 	H[0](3,3) = 1;
 	//// foot frame 을 Global frame 과 일치 시킨다.
@@ -302,9 +380,9 @@ Eigen::MatrixXd Kinematics::CenterToGroundTransformation(Eigen::MatrixXd point)
 	H_center_to_ground.resize(4,4);
 
 	H_center_to_ground << 1 , 0, 0, 0,
-	                      0 , 1, 0, 0,
-		                    0 , 0, 1, -total_length_,
-			                  0 , 0, 0, 1;
+			0 , 1, 0, 0,
+			0 , 0, 1, -total_length_,
+			0 , 0, 0, 1;
 
 	return H_center_to_ground*point;
 }
@@ -392,7 +470,7 @@ void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_
 
 	if((pow(l06_yz_,2) - pow(l05_yz_,2) - pow(dh_link[6],2))/ (2*l05_yz_*dh_link[6]) > 1.0 || (pow(l06_yz_,2) - pow(l05_yz_,2) - pow(dh_link[6],2))/ (2*l05_yz_*dh_link[6]) < -1.0)
 	{
-	//	real_theta[6] = 0;
+		//	real_theta[6] = 0;
 		return;
 
 	}
@@ -434,9 +512,9 @@ void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_
 	cos_theta1_ = - (r31_*cos(real_theta[4])*sin(real_theta[5]) + r31_*cos(real_theta[5])*sin(real_theta[4]) - r33_*cos(real_theta[6])*cos(real_theta[4])*cos(real_theta[5]) + r33_*cos(real_theta[6])*sin(real_theta[4])*sin(real_theta[5]) - r32_*sin(real_theta[6])*cos(real_theta[4])*cos(real_theta[5]) + r32_*sin(real_theta[6])*sin(real_theta[4])*sin(real_theta[5]));
 
 	if(isnan(floor(100000.*(atan2(sin_theta1_,cos_theta1_)+0.000005))/100000.))
-			return;
-		else
-			real_theta[1] = floor(100000.*(atan2(sin_theta1_,cos_theta1_)+0.000005))/100000.;
+		return;
+	else
+		real_theta[1] = floor(100000.*(atan2(sin_theta1_,cos_theta1_)+0.000005))/100000.;
 
 	/////////////
 	// theta 2 //
@@ -460,12 +538,20 @@ void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_
 	sin_theta3_ = r21_*cos(real_theta[4]+real_theta[5]) + r23_*cos(real_theta[6])*sin(real_theta[4]+real_theta[5]) + r22_*sin(real_theta[6])*sin(real_theta[4]+real_theta[5]);
 	cos_theta3_ = r22_*cos(real_theta[6]) - r23_*sin(real_theta[6]);
 
-  if(isnan(floor(100000.*(atan2(sin_theta3_,cos_theta3_)+0.000005))/100000.))
-  	return;
-  else
-  	real_theta[3] = floor(100000.*(atan2(sin_theta3_,cos_theta3_)+0.000005))/100000.;
+	if(isnan(floor(100000.*(atan2(sin_theta3_,cos_theta3_)+0.000005))/100000.))
+		return;
+	else
+		real_theta[3] = floor(100000.*(atan2(sin_theta3_,cos_theta3_)+0.000005))/100000.;
 
+  for(int i = 1; i<7;i++)
+		real_theta_public[i] = real_theta[i];
 
 	joint_radian << 0 , real_theta[1], real_theta[2] , real_theta[3] , real_theta[4] , real_theta[5] , real_theta[6];
 
+}
+void Kinematics::ZYXEulerAnglesSolution(Eigen::MatrixXd tf_matrix)
+{
+	z_euler_angle_ = atan2(tf_matrix(1,0),tf_matrix(0,0));
+	y_euler_angle_ = atan2(-tf_matrix(2,0),sqrt(pow(tf_matrix(2,1),2) + pow(tf_matrix(2,2),2)));
+	x_euler_angle_ = atan2(tf_matrix(2,1),tf_matrix(2,2));
 }

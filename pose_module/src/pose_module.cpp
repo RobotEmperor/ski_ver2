@@ -23,6 +23,7 @@ PoseModule::PoseModule()
 
 	// Dynamixel initialize ////
 
+
 	result_["head"]        = new robotis_framework::DynamixelState(); // joint 1
 	result_["waist_roll"]  = new robotis_framework::DynamixelState(); // joint 10
 
@@ -38,6 +39,7 @@ PoseModule::PoseModule()
 	result_["r_hip_roll"]  = new robotis_framework::DynamixelState();  // joint 14
 	result_["r_hip_yaw"]   = new robotis_framework::DynamixelState();  // joint 16
 	result_["r_knee_pitch"] = new robotis_framework::DynamixelState();  // joint 18
+
 	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
 	result_["r_ankle_roll"]  = new robotis_framework::DynamixelState();  // joint 22
 
@@ -72,9 +74,10 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 
 		joint_name_to_id_[joint_name] = dxl_info->id_;
 		joint_id_to_name_[dxl_info->id_] = joint_name;
+
+		//parsePgainValue(joint_name);
 	}
-
-
+	savePgainValue();
 	leg_end_point_l_.resize(6,8);
 	leg_end_point_l_.fill(0);
 	leg_end_point_l_(1,0) = 0.105; // y 초기값
@@ -85,7 +88,6 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 	end_to_rad_l_->current_pose_change(1,0) = 0.105;
 	end_to_rad_l_->cal_end_point_tra_pz->current_pose = -0.55;
 	end_to_rad_l_->current_pose_change(2,0) = -0.55;
-
 
 	leg_end_point_r_.resize(6,8);
 	leg_end_point_r_.fill(0);
@@ -127,6 +129,8 @@ void PoseModule::queueThread()
 	/* subscribe topics */
 	// for gui
 	ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/desired_pose", 5, &PoseModule::desiredPoseMsgCallback, this);
+	read_p_gain_value_srv = ros_node.advertiseService("/read_p_gain_value", &PoseModule::readPgainSrvFunction, this);
+
 	ros::WallDuration duration(control_cycle_msec_ / 1000.0);
 	while(ros_node.ok())
 		callback_queue.callAvailable(duration);
@@ -148,7 +152,62 @@ void PoseModule::desiredPoseMsgCallback(const std_msgs::Float64MultiArray::Const
 	is_moving_r_ = true;
 	is_moving_one_joint_ = true;
 }
+bool PoseModule::readPgainSrvFunction(pose_module::command::Request  &req, pose_module::command::Response &res)
+{
+	for(int id =1; id<30; id++)
+	{
+		res.dxl_state[id] = p_gain_data_[id]; // GUI 에서 요청한 모든 조인트의 위치값을 저장함.
+	}
+	return true;
+}
 
+void PoseModule::parsePgainValue(std::string joint_name_)
+{
+	std::string path_ = ros::package::getPath("ski_main_manager") + "/config/dxl_init.yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
+	YAML::Node doc; // YAML file class 선언!
+	try
+	{
+		// load yaml
+		doc = YAML::LoadFile(path_.c_str()); // 파일 경로를 입력하여 파일을 로드 한다.
+	}catch(const std::exception& e) // 에러 점검
+	{
+		ROS_ERROR("Fail to load yaml file!");
+		return;
+	}
+	YAML::Node pose_node = doc[joint_name_];
+	for (YAML::iterator it = pose_node.begin(); it != pose_node.end(); ++it) //motion_node 벡터의 처음과 시작 끝까지 for 문으로 반복한다.
+	{
+		std::string standard;
+		int p_gain_ = 0;
+		standard = it->first.as<std::string>();
+		if(!standard.compare("position_p_gain"))
+			p_gain_data_[joint_name_to_id_[joint_name_]] = it->second.as<int>();
+	}
+}
+void PoseModule::savePgainValue()
+{
+	// YAML SAVE
+	ROS_INFO("YAML_SAVE");
+	YAML::Emitter yaml_out;
+	std::map<std::string, double> dxl_init_data;
+
+	dxl_init_data["return_delay_time"] = 10;
+
+	yaml_out << YAML::BeginMap;
+	dxl_init_data["position_p_gain"] = p_gain_data_[1];
+	yaml_out << YAML::Key << joint_id_to_name_[1] << YAML::Value << dxl_init_data;
+
+	for(int id=10; id<23; id++)
+	{
+		dxl_init_data["position_p_gain"] = p_gain_data_[id];
+		yaml_out << YAML::Key << joint_id_to_name_[id] << YAML::Value << dxl_init_data;
+	}
+	yaml_out << YAML::EndMap;
+
+	std::string dxl_init_file_path = ros::package::getPath("ski_main_manager") + "/config/dxl_init.yaml";
+	std::ofstream fout(dxl_init_file_path.c_str());
+	fout << yaml_out.c_str();  // dump it back into the file
+}
 void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
 		std::map<std::string, double> sensors)
 {
@@ -196,18 +255,39 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		l_kinematics_->InverseKinematics(result_end_l_(0,0), result_end_l_(1,0) - 0.105, result_end_l_(2,0), result_end_l_(3,0), result_end_l_(4,0), result_end_l_(5,0)); // pX pY pZ alpha betta kamma
 		r_kinematics_->InverseKinematics(result_end_r_(0,0), result_end_r_(1,0) + 0.105, result_end_r_(2,0), result_end_r_(3,0), result_end_r_(4,0), result_end_r_(5,0)); // pX pY pZ alpha betta kamma
 
+		l_kinematics_->FowardKnematics(l_kinematics_->real_theta_public, "left");
+		r_kinematics_->FowardKnematics(r_kinematics_->real_theta_public, "right");
+
+		l_kinematics_->ZYXEulerAnglesSolution(l_kinematics_->center_to_foot_transform_leg);
+		r_kinematics_->ZYXEulerAnglesSolution(r_kinematics_->center_to_foot_transform_leg);
+
+		//		ROS_INFO("X :: %f", l_kinematics_->center_to_foot_transform_leg(0,3));
+		//		ROS_INFO("y :: %f", l_kinematics_->center_to_foot_transform_leg(1,3));
+		//		ROS_INFO("z :: %f", l_kinematics_->center_to_foot_transform_leg(2,3));
+		//
+		//		ROS_INFO("z_a :: %f", l_kinematics_->z_euler_angle_*RADIAN2DEGREE);
+		//		ROS_INFO("y_a :: %f", l_kinematics_->y_euler_angle_*RADIAN2DEGREE);
+		//		ROS_INFO("x_a :: %f", l_kinematics_->x_euler_angle_*RADIAN2DEGREE);
+		//
+		//		ROS_INFO("X r :: %f", r_kinematics_->center_to_foot_transform_leg(0,3));
+		//		ROS_INFO("y r:: %f", r_kinematics_->center_to_foot_transform_leg(1,3));
+		//		ROS_INFO("z r:: %f", r_kinematics_->center_to_foot_transform_leg(2,3));
+		//
+		//		ROS_INFO("z_a r:: %f", r_kinematics_->z_euler_angle_*RADIAN2DEGREE);
+		//		ROS_INFO("y_a r:: %f", r_kinematics_->y_euler_angle_*RADIAN2DEGREE);
+		//		ROS_INFO("x_a r:: %f", r_kinematics_->x_euler_angle_*RADIAN2DEGREE);
 
 		//<---  joint space control --->
 		result_[joint_id_to_name_[1]]->goal_position_ = 0;// head
 		result_[joint_id_to_name_[10]]->goal_position_ = -result_rad_one_joint_; // waist roll
 
 		//<---  cartesian space control  --->
-		result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);//
+		result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);
 		result_[joint_id_to_name_[13]]->goal_position_ = l_kinematics_->joint_radian(2,0);
 		result_[joint_id_to_name_[15]]->goal_position_ = l_kinematics_->joint_radian(3,0);
 
-		result_[joint_id_to_name_[17]]->goal_position_ = -l_kinematics_->joint_radian(4,0);//
-		result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);//
+		result_[joint_id_to_name_[17]]->goal_position_ = -l_kinematics_->joint_radian(4,0);
+		result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
 		result_[joint_id_to_name_[21]]->goal_position_ = l_kinematics_->joint_radian(6,0);
 
 		result_[joint_id_to_name_[12]]->goal_position_ = r_kinematics_->joint_radian(1,0);
@@ -218,38 +298,27 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
 		result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
 
-		ROS_INFO("Result 11:: %f",result_[joint_id_to_name_[11]]->goal_position_ );
-		ROS_INFO("Result 13:: %f",result_[joint_id_to_name_[13]]->goal_position_ );
-		ROS_INFO("Result 15:: %f",result_[joint_id_to_name_[15]]->goal_position_ );
 
-		ROS_INFO("Result 17:: %f",result_[joint_id_to_name_[17]]->goal_position_ );
-		ROS_INFO("Result 19:: %f",result_[joint_id_to_name_[19]]->goal_position_ );
-		ROS_INFO("Result 21:: %f",result_[joint_id_to_name_[21]]->goal_position_ );
-
-		ROS_INFO("Result 12:: %f",result_[joint_id_to_name_[12]]->goal_position_ );
-		ROS_INFO("Result 14:: %f",result_[joint_id_to_name_[14]]->goal_position_ );
-		ROS_INFO("Result 16:: %f",result_[joint_id_to_name_[16]]->goal_position_ );
-
-		ROS_INFO("Result 18:: %f",result_[joint_id_to_name_[18]]->goal_position_ );
-		ROS_INFO("Result 20:: %f",result_[joint_id_to_name_[20]]->goal_position_ );
-		ROS_INFO("Result 21:: %f",result_[joint_id_to_name_[22]]->goal_position_ );
-
-
-
-		//<---  read   --->
+				//<---  read   --->
 		for(int id=10 ; id<23 ; id++)
 		{
 			if(gazebo_check == true)
 				result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
-			//else
-			//result_[joint_id_to_name_[id]]->present_position_ = dxls[joint_id_to_name_[id]]->dxl_state_->present_position_; // real robot
+			else
+			{
+				result_[joint_id_to_name_[id]]->present_position_ = dxls[joint_id_to_name_[id]]->dxl_state_->present_position_; // real robot
+				p_gain_data_[id] =  dxls[joint_id_to_name_[id]]->dxl_state_->position_p_gain_;
+			}
+
 		}
 
 		is_moving_l_ = end_to_rad_l_-> is_moving_check;
 		is_moving_r_ = end_to_rad_r_-> is_moving_check;
 		is_moving_one_joint_ = one_joint_ ->is_moving_check;
-
 	}
+
+
+//	result_[joint_id_to_name_[20]]->present_position_ = dxls[joint_id_to_name_[20]]->dxl_state_->present_position_; // real robot
 }
 void PoseModule::stop()
 {

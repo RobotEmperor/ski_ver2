@@ -9,7 +9,6 @@
 #define SKI_VER2_MOTION_MODULE_INCLUDE_MOTION_MODULE_CENTER_CHANGE_LIB_H_
 #include <ros/ros.h>
 #include <ros/package.h>
-#include <boost/thread.hpp>
 
 #include <Eigen/Dense>
 #include <yaml-cpp/yaml.h>
@@ -21,7 +20,7 @@
 
 using namespace std;
 
-namespace diana
+namespace diana_motion
 {
   class CenterChange
 	{
@@ -29,17 +28,15 @@ namespace diana
   	CenterChange();
   	~CenterChange();
 
-  	void parseMotionData(std::string turn_type);
-  	void calculateStepEndPointValue(double desired_value, double step_value);
+  	void parseMotionData(std::string turn_type, std::string change_type);
+  	void calculateStepEndPointValue(double desired_value, double step_value, std::string change_type);
 
   	double step_end_point_value[2][6];
 
   	private:
-  	double right_end_point_value[2][6]; // rigth turn
-  	double left_end_point_value[2][6]; // left turn
-  	double middle_end_point_value[2][6]; // The number 2 pose
-
-
+  	double right_end_point_value_center[2][6]; // rigth turn
+  	double left_end_point_value_center[2][6]; // left turn
+  	double middle_end_point_value_center[2][6]; // The number 2 pose
 
 
 	};

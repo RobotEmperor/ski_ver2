@@ -95,8 +95,11 @@ MotionModule::MotionModule()
 	balance_updating_sys_time_sec_ = 2.0;
 	balance_update_= false;
 
-	center_change_ = new CenterChange;
-
+	center_change_ = new diana_motion::CenterChange;
+	temp_change_value_center = 0;
+	temp_change_value_edge = 0;
+	temp_turn_type = "basic";
+	temp_change_type = "basic";
 }
 MotionModule::~MotionModule()
 {
@@ -248,15 +251,31 @@ void MotionModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange
 	is_moving_r_ = true;
 	is_moving_one_joint_ = true;
 
-	center_change_->calculateStepEndPointValue(msg->center_change,100); // 0.01 단위로 조정 가능.
-	center_change_->parseMotionData("pflug_bogen");
-
-	for(int m = 0 ; m<6 ; m++)
+	if (temp_change_value_center != msg->center_change || temp_change_value_edge != msg->edge_change|| temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
 	{
-		leg_end_point_l_(m,1) = center_change_->step_end_point_value[1][m];
-		leg_end_point_r_(m,1) = center_change_->step_end_point_value[2][m];
-		leg_end_point_l_(m,7) = msg->time_change;
-		leg_end_point_r_(m,7) = msg->time_change;
+		center_change_->parseMotionData(msg->turn_type, msg->change_type);
+
+		if(!msg->change_type.compare("edge_change"))
+		center_change_->calculateStepEndPointValue(msg->edge_change,100,msg->change_type); // 0.01 단위로 조정 가능.
+		else
+		center_change_->calculateStepEndPointValue(msg->center_change,100,msg->change_type); // 0.01 단위로 조정 가능.
+
+		for(int m = 0 ; m<6 ; m++)
+		{
+			leg_end_point_l_(m,1) = center_change_->step_end_point_value[0][m];
+			leg_end_point_r_(m,1) = center_change_->step_end_point_value[1][m];
+			leg_end_point_l_(m,7) = msg->time_change;
+			leg_end_point_r_(m,7) = msg->time_change;
+		}
+		temp_change_value_center = msg->center_change;
+		temp_change_value_edge = msg->edge_change;
+		temp_turn_type    = msg->turn_type;
+		temp_change_type  = msg->change_type; // 이전값 저장
+		ROS_INFO("Turn !!  Change");
+	} // 변한 것이 있으면 값을 계산
+	else
+	{  ROS_INFO("Nothing to change");
+	return;
 	}
 }
 void MotionModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) // gyro data get
@@ -264,7 +283,6 @@ void MotionModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) // 
 	currentGyroX = (double) msg->angular_velocity.x;
 	currentGyroY = (double) -msg->angular_velocity.y;
 	currentGyroZ = (double) msg->angular_velocity.z;
-
 	balance_ctrl_.setCurrentGyroSensorOutput(currentGyroY, currentGyroX);
 }
 void MotionModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg)// force torque sensor data get
@@ -280,7 +298,7 @@ void MotionModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& ms
 	currentFX_r = (double) msg->force_x_raw_r;
 	currentFY_r = (double) msg->force_y_raw_r;
 	currentFZ_r = (double) msg->force_z_raw_r;
-
+	//currentFZ_r = 98.1;
 	currentTX_r = (double) msg->torque_x_raw_r;
 	currentTY_r = (double) msg->torque_y_raw_r;
 	currentTZ_r = (double) msg->torque_z_raw_r;
@@ -568,7 +586,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 			if(gazebo_check == true)
 				result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
 			//else
-			//result_[joint_id_to_name_[id]]->present_position_ = dxls[joint_id_to_name_[id]]->dxl_state_->present_position_; // real robot
+			 // result_[joint_id_to_name_[id]]->present_position_ = dxls[joint_id_to_name_[id]]->dxl_state_->present_position_; // real robot
 		}
 
 		is_moving_l_ = end_to_rad_l_-> is_moving_check;

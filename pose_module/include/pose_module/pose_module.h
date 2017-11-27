@@ -14,6 +14,7 @@
 #include <std_msgs/String.h>
 #include <geometry_msgs/Pose.h>
 #include <boost/thread.hpp>
+#include <pose_module/command.h>
 
 #include <Eigen/Dense>
 #include <yaml-cpp/yaml.h>
@@ -52,7 +53,10 @@ public:
 
 	/* ROS Topic Callback Functions */
 	void desiredPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
-
+	bool readPgainSrvFunction(pose_module::command::Request  &req, pose_module::command::Response &res);
+	void parsePgainValue(std::string joint_name_);
+	void savePgainValue();
+	ros::ServiceServer read_p_gain_value_srv;
 
 
 private:
@@ -87,6 +91,9 @@ private:
 	Eigen::MatrixXd result_end_l_;
 	Eigen::MatrixXd result_end_r_;
 	double result_rad_one_joint_;
+
+	// dxl gain
+	int p_gain_data_[30];
 
 
 

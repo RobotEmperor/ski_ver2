@@ -148,11 +148,10 @@ private:
   double currentFX_r,currentFY_r,currentFZ_r,currentTX_r,currentTY_r,currentTZ_r;
 
   //center change lib
-  CenterChange *center_change_;
-
-
-
-
+  diana_motion::CenterChange *center_change_;
+  double temp_change_value_edge, temp_change_value_center;
+  std::string temp_turn_type;
+  std::string temp_change_type;
 };
 
 }

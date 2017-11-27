@@ -73,6 +73,7 @@ bool QNode::init() {
 
 	//pose module //
 	desired_pose_pub = n.advertise<std_msgs::Float64MultiArray>("/desired_pose",100);
+	read_p_gain_value_client = n.serviceClient<atest_gui::command>("/read_p_gain_value");
 
 	//motion_module //
 	pattern_pub = n.advertise<std_msgs::Int32>("/motion_num",100);

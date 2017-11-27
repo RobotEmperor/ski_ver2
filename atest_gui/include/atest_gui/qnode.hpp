@@ -78,6 +78,7 @@ public:
 
         // pose module topic //
         ros::Publisher desired_pose_pub;
+        ros::ServiceClient read_p_gain_value_client;
 
         // balance on off topic //
         ros::Publisher diana_balance_parameter_pub; // 모듈 on off

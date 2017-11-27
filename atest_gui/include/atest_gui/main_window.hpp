@@ -57,6 +57,7 @@ public:
 
   // control
 	void center_change(int k);
+	void edge_change(int k);
 
 	// off set module ////
 	void on_read_data_clicked();
@@ -73,20 +74,8 @@ public:
 
 	void on_change_kinematics_1_1_clicked();
 	void on_change_kinematics_2_clicked();
-	void on_change_kinematics_3_clicked();
-	void on_change_kinematics_4_clicked();
-	void on_change_kinematics_4_1_clicked();
-	void on_change_kinematics_5_1_clicked();
-	void on_change_kinematics_6_1_clicked();
-	void on_change_kinematics_7_1_clicked();
-	void on_change_kinematics_8_1_clicked();
-	void on_change_kinematics_9_1_clicked();
-	void on_change_kinematics_10_1_clicked();
-	void on_change_kinematics_11_1_clicked();
-	void on_change_kinematics_12_1_clicked();
-	void on_change_kinematics_13_1_clicked();
-	void on_change_kinematics_100_1_clicked();
-	void on_change_kinematics_1000_1_clicked();
+
+
 
 
 
@@ -113,6 +102,41 @@ public:
 
 	void parse_gain_data();
 
+	// control GUI slot
+	void on_pflug_bogen_button_clicked();
+	void on_parallel_button_clicked();
+	void on_carving_button_clicked();
+
+	void on_center_change_button_clicked();
+	void on_edge_change_button_clicked();
+
+	// pose gain gui slot
+	void on_l_hip_pitch_button_clicked();
+	void on_l_hip_roll_button_clicked();
+	void on_l_hip_yaw_button_clicked();
+
+	void on_l_knee_pitch_button_clicked();
+	void on_l_ankle_pitch_button_clicked();
+	void on_l_ankle_roll_button_clicked();
+
+	void on_r_hip_pitch_button_clicked();
+	void on_r_hip_roll_button_clicked();
+	void on_r_hip_yaw_button_clicked();
+
+	void on_r_knee_pitch_button_clicked();
+	void on_r_ankle_pitch_button_clicked();
+	void on_r_ankle_roll_button_clicked();
+
+	void on_head_yaw_button_clicked();
+	void on_head_pitch_button_clicked();
+	void on_head_roll_button_clicked();
+
+	void on_waist_roll_button_clicked();
+	void on_waist_yaw_button_clicked();
+
+	void on_initial_p_gain_load_button_clicked();
+	void on_final_gain_save_button_clicked();
+	void on_gain_adjustment_button_clicked();
 
 
 	private:
@@ -129,7 +153,6 @@ public:
 	std_msgs::Int16MultiArray change_joint_value_msg_;
 	std_msgs::Float64MultiArray offset_joint_value_msg_;
 	atest_gui::command read_joint_value_msg_; // motor joint value read msg
-
 
 	// offset_joint variables /////////
 
@@ -154,6 +177,10 @@ public:
 
 	//<------------------------------------------------------------------- pose module -->
 	std_msgs::Float64MultiArray desired_pose_msg; // desired_pose command msg
+	atest_gui::command read_p_gain_value_msg_; // motor joint value read msg
+  std_msgs::Int16MultiArray p_gain_value_msg;
+  std_msgs::Bool fianl_gain_save_msg;
+	int p_gain_value_[30];
 
 	//<------------------------------------------------------------------- motion module -->
 	// balance on off msg

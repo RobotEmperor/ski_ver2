@@ -114,7 +114,6 @@ void OffsetModule::initialize(const int control_cycle_msec, robotis_framework::R
 
 void OffsetModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors)
 {
-
 	if (enable_ == false)
 		return;
 
@@ -160,7 +159,7 @@ bool OffsetModule::read_joint_value_srv_function(offset_module::command::Request
 {
 	for(int i =1; i<30; i++)
 	{
-		res.angle[i] = static_cast<int16_t>(((read_joint_value_[i]*RADIAN2DEGREE))/(0.088/3.0)); // GUI 에서 요청한 모든 조인트의 위치값을 저장함.
+		res.dxl_state[i] = static_cast<int16_t>(((read_joint_value_[i]*RADIAN2DEGREE))/(0.088/3.0)); // GUI 에서 요청한 모든 조인트의 위치값을 저장함.
 	}
 	return true;
 }
@@ -174,16 +173,17 @@ void OffsetModule::save_onoff_sub_function(const std_msgs::Bool::ConstPtr& msg)
 		std::map<std::string, double> offset;
 		std::map<std::string, double> init_pose;
 
-		offset[joint_id_to_name_[1]] = offset_joint_value_[1];  // edit one of the nodes
+		offset[joint_id_to_name_[1]] = offset_joint_value_[1];
 
 		for(int i=10; i<23 ; i++)
 		{
-			offset[joint_id_to_name_[i]] = offset_joint_value_[i];  // edit one of the nodes
+			offset[joint_id_to_name_[i]] = offset_joint_value_[i];
 		}
 
 		yaml_out << YAML::BeginMap;
 		yaml_out << YAML::Key << "offset" << YAML::Value << offset;
 		yaml_out << YAML::EndMap;
+
 		std::string offset_file_path = ros::package::getPath("ski_main_manager") + "/config/offset.yaml";
 		std::ofstream fout(offset_file_path.c_str());
 		fout << yaml_out.c_str();  // dump it back into the file

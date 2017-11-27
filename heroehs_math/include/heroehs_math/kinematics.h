@@ -24,10 +24,11 @@ public:
 	Kinematics();
 	~Kinematics();
 
-	void FowardKnematics(double joint[7]);
+	void FowardKnematics(double joint[7] , std::string left_right);
 	void FowardKnematicsGroundToSensorRight(double joint[7]);
 	void FowardKnematicsGroundToSensorLeft(double joint[7]);
 	void InverseKinematics(double pX_, double pY_, double pZ_, double z_alpha_, double y_betta_, double x_kamma_);
+	void ZYXEulerAnglesSolution(Eigen::MatrixXd tf_matrix);
 	Eigen::MatrixXd CenterToGroundTransformation(Eigen::MatrixXd point);
 
 
@@ -36,6 +37,12 @@ public:
 	Eigen::MatrixXd joint_radian;
 	Eigen::MatrixXd ground_to_sensor_transform_right;
 	Eigen::MatrixXd ground_to_sensor_transform_left;
+	Eigen::MatrixXd center_to_foot_transform_leg;
+
+	double real_theta_public[7];
+	double x_euler_angle_;
+	double y_euler_angle_;
+	double z_euler_angle_;
 
 private:
 
@@ -61,11 +68,6 @@ private:
 	double l05_xz_;
 	double l05_yz_;
 	double l06_yz_;
-
-
-
-
-
 
 };
 }
