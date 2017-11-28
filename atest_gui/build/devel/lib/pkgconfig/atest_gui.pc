@@ -1,8 +1,0 @@
-prefix=/home/robot11/catkin_ws/src/atest_gui/build/devel
-
-Name: atest_gui
-Description: Description of atest_gui
-Version: 0.1.0
-Cflags: -I/home/robot11/catkin_ws/src/atest_gui/build/devel/include
-Libs: -L/home/robot11/catkin_ws/src/atest_gui/build/devel/lib 
-Requires: 

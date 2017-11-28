@@ -54,6 +54,8 @@ PoseModule::PoseModule()
 	//////////////////////////
 	result_rad_one_joint_= 0;
 	traj_time_ = 4.0;
+	////
+	id_select = 20;
 }
 PoseModule::~PoseModule()
 {
@@ -75,9 +77,8 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 		joint_name_to_id_[joint_name] = dxl_info->id_;
 		joint_id_to_name_[dxl_info->id_] = joint_name;
 
-		//parsePgainValue(joint_name);
+		parsePgainValue(joint_name);
 	}
-	savePgainValue();
 	leg_end_point_l_.resize(6,8);
 	leg_end_point_l_.fill(0);
 	leg_end_point_l_(1,0) = 0.105; // y 초기값
@@ -129,6 +130,9 @@ void PoseModule::queueThread()
 	/* subscribe topics */
 	// for gui
 	ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/desired_pose", 5, &PoseModule::desiredPoseMsgCallback, this);
+	ros::Subscriber gain_adjustment_sub = ros_node.subscribe("/gain_adjustment", 5, &PoseModule::gainAdjustmentMsgCallback, this);
+	ros::Subscriber final_gain_save_sub = ros_node.subscribe("/final_gain_save", 5, &PoseModule::finalGainSaveMsgCallback, this);
+
 	read_p_gain_value_srv = ros_node.advertiseService("/read_p_gain_value", &PoseModule::readPgainSrvFunction, this);
 
 	ros::WallDuration duration(control_cycle_msec_ / 1000.0);
@@ -152,11 +156,26 @@ void PoseModule::desiredPoseMsgCallback(const std_msgs::Float64MultiArray::Const
 	is_moving_r_ = true;
 	is_moving_one_joint_ = true;
 }
+
+void PoseModule::gainAdjustmentMsgCallback(const std_msgs::Int16MultiArray::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실행
+{
+	id_select = msg->data[0];
+	p_gain_data_[id_select] = msg->data[1];
+}
+void PoseModule::finalGainSaveMsgCallback(const std_msgs::Bool::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실행
+{
+	if(msg->data)
+	{
+		savePgainValue();
+	}
+	else
+		return;
+}
 bool PoseModule::readPgainSrvFunction(pose_module::command::Request  &req, pose_module::command::Response &res)
 {
 	for(int id =1; id<30; id++)
 	{
-		res.dxl_state[id] = p_gain_data_[id]; // GUI 에서 요청한 모든 조인트의 위치값을 저장함.
+		res.dxl_state[id] = p_gain_data_[id]; // GUI 에서 요청한 모든 조인트의 p gain 값을 저장함 .
 	}
 	return true;
 }
@@ -299,7 +318,7 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
 
 
-				//<---  read   --->
+	 //<---  read   --->
 		for(int id=10 ; id<23 ; id++)
 		{
 			if(gazebo_check == true)
@@ -307,7 +326,6 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 			else
 			{
 				result_[joint_id_to_name_[id]]->present_position_ = dxls[joint_id_to_name_[id]]->dxl_state_->present_position_; // real robot
-				p_gain_data_[id] =  dxls[joint_id_to_name_[id]]->dxl_state_->position_p_gain_;
 			}
 
 		}
@@ -317,8 +335,7 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		is_moving_one_joint_ = one_joint_ ->is_moving_check;
 	}
 
-
-//	result_[joint_id_to_name_[20]]->present_position_ = dxls[joint_id_to_name_[20]]->dxl_state_->present_position_; // real robot
+	result_[joint_id_to_name_[id_select]]->position_p_gain_ = p_gain_data_[id_select];
 }
 void PoseModule::stop()
 {

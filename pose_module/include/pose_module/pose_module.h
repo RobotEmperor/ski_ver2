@@ -9,8 +9,10 @@
 #include <ros/callback_queue.h>
 #include <ros/package.h>
 #include <std_msgs/Int16.h>
+#include <std_msgs/Bool.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/Float64MultiArray.h>
+#include <std_msgs/Int16MultiArray.h>
 #include <std_msgs/String.h>
 #include <geometry_msgs/Pose.h>
 #include <boost/thread.hpp>
@@ -53,6 +55,8 @@ public:
 
 	/* ROS Topic Callback Functions */
 	void desiredPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
+	void gainAdjustmentMsgCallback(const std_msgs::Int16MultiArray::ConstPtr& msg);
+	void finalGainSaveMsgCallback(const std_msgs::Bool::ConstPtr& msg);
 	bool readPgainSrvFunction(pose_module::command::Request  &req, pose_module::command::Response &res);
 	void parsePgainValue(std::string joint_name_);
 	void savePgainValue();
@@ -94,6 +98,7 @@ private:
 
 	// dxl gain
 	int p_gain_data_[30];
+	int id_select;
 
 
 

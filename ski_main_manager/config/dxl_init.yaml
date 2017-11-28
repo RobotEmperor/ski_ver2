@@ -32,11 +32,11 @@ l_ankle_pitch:
   position_p_gain: 0
   return_delay_time: 10
 r_ankle_pitch:
-  position_p_gain: 0
+  position_p_gain: 3100
   return_delay_time: 10
 l_ankle_roll:
   position_p_gain: 0
   return_delay_time: 10
 r_ankle_roll:
-  position_p_gain: 0
+  position_p_gain: 500
   return_delay_time: 10

@@ -1,8 +1,0 @@
-prefix=/usr/local
-
-Name: atest_gui
-Description: Description of atest_gui
-Version: 0.1.0
-Cflags: -I/usr/local/include
-Libs: -L/usr/local/lib 
-Requires: 

@@ -1,5 +1,0 @@
-int16 a
-
----
-
-int16[30] dxl_state
