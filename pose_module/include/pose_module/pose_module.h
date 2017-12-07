@@ -32,6 +32,7 @@
 #include "heroehs_math/fifth_order_trajectory_generate.h"
 #include "heroehs_math/kinematics.h"
 #include "heroehs_math/end_point_to_rad_cal.h"
+#include "diana_balance_control/cop_calculation_function.h"
 
 
 
@@ -100,6 +101,8 @@ private:
 	int p_gain_data_[30];
 	int id_select;
 
+	//zmp experiment
+	diana::CopCalculationFunc cop_cal;
 
 
 };

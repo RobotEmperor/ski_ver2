@@ -22,26 +22,34 @@ PoseModule::PoseModule()
 	control_mode_ = robotis_framework::PositionControl;
 
 	// Dynamixel initialize ////
+	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
+	result_["r_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 2
+	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
 
+	result_["r_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 4
+	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5
+	result_["r_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 6
 
-	result_["head"]        = new robotis_framework::DynamixelState(); // joint 1
-	result_["waist_roll"]  = new robotis_framework::DynamixelState(); // joint 10
+	result_["waist_yaw"]        = new robotis_framework::DynamixelState();  // joint 9
+	result_["waist_roll"]       = new robotis_framework::DynamixelState();  // joint 10
 
-	result_["l_hip_pitch"] = new robotis_framework::DynamixelState();  // joint 11
-	result_["l_hip_roll"]  = new robotis_framework::DynamixelState();  // joint 13
+	result_["l_hip_pitch"]      = new robotis_framework::DynamixelState();  // joint 11
+	result_["l_hip_roll"]       = new robotis_framework::DynamixelState();  // joint 13
+	result_["l_hip_yaw"]        = new robotis_framework::DynamixelState();  // joint 15
+	result_["l_knee_pitch"]     = new robotis_framework::DynamixelState();  // joint 17
+	result_["l_ankle_pitch"]    = new robotis_framework::DynamixelState();  // joint 19
+	result_["l_ankle_roll"]     = new robotis_framework::DynamixelState();  // joint 21
 
-	result_["l_hip_yaw"]   = new robotis_framework::DynamixelState();  // joint 15
-	result_["l_knee_pitch"] = new robotis_framework::DynamixelState();  // joint 17
-	result_["l_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 19
-	result_["l_ankle_roll"]  = new robotis_framework::DynamixelState();  // joint 21
+	result_["r_hip_pitch"]      = new robotis_framework::DynamixelState();  // joint 12
+	result_["r_hip_roll"]       = new robotis_framework::DynamixelState();  // joint 14
+	result_["r_hip_yaw"]        = new robotis_framework::DynamixelState();  // joint 16
+	result_["r_knee_pitch"]     = new robotis_framework::DynamixelState();  // joint 18
+	result_["r_ankle_pitch"]    = new robotis_framework::DynamixelState();  // joint 20
+	result_["r_ankle_roll"]     = new robotis_framework::DynamixelState();  // joint 22
 
-	result_["r_hip_pitch"] = new robotis_framework::DynamixelState();  // joint 12
-	result_["r_hip_roll"]  = new robotis_framework::DynamixelState();  // joint 14
-	result_["r_hip_yaw"]   = new robotis_framework::DynamixelState();  // joint 16
-	result_["r_knee_pitch"] = new robotis_framework::DynamixelState();  // joint 18
-
-	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
-	result_["r_ankle_roll"]  = new robotis_framework::DynamixelState();  // joint 22
+	result_["head_yaw"]         = new robotis_framework::DynamixelState();  // joint 23
+	result_["head_pitch"]       = new robotis_framework::DynamixelState();  // joint 24
+	result_["head_roll"]        = new robotis_framework::DynamixelState();  // joint 25
 
 	///////////////////////////
 
@@ -213,13 +221,15 @@ void PoseModule::savePgainValue()
 	dxl_init_data["return_delay_time"] = 10;
 
 	yaml_out << YAML::BeginMap;
-	dxl_init_data["position_p_gain"] = p_gain_data_[1];
-	yaml_out << YAML::Key << joint_id_to_name_[1] << YAML::Value << dxl_init_data;
 
-	for(int id=10; id<23; id++)
+	for(int id=1; id<26; id++)
 	{
-		dxl_init_data["position_p_gain"] = p_gain_data_[id];
-		yaml_out << YAML::Key << joint_id_to_name_[id] << YAML::Value << dxl_init_data;
+		if(id == 7 || id == 8)
+			printf("id is not existed");
+		else{
+			dxl_init_data["position_p_gain"] = p_gain_data_[id];
+			yaml_out << YAML::Key << joint_id_to_name_[id] << YAML::Value << dxl_init_data;
+		}
 	}
 	yaml_out << YAML::EndMap;
 
@@ -274,27 +284,12 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		l_kinematics_->InverseKinematics(result_end_l_(0,0), result_end_l_(1,0) - 0.105, result_end_l_(2,0), result_end_l_(3,0), result_end_l_(4,0), result_end_l_(5,0)); // pX pY pZ alpha betta kamma
 		r_kinematics_->InverseKinematics(result_end_r_(0,0), result_end_r_(1,0) + 0.105, result_end_r_(2,0), result_end_r_(3,0), result_end_r_(4,0), result_end_r_(5,0)); // pX pY pZ alpha betta kamma
 
-		l_kinematics_->FowardKnematics(l_kinematics_->real_theta_public, "left");
-		r_kinematics_->FowardKnematics(r_kinematics_->real_theta_public, "right");
 
-		l_kinematics_->ZYXEulerAnglesSolution(l_kinematics_->center_to_foot_transform_leg);
-		r_kinematics_->ZYXEulerAnglesSolution(r_kinematics_->center_to_foot_transform_leg);
+		cop_cal.ftSensorDataLeftGet(0, 0, 98.1, 0, 0, 0);
+		cop_cal.ftSensorDataRightGet(0, 0, 98.1, 0, 0, 0);
+		cop_cal.jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
+		cop_cal.copCalculationResult();
 
-		//		ROS_INFO("X :: %f", l_kinematics_->center_to_foot_transform_leg(0,3));
-		//		ROS_INFO("y :: %f", l_kinematics_->center_to_foot_transform_leg(1,3));
-		//		ROS_INFO("z :: %f", l_kinematics_->center_to_foot_transform_leg(2,3));
-		//
-		//		ROS_INFO("z_a :: %f", l_kinematics_->z_euler_angle_*RADIAN2DEGREE);
-		//		ROS_INFO("y_a :: %f", l_kinematics_->y_euler_angle_*RADIAN2DEGREE);
-		//		ROS_INFO("x_a :: %f", l_kinematics_->x_euler_angle_*RADIAN2DEGREE);
-		//
-		//		ROS_INFO("X r :: %f", r_kinematics_->center_to_foot_transform_leg(0,3));
-		//		ROS_INFO("y r:: %f", r_kinematics_->center_to_foot_transform_leg(1,3));
-		//		ROS_INFO("z r:: %f", r_kinematics_->center_to_foot_transform_leg(2,3));
-		//
-		//		ROS_INFO("z_a r:: %f", r_kinematics_->z_euler_angle_*RADIAN2DEGREE);
-		//		ROS_INFO("y_a r:: %f", r_kinematics_->y_euler_angle_*RADIAN2DEGREE);
-		//		ROS_INFO("x_a r:: %f", r_kinematics_->x_euler_angle_*RADIAN2DEGREE);
 
 		//<---  joint space control --->
 		result_[joint_id_to_name_[1]]->goal_position_ = 0;// head
@@ -318,7 +313,7 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
 
 
-	 //<---  read   --->
+		//<---  read   --->
 		for(int id=10 ; id<23 ; id++)
 		{
 			if(gazebo_check == true)

@@ -56,7 +56,7 @@ public:
 
 
 	BaseModuleState *base_module_state;
-	heroehs_math::FifthOrderTrajectory *motion_trajectory[23];
+	heroehs_math::FifthOrderTrajectory *motion_trajectory[26];
 
 
 

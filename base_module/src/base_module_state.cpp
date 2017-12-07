@@ -15,8 +15,8 @@ BaseModuleState::BaseModuleState()
   mov_time_state =0.0;
   MAX_JOINT_ID_STATE = 0;
 
-  joint_ini_pose_state  = Eigen::MatrixXd::Zero( MAX_JOINT_ID_STATE + 1, 1);
-  joint_ini_pose_goal  = Eigen::MatrixXd::Zero( MAX_JOINT_ID_STATE + 1, 1);
+  joint_ini_pose_state  = Eigen::MatrixXd::Zero( MAX_JOINT_ID_STATE + 3, 1);
+  joint_ini_pose_goal  = Eigen::MatrixXd::Zero( MAX_JOINT_ID_STATE + 3, 1);
 
 }
 

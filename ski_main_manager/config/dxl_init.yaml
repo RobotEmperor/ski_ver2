@@ -1,42 +1,69 @@
-head:
+l_shoulder_pitch:
+  position_p_gain: 0
+  return_delay_time: 10
+r_shoulder_pitch:
+  position_p_gain: 0
+  return_delay_time: 10
+l_shoulder_roll:
+  position_p_gain: 0
+  return_delay_time: 10
+r_shoulder_roll:
+  position_p_gain: 0
+  return_delay_time: 10
+l_elbow_pitch:
+  position_p_gain: 0
+  return_delay_time: 10
+r_elbow_pitch:
+  position_p_gain: 0
+  return_delay_time: 10
+waist_yaw:
   position_p_gain: 0
   return_delay_time: 10
 waist_roll:
-  position_p_gain: 0
+  position_p_gain: 850
   return_delay_time: 10
 l_hip_pitch:
-  position_p_gain: 0
+  position_p_gain: 2100
   return_delay_time: 10
 r_hip_pitch:
-  position_p_gain: 0
+  position_p_gain: 2100
   return_delay_time: 10
 l_hip_roll:
-  position_p_gain: 0
+  position_p_gain: 2100
   return_delay_time: 10
 r_hip_roll:
-  position_p_gain: 0
+  position_p_gain: 2100
   return_delay_time: 10
 l_hip_yaw:
-  position_p_gain: 0
+  position_p_gain: 2100
   return_delay_time: 10
 r_hip_yaw:
-  position_p_gain: 0
+  position_p_gain: 2100
   return_delay_time: 10
 l_knee_pitch:
-  position_p_gain: 0
+  position_p_gain: 2100
   return_delay_time: 10
 r_knee_pitch:
-  position_p_gain: 0
+  position_p_gain: 2100
   return_delay_time: 10
 l_ankle_pitch:
-  position_p_gain: 0
+  position_p_gain: 2100
   return_delay_time: 10
 r_ankle_pitch:
-  position_p_gain: 3100
+  position_p_gain: 2100
   return_delay_time: 10
 l_ankle_roll:
-  position_p_gain: 0
+  position_p_gain: 2100
   return_delay_time: 10
 r_ankle_roll:
-  position_p_gain: 500
+  position_p_gain: 2100
+  return_delay_time: 10
+head_yaw:
+  position_p_gain: 0
+  return_delay_time: 10
+head_pitch:
+  position_p_gain: 0
+  return_delay_time: 10
+head_roll:
+  position_p_gain: 0
   return_delay_time: 10

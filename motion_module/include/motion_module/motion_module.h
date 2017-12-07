@@ -23,6 +23,7 @@
 #include "heroehs_math/end_point_to_rad_cal.h"
 #include "diana_balance_control/diana_balance_control.h"
 #include "motion_module/center_change_lib.h"
+#include "diana_balance_control/cop_calculation_function.h"
 
 //message
 //m - standard
@@ -36,7 +37,6 @@
 #include <sensor_msgs/Imu.h>
 
 //m - personal
-#include "diana_balance_control/zmp_calculation_function.h"
 #include "diana_msgs/BalanceParam.h"
 #include "diana_msgs/ForceTorque.h"
 #include "robotis_controller_msgs/StatusMsg.h"
@@ -65,7 +65,9 @@ public:
 	// paper messages
 	ros::Publisher state_end_point_pose_pub;
 	ros::Publisher state_end_point_orientation_pub;
-	ros::Publisher zmp_point_pub;
+	ros::Publisher cop_point_Fz_pub;
+	ros::Publisher cop_point_Fy_pub;
+	ros::Publisher cop_point_Fx_pub;
 
 	// sensor data & balance on off
 	ros::Subscriber get_imu_data_sub_;
@@ -88,7 +90,9 @@ private:
 
 	geometry_msgs::Vector3 state_end_point_pose_msg_;
 	geometry_msgs::Vector3 state_end_point_orientation_msg_;
-	geometry_msgs::PointStamped zmp_point_msg_;
+	geometry_msgs::PointStamped cop_point_Fz_msg_;
+	geometry_msgs::PointStamped cop_point_Fy_msg_;
+	geometry_msgs::PointStamped cop_point_Fx_msg_;
 
 	boost::thread queue_thread_;
 
@@ -143,7 +147,7 @@ private:
   bool balance_update_;
 
   // zmp
-  diana::ZmpCalculationFunc zmp_cal;
+  diana::CopCalculationFunc *cop_cal;
   double currentFX_l,currentFY_l,currentFZ_l,currentTX_l,currentTY_l,currentTZ_l;
   double currentFX_r,currentFY_r,currentFZ_r,currentTX_r,currentTY_r,currentTZ_r;
 

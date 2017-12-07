@@ -21,29 +21,28 @@ using namespace std;
 namespace diana
 {
 
-class ZmpCalculationFunc
+class CopCalculationFunc
 {
 
 public:
-	ZmpCalculationFunc();
-	~ZmpCalculationFunc();
+	CopCalculationFunc();
+	~CopCalculationFunc();
 	void ftSensorDataLeftGet(double force_sensor_data_x, double force_sensor_data_y , double force_sensor_data_z , double torque_sensor_data_x, double torque_sensor_data_y, double torque_sensor_data_z);
 	void ftSensorDataRightGet(double force_sensor_data_x, double force_sensor_data_y , double force_sensor_data_z , double torque_sensor_data_x, double torque_sensor_data_y, double torque_sensor_data_z);
 	void jointStateGetForTransForm(Eigen::MatrixXd joint_state_l, Eigen::MatrixXd joint_state_r);
-	void zmpCalculationResult();
+	void copCalculationResult();
 
-
-	Eigen::MatrixXd gf_zmp_point;
-	Eigen::MatrixXd cf_zmp_point;
+	double cop_fz_point_x, cop_fz_point_y, cop_fy_point_x, cop_fy_point_z, cop_fx_point_y, cop_fx_point_z;
 
 private:
 	Eigen::MatrixXd force_data_l, torque_data_l;
 	Eigen::MatrixXd force_data_r, torque_data_r;
 	heroehs_math::Kinematics transformation_;
-	double gf_fx_l,gf_fy_l,gf_fz_l,gf_tx_l,gf_ty_l,gf_tz_l; // ground frame gf
-	double gf_fx_r,gf_fy_r,gf_fz_r,gf_tx_r,gf_ty_r,gf_tz_r; // ground frame gf
-	double gf_px_l,gf_py_l,gf_pz_l;
-	double gf_px_r,gf_py_r,gf_pz_r;
+	double cf_fx_l,cf_fy_l,cf_fz_l,cf_tx_l,cf_ty_l,cf_tz_l; // center frame cf
+	double cf_fx_r,cf_fy_r,cf_fz_r,cf_tx_r,cf_ty_r,cf_tz_r; // center frame cf
+	double cf_px_l,cf_py_l,cf_pz_l;
+	double cf_px_r,cf_py_r,cf_pz_r;
+
 
 };
 

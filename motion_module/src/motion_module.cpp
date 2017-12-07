@@ -96,6 +96,7 @@ MotionModule::MotionModule()
 	balance_update_= false;
 
 	center_change_ = new diana_motion::CenterChange;
+	cop_cal = new  diana::CopCalculationFunc;
 	temp_change_value_center = 0;
 	temp_change_value_edge = 0;
 	temp_turn_type = "basic";
@@ -211,7 +212,9 @@ void MotionModule::queueThread()
 	/* publisher topics */
 	state_end_point_pose_pub = ros_node.advertise<geometry_msgs::Vector3>("/state_end_point_pose",100);
 	state_end_point_orientation_pub = ros_node.advertise<geometry_msgs::Vector3>("/state_end_point_orientation",100);
-	zmp_point_pub = ros_node.advertise<geometry_msgs::PointStamped>("/zmp_point",100);
+	cop_point_Fz_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fz",100);
+	cop_point_Fy_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fy",100);
+	cop_point_Fx_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fx",100);
 
 	/* subscribe topics */
 	get_imu_data_sub_ = ros_node.subscribe("/imu/data", 100, &MotionModule::imuDataMsgCallback, this);
@@ -256,9 +259,9 @@ void MotionModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange
 		center_change_->parseMotionData(msg->turn_type, msg->change_type);
 
 		if(!msg->change_type.compare("edge_change"))
-		center_change_->calculateStepEndPointValue(msg->edge_change,100,msg->change_type); // 0.01 단위로 조정 가능.
+			center_change_->calculateStepEndPointValue(msg->edge_change,100,msg->change_type); // 0.01 단위로 조정 가능.
 		else
-		center_change_->calculateStepEndPointValue(msg->center_change,100,msg->change_type); // 0.01 단위로 조정 가능.
+			center_change_->calculateStepEndPointValue(msg->center_change,100,msg->change_type); // 0.01 단위로 조정 가능.
 
 		for(int m = 0 ; m<6 ; m++)
 		{
@@ -289,23 +292,31 @@ void MotionModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& ms
 {
 	currentFX_l = (double) msg->force_x_raw_l;
 	currentFY_l = (double) msg->force_y_raw_l;
-	currentFZ_l = (double) msg->force_z_raw_l;
+	currentFZ_l = -(double) msg->force_z_raw_l;
+
 
 	currentTX_l = (double) msg->torque_x_raw_l;
 	currentTY_l = (double) msg->torque_y_raw_l;
-	currentTZ_l = (double) msg->torque_z_raw_l;
+	currentTZ_l = -(double) msg->torque_z_raw_l;
 
-	currentFX_r = (double) msg->force_x_raw_r;
-	currentFY_r = (double) msg->force_y_raw_r;
-	currentFZ_r = (double) msg->force_z_raw_r;
-	//currentFZ_r = 98.1;
-	currentTX_r = (double) msg->torque_x_raw_r;
-	currentTY_r = (double) msg->torque_y_raw_r;
-	currentTZ_r = (double) msg->torque_z_raw_r;
+	//		currentFX_r = (double) msg->force_x_raw_r;
+	//		currentFY_r = (double) msg->force_y_raw_r;
+	//		currentFZ_r = (double) msg->force_z_raw_r;
 
-	zmp_cal.ftSensorDataLeftGet(currentFX_l, currentFY_l, currentFZ_l, currentTX_l, currentTY_l, currentTZ_l);
-	zmp_cal.ftSensorDataRightGet(currentFX_r, currentFY_r, currentFZ_r, currentTX_r, currentTY_r, currentTZ_r);
+	currentFX_r = 1;
+	currentFY_r = 1;
+	currentFZ_r = 98.1;
 
+	//		currentTX_r = (double) msg->torque_x_raw_r;
+	//		currentTY_r = (double) msg->torque_y_raw_r;
+	//		currentTZ_r = (double) msg->torque_z_raw_r;
+
+	currentTX_r = 0;
+	currentTY_r = 0;
+	currentTZ_r = 0;
+
+	cop_cal->ftSensorDataLeftGet(currentFX_l, currentFY_l, currentFZ_l, currentTX_l, currentTY_l, currentTZ_l);
+	cop_cal->ftSensorDataRightGet(currentFX_r, currentFY_r, currentFZ_r, currentTX_r, currentTY_r, currentTZ_r);
 }
 void MotionModule::setBalanceParameterCallback(const diana_msgs::BalanceParam::ConstPtr& msg)
 {
@@ -586,7 +597,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 			if(gazebo_check == true)
 				result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
 			//else
-			 // result_[joint_id_to_name_[id]]->present_position_ = dxls[joint_id_to_name_[id]]->dxl_state_->present_position_; // real robot
+			// result_[joint_id_to_name_[id]]->present_position_ = dxls[joint_id_to_name_[id]]->dxl_state_->present_position_; // real robot
 		}
 
 		is_moving_l_ = end_to_rad_l_-> is_moving_check;
@@ -618,20 +629,34 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	r_kinematics_->InverseKinematics(result_pose_r_modified_.x, result_pose_r_modified_.y + 0.105, result_pose_r_modified_.z,
 			result_pose_r_modified_.roll, result_pose_r_modified_.pitch, result_pose_r_modified_.yaw); // pX pY pZ alpha betta kamma
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// zmp
-	zmp_cal.jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
-	zmp_cal.zmpCalculationResult();
+	// cop
+	cop_cal->jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
+	cop_cal->copCalculationResult();
 
-	// display zmp to rviz
-	zmp_point_msg_.header.stamp = ros::Time();
+	// display cop to rviz
+	cop_point_Fz_msg_.header.stamp = ros::Time();
+	cop_point_Fy_msg_.header.stamp = ros::Time();
+	cop_point_Fx_msg_.header.stamp = ros::Time();
+
 	std::string frame = "/pelvis";
-	zmp_point_msg_.header.frame_id = frame.c_str();
+	cop_point_Fz_msg_.header.frame_id = frame.c_str();
+	cop_point_Fy_msg_.header.frame_id = frame.c_str();
+	cop_point_Fx_msg_.header.frame_id = frame.c_str();
 
-	zmp_point_msg_.point.x = zmp_cal.cf_zmp_point(0,0);
-	zmp_point_msg_.point.y = zmp_cal.cf_zmp_point(1,0);
-	zmp_point_msg_.point.z = zmp_cal.cf_zmp_point(2,0);
-	zmp_point_pub.publish(zmp_point_msg_);
+	cop_point_Fz_msg_.point.x = cop_cal->cop_fz_point_x;
+	cop_point_Fz_msg_.point.y = cop_cal->cop_fz_point_y;
+	cop_point_Fz_msg_.point.z = 0;
+	cop_point_Fz_pub.publish(cop_point_Fz_msg_);
+
+	cop_point_Fy_msg_.point.x = cop_cal->cop_fy_point_x;
+	cop_point_Fy_msg_.point.y = 0;
+	cop_point_Fy_msg_.point.z = cop_cal->cop_fy_point_z;
+	cop_point_Fy_pub.publish(cop_point_Fy_msg_);
+
+	cop_point_Fx_msg_.point.x = 0;
+	cop_point_Fx_msg_.point.y = cop_cal->cop_fx_point_y;
+	cop_point_Fx_msg_.point.z = cop_cal->cop_fx_point_z;
+	cop_point_Fx_pub.publish(cop_point_Fx_msg_);
 
 
 	//<---  joint space control --->

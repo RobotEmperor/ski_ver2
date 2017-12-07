@@ -93,12 +93,14 @@ Kinematics::Kinematics()
 		H[i].resize(4,4);
 		H[i].fill(0);
 	}
-	ground_to_sensor_transform_right.resize(4,4);
-	ground_to_sensor_transform_right.fill(0);
-	ground_to_sensor_transform_left.resize(4,4);
-	ground_to_sensor_transform_left.fill(0);
-	center_to_foot_transform_leg.resize(4,4);
-	center_to_foot_transform_leg.fill(0);
+	center_to_sensor_transform_right.resize(4,4);
+	center_to_sensor_transform_right.fill(0);
+	center_to_sensor_transform_left.resize(4,4);
+	center_to_sensor_transform_left.fill(0);
+	center_to_foot_transform_left_leg.resize(4,4);
+	center_to_foot_transform_left_leg.fill(0);
+	center_to_foot_transform_right_leg.resize(4,4);
+	center_to_foot_transform_right_leg.fill(0);
 	H_ground_to_center.resize(4,4);
 	H_ground_to_center.fill(0);
 
@@ -193,15 +195,17 @@ void Kinematics::FowardKnematics(double joint[7], std::string left_right)
 	H[0](3,3) = 1;
 	//// foot frame 을 Global frame 과 일치 시킨다.
 	if(!left_right.compare("left")) // left
+	{
 		H[0](1,3) = 0.105;
+		center_to_foot_transform_left_leg = H[0]*H[1]*H[2]*H[3]*H[4]*H[5]*H[6]*H[7];
+	}
 	else // right
+	{
 		H[0](1,3) = -0.105;
-	// H[7]
-	/////////////////////////////////
-
-	center_to_foot_transform_leg = H[0]*H[1]*H[2]*H[3]*H[4]*H[5]*H[6]*H[7];
+		center_to_foot_transform_right_leg = H[0]*H[1]*H[2]*H[3]*H[4]*H[5]*H[6]*H[7];
+	}
 }
-void Kinematics::FowardKnematicsGroundToSensorRight(double joint[7])
+void Kinematics::FowardKnematicsCenterToSensorRight(double joint[7])
 {
 	double sum_theta[7] = {0,0,0,0,0,0,0};
 	double offset_theta[7] = {0, 0, (M_PI)/2, -(M_PI)/2, (M_PI)/2, 0, 0};
@@ -284,10 +288,10 @@ void Kinematics::FowardKnematicsGroundToSensorRight(double joint[7])
 
 	/////////////////////////////////
 
-	ground_to_sensor_transform_right = H_ground_to_center*H[0]*H[1]*H[2]*H[3]*H[4]*H[5]*H[6]*H[7];
+	center_to_sensor_transform_right = H[0]*H[1]*H[2]*H[3]*H[4]*H[5]*H[6]*H[7];
 }
 
-void Kinematics::FowardKnematicsGroundToSensorLeft(double joint[7])
+void Kinematics::FowardKnematicsCenterToSensorLeft(double joint[7])
 {
 	double sum_theta[7] = {0,0,0,0,0,0,0};
 	double offset_theta[7] = {0, 0, (M_PI)/2, -(M_PI)/2, (M_PI)/2, 0, 0};
@@ -368,11 +372,10 @@ void Kinematics::FowardKnematicsGroundToSensorLeft(double joint[7])
 	H[0](3,2) = 0;
 	H[0](3,3) = 1;
 	//// foot frame 을 Global frame 과 일치 시킨다.
-	//// foot frame 을 Global frame 과 일치 시킨다.
 	// H[7]
 	/////////////////////////////////
 
-	ground_to_sensor_transform_left = H_ground_to_center*H[0]*H[1]*H[2]*H[3]*H[4]*H[5]*H[6]*H[7];
+	center_to_sensor_transform_left = H[0]*H[1]*H[2]*H[3]*H[4]*H[5]*H[6]*H[7];
 }
 Eigen::MatrixXd Kinematics::CenterToGroundTransformation(Eigen::MatrixXd point)
 {
@@ -543,7 +546,7 @@ void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_
 	else
 		real_theta[3] = floor(100000.*(atan2(sin_theta3_,cos_theta3_)+0.000005))/100000.;
 
-  for(int i = 1; i<7;i++)
+	for(int i = 1; i<7;i++)
 		real_theta_public[i] = real_theta[i];
 
 	joint_radian << 0 , real_theta[1], real_theta[2] , real_theta[3] , real_theta[4] , real_theta[5] , real_theta[6];
