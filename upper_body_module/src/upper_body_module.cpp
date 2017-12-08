@@ -22,7 +22,7 @@ UpperBodyModule::UpperBodyModule()
 	control_mode_ = robotis_framework::PositionControl;
 
 	// Dynamixel initialize ////
-	result_["head"]        = new robotis_framework::DynamixelState(); // joint 1
+	//result_["head"]        = new robotis_framework::DynamixelState(); // joint 1
 	//result_["waist_roll"]  = new robotis_framework::DynamixelState(); // joint 10
 
 	///////////////////////////

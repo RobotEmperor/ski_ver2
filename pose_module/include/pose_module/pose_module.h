@@ -101,10 +101,20 @@ private:
 	int p_gain_data_[30];
 	int id_select;
 
-	//zmp experiment
+	//cop experiment
 	diana::CopCalculationFunc cop_cal;
 
+	//waist kinematics
+	heroehs_math::Kinematics *waist_kinematics_;
+	heroehs_math::CalRad *end_to_rad_waist_;
+	Eigen::MatrixXd waist_end_point_;
+	Eigen::MatrixXd result_end_waist_;
 
+	//head kinematics
+	heroehs_math::Kinematics *head_kinematics_;
+	heroehs_math::CalRad *end_to_rad_head_;
+	Eigen::MatrixXd head_end_point_;
+	Eigen::MatrixXd result_end_head_;
 };
 
 }

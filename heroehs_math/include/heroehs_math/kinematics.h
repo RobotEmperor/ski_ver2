@@ -28,7 +28,10 @@ public:
 	void FowardKnematicsCenterToSensorRight(double joint[7]);
 	void FowardKnematicsCenterToSensorLeft(double joint[7]);
 	void InverseKinematics(double pX_, double pY_, double pZ_, double z_alpha_, double y_betta_, double x_kamma_);
-	void ZYXEulerAnglesSolution(Eigen::MatrixXd tf_matrix);
+	void ZYXEulerAnglesSolution(double z, double y, double x);
+	void ZYXEulerAngles(double z, double y, double x);
+	void XYZEulerAnglesSolution(double x, double y, double z);
+	void XYZEulerAngles(double z, double y, double x);
 	Eigen::MatrixXd CenterToGroundTransformation(Eigen::MatrixXd point);
 
 
@@ -41,9 +44,13 @@ public:
 	Eigen::MatrixXd center_to_foot_transform_right_leg;
 
 	double real_theta_public[7];
-	double x_euler_angle_;
-	double y_euler_angle_;
-	double z_euler_angle_;
+	double zyx_euler_angle_x;
+	double zyx_euler_angle_y;
+	double zyx_euler_angle_z;
+
+	double xyz_euler_angle_x;
+	double xyz_euler_angle_y;
+	double xyz_euler_angle_z;
 
 private:
 
@@ -52,7 +59,7 @@ private:
 	Eigen::MatrixXd H_ground_to_center;
 
 
-  // inverse_kinematics
+	// inverse_kinematics
 	double r11_,r12_,r13_,r21_,r22_,r23_,r31_,r32_,r33_; // euler angle
 	double real_theta[7] , dh_alpha[7] , dh_link[7] , dh_link_d[7]; // dh_convention variables
 	double total_length_;
@@ -69,6 +76,12 @@ private:
 	double l05_xz_;
 	double l05_yz_;
 	double l06_yz_;
+
+	//zyx euler angle
+	Eigen::MatrixXd zyx_euler_angle_matrix_;
+
+	//xyz euler angle
+	Eigen::MatrixXd xyz_euler_angle_matrix_;
 
 };
 }

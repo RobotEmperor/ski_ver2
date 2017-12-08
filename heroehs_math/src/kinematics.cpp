@@ -118,9 +118,7 @@ Kinematics::Kinematics()
 
 Kinematics::~Kinematics()
 {
-
 }
-
 void Kinematics::FowardKnematics(double joint[7], std::string left_right)
 {
 	double sum_theta[7] = {0,0,0,0,0,0,0};
@@ -552,9 +550,56 @@ void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_
 	joint_radian << 0 , real_theta[1], real_theta[2] , real_theta[3] , real_theta[4] , real_theta[5] , real_theta[6];
 
 }
-void Kinematics::ZYXEulerAnglesSolution(Eigen::MatrixXd tf_matrix)
+void Kinematics::ZYXEulerAngles(double z, double y, double x)
 {
-	z_euler_angle_ = atan2(tf_matrix(1,0),tf_matrix(0,0));
-	y_euler_angle_ = atan2(-tf_matrix(2,0),sqrt(pow(tf_matrix(2,1),2) + pow(tf_matrix(2,2),2)));
-	x_euler_angle_ = atan2(tf_matrix(2,1),tf_matrix(2,2));
+	zyx_euler_angle_matrix_.resize(3,3);
+	zyx_euler_angle_matrix_.fill(0);
+
+	zyx_euler_angle_matrix_<< cos(y)*cos(z), cos(z)*sin(x)*sin(y) - cos(x)*sin(z), sin(x)*sin(z) + cos(x)*cos(z)*sin(y),
+			                      cos(y)*sin(z), cos(x)*cos(z) + sin(x)*sin(y)*sin(z), cos(x)*sin(y)*sin(z) - cos(z)*sin(x) ,
+			                      -sin(y)      , cos(y)*sin(x)                       , cos(x)*cos(y);
+//printf("zyx angles \n");
+//printf("%f     %f     %f\n",zyx_euler_angle_matrix_(0,0),zyx_euler_angle_matrix_(0,1),zyx_euler_angle_matrix_(0,2));
+//printf("%f     %f     %f\n",zyx_euler_angle_matrix_(1,0),zyx_euler_angle_matrix_(1,1),zyx_euler_angle_matrix_(1,2));
+//printf("%f     %f     %f\n",zyx_euler_angle_matrix_(2,0),zyx_euler_angle_matrix_(2,1),zyx_euler_angle_matrix_(2,2));
+}
+
+void Kinematics::XYZEulerAngles(double x, double y, double z)
+{
+	xyz_euler_angle_matrix_.resize(3,3);
+	xyz_euler_angle_matrix_.fill(0);
+
+	xyz_euler_angle_matrix_ << cos(y)*cos(z)                       , -cos(y)*sin(z)                      , sin(y)        ,
+			                       cos(x)*sin(z) + cos(z)*sin(x)*sin(y), cos(x)*cos(z) - sin(x)*sin(y)*sin(z), -cos(y)*sin(x),
+														 sin(x)*sin(z) - cos(x)*cos(z)*sin(y), cos(z)*sin(x) + cos(x)*sin(y)*sin(z),  cos(x)*cos(y);
+
+	//printf("xyz angles \n");
+	//printf("%f     %f     %f\n",xyz_euler_angle_matrix_(0,0),xyz_euler_angle_matrix_(0,1),xyz_euler_angle_matrix_(0,2));
+	//printf("%f     %f     %f\n",xyz_euler_angle_matrix_(1,0),xyz_euler_angle_matrix_(1,1),xyz_euler_angle_matrix_(1,2));
+	//printf("%f     %f     %f\n",xyz_euler_angle_matrix_(2,0),xyz_euler_angle_matrix_(2,1),xyz_euler_angle_matrix_(2,2));
+
+}
+void Kinematics::ZYXEulerAnglesSolution(double z, double y, double x)
+{
+	ZYXEulerAngles(z, y, x);
+
+	zyx_euler_angle_z = atan2(zyx_euler_angle_matrix_(1,0),zyx_euler_angle_matrix_(0,0));
+	zyx_euler_angle_y = atan2(-zyx_euler_angle_matrix_(2,0),sqrt(pow(zyx_euler_angle_matrix_(2,1),2) + pow(zyx_euler_angle_matrix_(2,2),2)));
+	zyx_euler_angle_x = atan2(zyx_euler_angle_matrix_(2,1),zyx_euler_angle_matrix_(2,2));
+
+	//printf("zyx angles forward angles \n");
+	//ZYXEulerAngles(zyx_euler_angle_z, zyx_euler_angle_y, zyx_euler_angle_x);
+
+}
+
+void Kinematics::XYZEulerAnglesSolution(double x, double y, double z)
+{
+	XYZEulerAngles(x, y, z);
+
+	xyz_euler_angle_x = atan2(-xyz_euler_angle_matrix_(1,2),xyz_euler_angle_matrix_(2,2));
+	xyz_euler_angle_y = atan2(xyz_euler_angle_matrix_(0,2),sqrt(pow(xyz_euler_angle_matrix_(0,0),2) + pow(xyz_euler_angle_matrix_(0,1),2)));
+	xyz_euler_angle_z = atan2(-xyz_euler_angle_matrix_(0,1),xyz_euler_angle_matrix_(0,0));
+
+	//printf("xyz angles forward angles \n");
+	//XYZEulerAngles(xyz_euler_angle_x, xyz_euler_angle_y, xyz_euler_angle_z);
 }

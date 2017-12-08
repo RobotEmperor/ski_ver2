@@ -17,7 +17,7 @@ r_elbow_pitch:
   position_p_gain: 0
   return_delay_time: 10
 waist_yaw:
-  position_p_gain: 0
+  position_p_gain: 850
   return_delay_time: 10
 waist_roll:
   position_p_gain: 850
