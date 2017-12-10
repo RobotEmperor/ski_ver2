@@ -19,7 +19,7 @@ BaseModule::BaseModule()
 
 	// Dynamixel initialize ////
 
-	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
+	//result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 /*
 	result_["r_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 2
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
@@ -46,6 +46,7 @@ BaseModule::BaseModule()
 	result_["r_ankle_pitch"]    = new robotis_framework::DynamixelState();  // joint 20
 	result_["r_ankle_roll"]     = new robotis_framework::DynamixelState();  // joint 22
 
+	result_["head_yaw"]         = new robotis_framework::DynamixelState();  // joint 23
 /*
 	result_["head_yaw"]         = new robotis_framework::DynamixelState();  // joint 23
 	result_["head_pitch"]       = new robotis_framework::DynamixelState();  // joint 24
@@ -126,7 +127,7 @@ void BaseModule::parse_init_pose_data_(const std::string &path)
 void BaseModule::initPoseMsgCallback(const std_msgs::String::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실
 {
 	std::string init_pose_path = ros::package::getPath("base_module") + "/data/ini_pose.yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
-	parse_init_pose_data_(init_pose_path); // YAML 파일 로드 및 값 저장.
+	parse_init_pose_data_(init_pose_path); // YAML 파일 로드
 	base_module_state->is_moving_state = true;
 	ROS_INFO("FILE LOAD");
 }
@@ -161,6 +162,7 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	//// read current position ////
 	if(new_count_ == 1)
 	{
+		ROS_INFO("Base_Process Start!");
 		new_count_ ++;
 
 		for (std::map<std::string, robotis_framework::Dynamixel*>::iterator state_iter = dxls.begin();
@@ -230,16 +232,16 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		result_[joint_id_to_name_[9]]->goal_position_ = - motion_trajectory[9]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(9,0),
 								base_module_state->joint_ini_pose_goal(9,0),0,0,0,0,0,base_module_state->mov_time_state);
 
-		result_[joint_id_to_name_[20]]->goal_position_ = - motion_trajectory[20]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(20,0),
+		result_[joint_id_to_name_[20]]->goal_position_ =  motion_trajectory[20]->fifth_order_traj_gen(base_module_state->joint_ini_pose_state(20,0),
 								base_module_state->joint_ini_pose_goal(20,0),0,0,0,0,0,base_module_state->mov_time_state);
-		result_[joint_id_to_name_[22]]->goal_position_ = - motion_trajectory[22]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(22,0),
+		result_[joint_id_to_name_[22]]->goal_position_ =  motion_trajectory[22]->fifth_order_traj_gen(base_module_state->joint_ini_pose_state(22,0),
 								base_module_state->joint_ini_pose_goal(22,0),0,0,0,0,0,base_module_state->mov_time_state);
 
-		result_[joint_id_to_name_[1]]->goal_position_ = - motion_trajectory[1]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(1,0),
-								base_module_state->joint_ini_pose_goal(1,0),0,0,0,0,0,base_module_state->mov_time_state);
+		result_[joint_id_to_name_[23]]->goal_position_ =  motion_trajectory[23]->fifth_order_traj_gen(base_module_state->joint_ini_pose_state(23,0),
+								base_module_state->joint_ini_pose_goal(23,0),0,0,0,0,0,base_module_state->mov_time_state);
 
 
-		base_module_state->is_moving_state = motion_trajectory[1]->is_moving_traj;// trajectory end
+		base_module_state->is_moving_state = motion_trajectory[10]->is_moving_traj;// trajectory end
 	}
 }
 void BaseModule::stop()

@@ -15,15 +15,12 @@ PoseModule::PoseModule()
 	new_count_ = 0;
 	running_ = false;
 	gazebo_check = false;
-	is_moving_l_ = false;
-	is_moving_r_ = false;
-	is_moving_one_joint_ = false;
 	enable_       = false;
 	module_name_  = "pose_module";
 	control_mode_ = robotis_framework::PositionControl;
 
 	// Dynamixel initialize ////
-/*
+	/*
 	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["r_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 2
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
@@ -31,12 +28,17 @@ PoseModule::PoseModule()
 	result_["r_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 4
 	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5
 	result_["r_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 6
-*/
+	 */
 
 	result_["waist_yaw"]        = new robotis_framework::DynamixelState();  // joint 9
 	result_["waist_roll"]       = new robotis_framework::DynamixelState();  // joint 10
 
-/*
+	result_["head_yaw"]         = new robotis_framework::DynamixelState();  // joint 23
+
+	result_["r_ankle_pitch"]    = new robotis_framework::DynamixelState();  // joint 20
+	result_["r_ankle_roll"]     = new robotis_framework::DynamixelState();  // joint 22
+
+	/*
 	result_["l_hip_pitch"]      = new robotis_framework::DynamixelState();  // joint 11
 	result_["l_hip_roll"]       = new robotis_framework::DynamixelState();  // joint 13
 	result_["l_hip_yaw"]        = new robotis_framework::DynamixelState();  // joint 15
@@ -54,7 +56,7 @@ PoseModule::PoseModule()
 	result_["head_yaw"]         = new robotis_framework::DynamixelState();  // joint 23
 	result_["head_pitch"]       = new robotis_framework::DynamixelState();  // joint 24
 	result_["head_roll"]        = new robotis_framework::DynamixelState();  // joint 25
-*/
+	 */
 
 	///////////////////////////
 
@@ -62,19 +64,23 @@ PoseModule::PoseModule()
 	r_kinematics_ = new heroehs_math::Kinematics;
 	end_to_rad_l_ = new heroehs_math::CalRad;
 	end_to_rad_r_ = new heroehs_math::CalRad;
+	is_moving_l_  = false;
+	is_moving_r_  = false;
 
 	waist_kinematics_ = new heroehs_math::Kinematics;
 	end_to_rad_waist_ = new heroehs_math::CalRad;
+	is_moving_waist   = false;
+
 	head_kinematics_  = new heroehs_math::Kinematics;
-	end_to_rad_head_ = new heroehs_math::CalRad;
+	end_to_rad_head_  = new heroehs_math::CalRad;
+	is_moving_head    = false;
 
-	one_joint_ = new heroehs_math::CalRad;
-
+	//	one_joint_ = new heroehs_math::CalRad;
+	//	result_rad_one_joint_= 0;
 	//////////////////////////
-	result_rad_one_joint_= 0;
 	traj_time_ = 4.0;
 	////
-	id_select = 9;
+	id_select = 23;
 }
 PoseModule::~PoseModule()
 {
@@ -125,16 +131,21 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 	result_end_l_.fill(0);
 	result_end_r_.fill(0);
 
- // waist yaw roll
+	// waist yaw roll
 	waist_end_point_.resize(6,8);
 	waist_end_point_.fill(0);
-  result_end_waist_.resize(6,1);
-  result_end_waist_.fill(0);
+	result_end_waist_.resize(6,1);
+	result_end_waist_.fill(0);
 
-	one_joint_ctrl_.resize(1,8);
+	// waist yaw roll
+	head_end_point_.resize(6,8);
+	head_end_point_.fill(0);
+	result_end_head_.resize(6,1);
+	result_end_head_.fill(0);
+	/*one_joint_ctrl_.resize(1,8);
 	one_joint_ctrl_.fill(0);
 	one_joint_ctrl_(0,1) = 0;
-	result_rad_one_joint_ = 0;
+	result_rad_one_joint_ = 0;*/
 
 	for(int joint_num_= 0; joint_num_< 6 ; joint_num_ ++)
 	{
@@ -142,10 +153,9 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 		leg_end_point_r_(joint_num_, 7) = traj_time_;
 		waist_end_point_(joint_num_, 7) = traj_time_; // joint 9 yaw
 		waist_end_point_(joint_num_, 7) = traj_time_; // joint 10 yaw
+		head_end_point_ (joint_num_, 7) = traj_time_;
 	}
-
-
-	one_joint_ctrl_(0,7) = traj_time_;
+	//one_joint_ctrl_(0,7) = traj_time_;
 
 	ROS_INFO("< -------  Initialize Module : Pose Module !!  ------->");
 }
@@ -158,7 +168,9 @@ void PoseModule::queueThread()
 
 	/* subscribe topics */
 	// for gui
-	ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/desired_pose", 5, &PoseModule::desiredPoseMsgCallback, this);
+	ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/desired_pose_leg", 5, &PoseModule::desiredPoseMsgCallback, this);
+	ros::Subscriber desired_pose_waist_sub = ros_node.subscribe("/desired_pose_waist", 5, &PoseModule::desiredPoseWaistMsgCallback, this);
+	ros::Subscriber desired_pose_head_sub = ros_node.subscribe("/desired_pose_head", 5, &PoseModule::desiredPoseHeadMsgCallback, this);
 	ros::Subscriber gain_adjustment_sub = ros_node.subscribe("/gain_adjustment", 5, &PoseModule::gainAdjustmentMsgCallback, this);
 	ros::Subscriber final_gain_save_sub = ros_node.subscribe("/final_gain_save", 5, &PoseModule::finalGainSaveMsgCallback, this);
 
@@ -178,16 +190,23 @@ void PoseModule::desiredPoseMsgCallback(const std_msgs::Float64MultiArray::Const
 	{
 		leg_end_point_l_(joint_num_, 1) = msg->data[joint_num_]; // left leg
 		leg_end_point_r_(joint_num_, 1) = msg->data[joint_num_+6]; // right leg
-		waist_end_point_(joint_num_, 1) = msg->data[joint_num_];
 	}
-
-	one_joint_ctrl_(0,1) = msg-> data[12]; // waist roll
-
 	is_moving_l_ = true;
 	is_moving_r_ = true;
-	is_moving_one_joint_ = true;
 }
-
+void PoseModule::desiredPoseWaistMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실행
+{
+	waist_end_point_(3, 1) = msg->data[0]; // yaw  트레젝토리 6 * 8 은 xyz yaw(z) pitch(y) roll(x) 이며 8은 처음 위치 나중 위치 / 속도 속도 / 가속도 가속도 / 시간 시간 / 임
+	waist_end_point_(5, 1) = msg->data[1]; // roll
+	is_moving_waist = true;
+}
+void PoseModule::desiredPoseHeadMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실행
+{
+	head_end_point_(3, 1) = msg->data[0]; // yaw  트레젝토리 6 * 8 은 xyz yaw(z) pitch(y) roll(x) 이며 8은 처음 위치 나중 위치 / 속도 속도 / 가속도 가속도 / 시간 시간 / 임
+	head_end_point_(4, 1) = msg->data[1];
+	head_end_point_(5, 1) = msg->data[2]; // roll
+	is_moving_head = true;
+}
 void PoseModule::gainAdjustmentMsgCallback(const std_msgs::Int16MultiArray::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실행
 {
 	id_select = msg->data[0];
@@ -210,7 +229,6 @@ bool PoseModule::readPgainSrvFunction(pose_module::command::Request  &req, pose_
 	}
 	return true;
 }
-
 void PoseModule::parsePgainValue(std::string joint_name_)
 {
 	std::string path_ = ros::package::getPath("ski_main_manager") + "/config/dxl_init.yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
@@ -248,7 +266,7 @@ void PoseModule::savePgainValue()
 	for(int id=1; id<26; id++)
 	{
 		if(id == 7 || id == 8)
-			printf("id is not existed");
+			printf("There is not id");
 		else{
 			dxl_init_data["position_p_gain"] = p_gain_data_[id];
 			yaml_out << YAML::Key << joint_id_to_name_[id] << YAML::Value << dxl_init_data;
@@ -270,6 +288,7 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	//// read current position ////
 	if(new_count_ == 1)
 	{
+		ROS_INFO("Pose_Process Start!");
 		new_count_ ++;
 		for (std::map<std::string, robotis_framework::Dynamixel*>::iterator state_iter = dxls.begin();
 				state_iter != dxls.end(); state_iter++)
@@ -285,65 +304,76 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		ROS_INFO("Pose module :: Read position and Send goal position");
 		result_end_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
 		result_end_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
-		result_rad_one_joint_ = one_joint_ -> cal_one_joint_rad(one_joint_ctrl_);
+		//result_rad_one_joint_ = one_joint_ -> cal_one_joint_rad(one_joint_ctrl_);
 
 		l_kinematics_->InverseKinematics(result_end_l_(0,0), result_end_l_(1,0) - 0.105, result_end_l_(2,0), result_end_l_(3,0), result_end_l_(4,0), result_end_l_(5,0)); // pX pY pZ alpha betta kamma
 		r_kinematics_->InverseKinematics(result_end_r_(0,0), result_end_r_(1,0) + 0.105, result_end_r_(2,0), result_end_r_(3,0), result_end_r_(4,0), result_end_r_(5,0)); // pX pY pZ alpha betta kamma
 
 		result_end_waist_ = end_to_rad_waist_ -> cal_end_point_to_rad(waist_end_point_);
-
 		waist_kinematics_->XYZEulerAnglesSolution(result_end_waist_ (5,0),0,result_end_waist_ (3,0));
+
+		result_end_head_ = end_to_rad_head_   -> cal_end_point_to_rad(head_end_point_);
+		head_kinematics_->ZYXEulerAnglesSolution(result_end_head_(3,0),result_end_head_(4,0),result_end_head_(5,0));
 	}
 
-	if(is_moving_l_ == false && is_moving_r_ == false && is_moving_one_joint_ == false)
+	if(is_moving_l_ == false && is_moving_r_ == false && is_moving_waist == false && is_moving_head == false)
 	{
-		ROS_INFO("Pose_stay");
+	  result_[joint_id_to_name_[id_select]]->position_p_gain_ = p_gain_data_[id_select]; // 움직이지 않을때 게인 값 조정
+	  printf("id :: %d value :: %d adjust!", id_select, p_gain_data_[id_select]);
+	  ROS_INFO("Pose Stay");
 	}
 	else
 	{
 		ROS_INFO("Pose Trajectory Start");
 
-		// trajectory is working cartesian space control
+		// trajectory is working cartesian space control LEG
 		result_end_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
 		result_end_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
-		result_rad_one_joint_ = one_joint_ -> cal_one_joint_rad(one_joint_ctrl_);
 
 		l_kinematics_->InverseKinematics(result_end_l_(0,0), result_end_l_(1,0) - 0.105, result_end_l_(2,0), result_end_l_(3,0), result_end_l_(4,0), result_end_l_(5,0)); // pX pY pZ alpha betta kamma
 		r_kinematics_->InverseKinematics(result_end_r_(0,0), result_end_r_(1,0) + 0.105, result_end_r_(2,0), result_end_r_(3,0), result_end_r_(4,0), result_end_r_(5,0)); // pX pY pZ alpha betta kamma
+		////////////////////////////////////////////////////
 
-		/*cop_cal.ftSensorDataLeftGet(0, 0, 98.1, 0, 0, 0);
-		cop_cal.ftSensorDataRightGet(0, 0, 98.1, 0, 0, 0);
-		cop_cal.jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
-		cop_cal.copCalculationResult();*/
-
-		//waist_kinematics_->ZYXEulerAnglesSolution(-90*DEGREE2RADIAN,-30*DEGREE2RADIAN,-30*DEGREE2RADIAN);
-
+		// trajectory is working cartesian space control WAIST
 		result_end_waist_ = end_to_rad_waist_ -> cal_end_point_to_rad(waist_end_point_);
 		waist_kinematics_->XYZEulerAnglesSolution(result_end_waist_ (5,0) , 0, result_end_waist_ (3,0));
 
-		//<---  joint space control --->
+		// trajectory is working cartesian space control head
+		result_end_head_ = end_to_rad_head_   -> cal_end_point_to_rad(head_end_point_);
+		head_kinematics_->ZYXEulerAnglesSolution(result_end_head_(3,0),result_end_head_(4,0),result_end_head_(5,0));
+
+		//<---  catesian space control test --->
 		result_[joint_id_to_name_[9]]->goal_position_  = waist_kinematics_->xyz_euler_angle_z;// waist yaw
 		result_[joint_id_to_name_[10]]->goal_position_ = waist_kinematics_->xyz_euler_angle_x; // waist roll
 
-		printf("%f ::  %f \n", waist_kinematics_->xyz_euler_angle_z, waist_kinematics_->xyz_euler_angle_x);
+		result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
+		result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
+
+		result_[joint_id_to_name_[23]]->goal_position_ = head_kinematics_->zyx_euler_angle_z;
 		//<---  cartesian space control  --->
-/*		result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);
-		result_[joint_id_to_name_[13]]->goal_position_ = l_kinematics_->joint_radian(2,0);
-		result_[joint_id_to_name_[15]]->goal_position_ = l_kinematics_->joint_radian(3,0);
+		/*
+		result_[joint_id_to_name_[9]]->goal_position_  = waist_kinematics_->xyz_euler_angle_z;// waist yaw
+		result_[joint_id_to_name_[10]]->goal_position_ = waist_kinematics_->xyz_euler_angle_x; // waist roll
+
+		result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);
+		result_[joint_id_to_name_[13]]->goal_position_ =  l_kinematics_->joint_radian(2,0);
+		result_[joint_id_to_name_[15]]->goal_position_ =  l_kinematics_->joint_radian(3,0);
 
 		result_[joint_id_to_name_[17]]->goal_position_ = -l_kinematics_->joint_radian(4,0);
 		result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
-		result_[joint_id_to_name_[21]]->goal_position_ = l_kinematics_->joint_radian(6,0);
+		result_[joint_id_to_name_[21]]->goal_position_ =  l_kinematics_->joint_radian(6,0);
 
-		result_[joint_id_to_name_[12]]->goal_position_ = r_kinematics_->joint_radian(1,0);
-		result_[joint_id_to_name_[14]]->goal_position_ = r_kinematics_->joint_radian(2,0);
-		result_[joint_id_to_name_[16]]->goal_position_ = r_kinematics_->joint_radian(3,0);
+		result_[joint_id_to_name_[12]]->goal_position_ =  r_kinematics_->joint_radian(1,0);
+		result_[joint_id_to_name_[14]]->goal_position_ =  r_kinematics_->joint_radian(2,0);
+		result_[joint_id_to_name_[16]]->goal_position_ =  r_kinematics_->joint_radian(3,0);
 
-		result_[joint_id_to_name_[18]]->goal_position_ = r_kinematics_->joint_radian(4,0);
-		result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
-		result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);*/
+		result_[joint_id_to_name_[18]]->goal_position_ =  r_kinematics_->joint_radian(4,0);
+		result_[joint_id_to_name_[20]]->goal_position_ =  r_kinematics_->joint_radian(5,0);
+		result_[joint_id_to_name_[22]]->goal_position_ =  r_kinematics_->joint_radian(6,0);
 
-
+		result_[joint_id_to_name_[23]]->goal_position_ = head_kinematics_->zyx_euler_angle_z;
+		result_[joint_id_to_name_[24]]->goal_position_ = head_kinematics_->zyx_euler_angle_y;
+		result_[joint_id_to_name_[25]]->goal_position_ = head_kinematics_->zyx_euler_angle_x;*/
 		/*//<---  read   --->
 		for(int id=10 ; id<23 ; id++)
 		{
@@ -355,12 +385,18 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 			}
 		}*/
 
-		is_moving_l_ = end_to_rad_l_-> is_moving_check;
-		is_moving_r_ = end_to_rad_r_-> is_moving_check;
-		is_moving_one_joint_ = one_joint_ ->is_moving_check;
+		/*cop_cal.ftSensorDataLeftGet(0, 0, 98.1, 0, 0, 0);
+		cop_cal.ftSensorDataRightGet(0, 0, 98.1, 0, 0, 0);
+		cop_cal.jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
+		cop_cal.copCalculationResult();*/
+
+		is_moving_l_    = end_to_rad_l_     -> is_moving_check;
+		is_moving_r_    = end_to_rad_r_     -> is_moving_check;
+		is_moving_waist = end_to_rad_waist_ -> is_moving_check;
+		is_moving_head  = end_to_rad_head_  -> is_moving_check;
 	}
 
-	//result_[joint_id_to_name_[id_select]]->position_p_gain_ = p_gain_data_[id_select];
+
 }
 void PoseModule::stop()
 {

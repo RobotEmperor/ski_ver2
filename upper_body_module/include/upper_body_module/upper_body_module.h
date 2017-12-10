@@ -90,6 +90,7 @@ private:
 	std::map<std::string, int> joint_name_to_id_;
 	std::map<int, std::string> joint_id_to_name_;
 
+	int new_count_;
 
 };
 

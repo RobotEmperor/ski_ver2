@@ -24,9 +24,8 @@ MotionModule::MotionModule()
 	pose_ = 0;
 	current_time_ = 0;
 	// Dynamixel initialize ////
-	result_["head"]        = new robotis_framework::DynamixelState(); // joint 1
-	result_["waist_roll"]  = new robotis_framework::DynamixelState(); // joint 10
 
+	/*
 	result_["l_hip_pitch"] = new robotis_framework::DynamixelState();  // joint 11
 	result_["l_hip_roll"]  = new robotis_framework::DynamixelState();  // joint 13
 
@@ -39,6 +38,7 @@ MotionModule::MotionModule()
 	result_["r_hip_roll"]  = new robotis_framework::DynamixelState();  // joint 14
 	result_["r_hip_yaw"]   = new robotis_framework::DynamixelState();  // joint 16
 	result_["r_knee_pitch"] = new robotis_framework::DynamixelState();  // joint 18
+	 */
 	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
 	result_["r_ankle_roll"]  = new robotis_framework::DynamixelState();  // joint 22
 
@@ -573,20 +573,18 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 			std::string joint_name = state_iter->first;
 			if(gazebo_check == true)
 				result_[joint_name]->goal_position_ = result_[joint_name]->present_position_; // 가제보 상 초기위치 0
-			else
-			{
-				result_[joint_name]->goal_position_ = dxls[joint_name]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
-			}
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
 
+	  //result_[joint_id_to_name_[20]]->goal_position_ = dxls[joint_id_to_name_[20]]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
+	  //result_[joint_id_to_name_[22]]->goal_position_ = dxls[joint_id_to_name_[22]]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
 	}
 	if(is_moving_l_ == false && is_moving_r_ == false && is_moving_one_joint_ == false) // desired pose
 	{
-		//ROS_INFO("Motion Stay");
+		ROS_INFO("Motion Stay");
 	}
 	else
 	{
-		//ROS_INFO("Motion Trajectory Start");
+		ROS_INFO("Motion Trajectory Start");
 		// trajectory is working cartesian space control
 		result_end_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
 		result_end_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
@@ -660,11 +658,9 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 
 
 	//<---  joint space control --->
-	result_[joint_id_to_name_[1]]->goal_position_ = 0;// head
-	result_[joint_id_to_name_[10]]->goal_position_ = -result_rad_one_joint_; // waist roll
 
 	//<---  cartesian space control  --->
-	result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);//
+	/*result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);//
 	result_[joint_id_to_name_[13]]->goal_position_ = l_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[15]]->goal_position_ = l_kinematics_->joint_radian(3,0);
 
@@ -676,7 +672,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	result_[joint_id_to_name_[14]]->goal_position_ = r_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[16]]->goal_position_ = r_kinematics_->joint_radian(3,0);
 
-	result_[joint_id_to_name_[18]]->goal_position_ = r_kinematics_->joint_radian(4,0);
+	result_[joint_id_to_name_[18]]->goal_position_ = r_kinematics_->joint_radian(4,0);*/
 	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
 	result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
 

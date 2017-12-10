@@ -22,8 +22,9 @@ UpperBodyModule::UpperBodyModule()
 	control_mode_ = robotis_framework::PositionControl;
 
 	// Dynamixel initialize ////
-	//result_["head"]        = new robotis_framework::DynamixelState(); // joint 1
-	//result_["waist_roll"]  = new robotis_framework::DynamixelState(); // joint 10
+	result_["head_yaw"]   = new robotis_framework::DynamixelState(); // joint 23
+	result_["waist_yaw"]  = new robotis_framework::DynamixelState(); // joint 9
+	result_["waist_roll"] = new robotis_framework::DynamixelState(); // joint 10
 
 	///////////////////////////
 /*	l_kinematics_ = new heroehs_math::Kinematics;
@@ -31,6 +32,7 @@ UpperBodyModule::UpperBodyModule()
 	end_to_rad_l_ = new heroehs_math::CalRad;
 	end_to_rad_r_ = new heroehs_math::CalRad;
 	one_joint_ = new heroehs_math::CalRad;*/
+	new_count_ = 1 ;
 
 }
 UpperBodyModule::~UpperBodyModule()
@@ -89,18 +91,16 @@ bool UpperBodyModule::isRunning()
 void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
 		std::map<std::string, double> sensors)
 {
-	//ROS_INFO("Motion Trajectory Start");
+
 	if (enable_ == false)
 	{
 		return;
 	}
-	//current_time_ = current_time_+ 0.008;
 
-
-	//motion_generater_();
 	//// read current position ////
-	/*if(new_count_ == 1)
+	if(new_count_ == 1)
 	{
+		ROS_INFO("Upper Start");
 		new_count_ ++;
 		for (std::map<std::string, robotis_framework::Dynamixel*>::iterator state_iter = dxls.begin();
 				state_iter != dxls.end(); state_iter++)
@@ -108,26 +108,25 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 			std::string joint_name = state_iter->first;
 			if(gazebo_check == true)
 				result_[joint_name]->goal_position_ = result_[joint_name]->present_position_; // 가제보 상 초기위치 0
-			else
-			{
-				result_[joint_name]->goal_position_ = dxls[joint_name]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
-			}
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
 
-	}*/
+	}
 /*	if(is_moving_l_ == false && is_moving_r_ == false && is_moving_one_joint_ == false) // desired pose
 	{
-		//ROS_INFO("Motion Stay");
+		//ROS_INFO("Upper Stay");
 	}
 	else
 	{
-		//ROS_INFO("Motion Trajectory Start");
+		//ROS_INFO("Upper Module Trajectory Start");
 
 
 	}*/
 	///////////////////////////////////////////////////// control //////////////////////////////////////////////////////////
 
-	printf("%f \n" , dxls["head"]->dxl_state_->present_position_);
+  ROS_INFO("Upper Module Trajectory Start");
+	result_[joint_id_to_name_[23]]->goal_position_ = 0;
+	result_[joint_id_to_name_[9]]->goal_position_  = 0;
+	result_[joint_id_to_name_[10]]->goal_position_ = 0;
 	//<---  joint space control --->
 	//result_[joint_id_to_name_[1]]->goal_position_ = 3.14;
 

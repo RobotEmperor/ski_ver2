@@ -56,6 +56,8 @@ public:
 
 	/* ROS Topic Callback Functions */
 	void desiredPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
+	void desiredPoseWaistMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
+	void desiredPoseHeadMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
 	void gainAdjustmentMsgCallback(const std_msgs::Int16MultiArray::ConstPtr& msg);
 	void finalGainSaveMsgCallback(const std_msgs::Bool::ConstPtr& msg);
 	bool readPgainSrvFunction(pose_module::command::Request  &req, pose_module::command::Response &res);
@@ -78,31 +80,25 @@ private:
 
 	bool is_moving_l_;
 	bool is_moving_r_;
-	bool is_moving_one_joint_;
+	bool is_moving_waist;
+	bool is_moving_head;
 
 	double traj_time_;
 
+	// leg kinematics
 	Eigen::MatrixXd leg_end_point_l_;
 	Eigen::MatrixXd leg_end_point_r_;
 	Eigen::MatrixXd one_joint_ctrl_;
 
 	heroehs_math::CalRad *end_to_rad_l_;
 	heroehs_math::CalRad *end_to_rad_r_;
-	heroehs_math::CalRad *one_joint_;
+
 
 	heroehs_math::Kinematics *l_kinematics_;
 	heroehs_math::Kinematics *r_kinematics_;
 
 	Eigen::MatrixXd result_end_l_;
 	Eigen::MatrixXd result_end_r_;
-	double result_rad_one_joint_;
-
-	// dxl gain
-	int p_gain_data_[30];
-	int id_select;
-
-	//cop experiment
-	diana::CopCalculationFunc cop_cal;
 
 	//waist kinematics
 	heroehs_math::Kinematics *waist_kinematics_;
@@ -115,6 +111,18 @@ private:
 	heroehs_math::CalRad *end_to_rad_head_;
 	Eigen::MatrixXd head_end_point_;
 	Eigen::MatrixXd result_end_head_;
+
+
+	//one joint control
+	//heroehs_math::CalRad *one_joint_;
+	//double result_rad_one_joint_;
+
+	// dxl gain
+	int p_gain_data_[30];
+	int id_select;
+
+	//cop experiment
+	diana::CopCalculationFunc cop_cal;
 };
 
 }
