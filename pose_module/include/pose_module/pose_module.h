@@ -120,6 +120,7 @@ private:
 	// dxl gain
 	int p_gain_data_[30];
 	int id_select;
+	bool p_gain_adjust_check;
 
 	//cop experiment
 	diana::CopCalculationFunc cop_cal;

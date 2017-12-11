@@ -60,6 +60,13 @@ public:
 
 	bool gazebo_check;
 
+	ros::Subscriber head_test;
+	ros::Subscriber waist_test;
+	double traj_time_test;
+
+	void desiredPoseWaistMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
+	void desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
+
 /*	// paper messages
 	ros::Publisher state_end_point_pose_pub;
 	ros::Publisher state_end_point_orientation_pub;
@@ -91,6 +98,20 @@ private:
 	std::map<int, std::string> joint_id_to_name_;
 
 	int new_count_;
+	bool is_moving_head_;
+	bool is_moving_waist_;
+
+	//waist kinematics
+	heroehs_math::Kinematics *waist_kinematics_;
+	heroehs_math::CalRad *end_to_rad_waist_;     // (6*8)
+	Eigen::MatrixXd waist_end_point_;            // (6*1)
+	Eigen::MatrixXd result_rad_waist_;           // (6*1)
+
+	//head kinematics
+	heroehs_math::Kinematics *head_kinematics_;
+	heroehs_math::CalRad *end_to_rad_head_;      // (6*8)
+	Eigen::MatrixXd head_end_point_;             // (6*1)
+	Eigen::MatrixXd result_rad_head_;            // (6*1)
 
 };
 

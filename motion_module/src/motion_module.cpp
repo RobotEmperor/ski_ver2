@@ -47,7 +47,7 @@ MotionModule::MotionModule()
 	r_kinematics_ = new heroehs_math::Kinematics;
 	end_to_rad_l_ = new heroehs_math::CalRad;
 	end_to_rad_r_ = new heroehs_math::CalRad;
-	one_joint_ = new heroehs_math::CalRad;
+
 
 
 	//////////////////////////
@@ -237,7 +237,6 @@ void MotionModule::desiredMotionMsgCallback(const std_msgs::Int32::ConstPtr& msg
 {
 	is_moving_l_ = true;
 	is_moving_r_ = true;
-	is_moving_one_joint_ = true;
 
 	motion_command_ = msg->data;
 	if(msg->data != 0)
@@ -252,7 +251,6 @@ void MotionModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange
 {
 	is_moving_l_ = true;
 	is_moving_r_ = true;
-	is_moving_one_joint_ = true;
 
 	if (temp_change_value_center != msg->center_change || temp_change_value_edge != msg->edge_change|| temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
 	{
@@ -578,7 +576,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	  //result_[joint_id_to_name_[20]]->goal_position_ = dxls[joint_id_to_name_[20]]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
 	  //result_[joint_id_to_name_[22]]->goal_position_ = dxls[joint_id_to_name_[22]]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
 	}
-	if(is_moving_l_ == false && is_moving_r_ == false && is_moving_one_joint_ == false) // desired pose
+	if(is_moving_l_ == false && is_moving_r_ == false) // desired pose
 	{
 		ROS_INFO("Motion Stay");
 	}
@@ -588,7 +586,6 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 		// trajectory is working cartesian space control
 		result_end_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
 		result_end_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
-		result_rad_one_joint_ = one_joint_ -> cal_one_joint_rad(one_joint_ctrl_);
 		//<---  read   --->
 		for(int id=10 ; id<23 ; id++)
 		{
@@ -600,8 +597,6 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 
 		is_moving_l_ = end_to_rad_l_-> is_moving_check;
 		is_moving_r_ = end_to_rad_r_-> is_moving_check;
-		is_moving_one_joint_ = one_joint_ ->is_moving_check;
-
 	}
 	///////////////////////////////////////////////////// control //////////////////////////////////////////////////////////
 	//////balance

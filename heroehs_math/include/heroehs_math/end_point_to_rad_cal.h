@@ -24,6 +24,7 @@ public:
 	Eigen::MatrixXd cal_end_point_to_rad(Eigen::MatrixXd eP_);
 	double cal_one_joint_rad(Eigen::MatrixXd joint_);
 
+
 	FifthOrderTrajectory *cal_end_point_tra_px;
 	FifthOrderTrajectory *cal_end_point_tra_py;
 	FifthOrderTrajectory *cal_end_point_tra_pz;
@@ -36,10 +37,13 @@ public:
 
 	Kinematics *kinematics;
 
-
-	Eigen::MatrixXd result_joint;
 	Eigen::MatrixXd current_pose_change;
 	Eigen::MatrixXd current_one_joint_pose;
+
+private:
+	Eigen::MatrixXd result_joint;
+	Eigen::MatrixXd end_point_;
+
 
 
 };

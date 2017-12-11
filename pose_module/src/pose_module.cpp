@@ -59,7 +59,6 @@ PoseModule::PoseModule()
 	 */
 
 	///////////////////////////
-
 	l_kinematics_ = new heroehs_math::Kinematics;
 	r_kinematics_ = new heroehs_math::Kinematics;
 	end_to_rad_l_ = new heroehs_math::CalRad;
@@ -74,12 +73,10 @@ PoseModule::PoseModule()
 	head_kinematics_  = new heroehs_math::Kinematics;
 	end_to_rad_head_  = new heroehs_math::CalRad;
 	is_moving_head    = false;
-
-	//	one_joint_ = new heroehs_math::CalRad;
-	//	result_rad_one_joint_= 0;
 	//////////////////////////
 	traj_time_ = 4.0;
 	////
+	p_gain_adjust_check = false;
 	id_select = 23;
 }
 PoseModule::~PoseModule()
@@ -137,7 +134,7 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 	result_end_waist_.resize(6,1);
 	result_end_waist_.fill(0);
 
-	// waist yaw roll
+	// head
 	head_end_point_.resize(6,8);
 	head_end_point_.fill(0);
 	result_end_head_.resize(6,1);
@@ -151,8 +148,7 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 	{
 		leg_end_point_l_(joint_num_, 7) = traj_time_;
 		leg_end_point_r_(joint_num_, 7) = traj_time_;
-		waist_end_point_(joint_num_, 7) = traj_time_; // joint 9 yaw
-		waist_end_point_(joint_num_, 7) = traj_time_; // joint 10 yaw
+		waist_end_point_(joint_num_, 7) = traj_time_;
 		head_end_point_ (joint_num_, 7) = traj_time_;
 	}
 	//one_joint_ctrl_(0,7) = traj_time_;
@@ -211,6 +207,7 @@ void PoseModule::gainAdjustmentMsgCallback(const std_msgs::Int16MultiArray::Cons
 {
 	id_select = msg->data[0];
 	p_gain_data_[id_select] = msg->data[1];
+	p_gain_adjust_check = true;
 }
 void PoseModule::finalGainSaveMsgCallback(const std_msgs::Bool::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실행
 {
@@ -318,8 +315,13 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 
 	if(is_moving_l_ == false && is_moving_r_ == false && is_moving_waist == false && is_moving_head == false)
 	{
-	  result_[joint_id_to_name_[id_select]]->position_p_gain_ = p_gain_data_[id_select]; // 움직이지 않을때 게인 값 조정
-	  printf("id :: %d value :: %d adjust!", id_select, p_gain_data_[id_select]);
+		if(p_gain_adjust_check == true)
+		{
+			result_[joint_id_to_name_[id_select]]->position_p_gain_ = p_gain_data_[id_select]; // 움직이지 않을때 게인 값 조정
+			printf("id :: %d value :: %d adjust!", id_select, p_gain_data_[id_select]);
+			p_gain_adjust_check = false;
+		}
+
 	  ROS_INFO("Pose Stay");
 	}
 	else
@@ -341,39 +343,6 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		// trajectory is working cartesian space control head
 		result_end_head_ = end_to_rad_head_   -> cal_end_point_to_rad(head_end_point_);
 		head_kinematics_->ZYXEulerAnglesSolution(result_end_head_(3,0),result_end_head_(4,0),result_end_head_(5,0));
-
-		//<---  catesian space control test --->
-		result_[joint_id_to_name_[9]]->goal_position_  = waist_kinematics_->xyz_euler_angle_z;// waist yaw
-		result_[joint_id_to_name_[10]]->goal_position_ = waist_kinematics_->xyz_euler_angle_x; // waist roll
-
-		result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
-		result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
-
-		result_[joint_id_to_name_[23]]->goal_position_ = head_kinematics_->zyx_euler_angle_z;
-		//<---  cartesian space control  --->
-		/*
-		result_[joint_id_to_name_[9]]->goal_position_  = waist_kinematics_->xyz_euler_angle_z;// waist yaw
-		result_[joint_id_to_name_[10]]->goal_position_ = waist_kinematics_->xyz_euler_angle_x; // waist roll
-
-		result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);
-		result_[joint_id_to_name_[13]]->goal_position_ =  l_kinematics_->joint_radian(2,0);
-		result_[joint_id_to_name_[15]]->goal_position_ =  l_kinematics_->joint_radian(3,0);
-
-		result_[joint_id_to_name_[17]]->goal_position_ = -l_kinematics_->joint_radian(4,0);
-		result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
-		result_[joint_id_to_name_[21]]->goal_position_ =  l_kinematics_->joint_radian(6,0);
-
-		result_[joint_id_to_name_[12]]->goal_position_ =  r_kinematics_->joint_radian(1,0);
-		result_[joint_id_to_name_[14]]->goal_position_ =  r_kinematics_->joint_radian(2,0);
-		result_[joint_id_to_name_[16]]->goal_position_ =  r_kinematics_->joint_radian(3,0);
-
-		result_[joint_id_to_name_[18]]->goal_position_ =  r_kinematics_->joint_radian(4,0);
-		result_[joint_id_to_name_[20]]->goal_position_ =  r_kinematics_->joint_radian(5,0);
-		result_[joint_id_to_name_[22]]->goal_position_ =  r_kinematics_->joint_radian(6,0);
-
-		result_[joint_id_to_name_[23]]->goal_position_ = head_kinematics_->zyx_euler_angle_z;
-		result_[joint_id_to_name_[24]]->goal_position_ = head_kinematics_->zyx_euler_angle_y;
-		result_[joint_id_to_name_[25]]->goal_position_ = head_kinematics_->zyx_euler_angle_x;*/
 		/*//<---  read   --->
 		for(int id=10 ; id<23 ; id++)
 		{
@@ -395,6 +364,40 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		is_moving_waist = end_to_rad_waist_ -> is_moving_check;
 		is_moving_head  = end_to_rad_head_  -> is_moving_check;
 	}
+
+	//<---  catesian space control test --->
+	result_[joint_id_to_name_[9]]->goal_position_  = waist_kinematics_->xyz_euler_angle_z;// waist yaw
+	result_[joint_id_to_name_[10]]->goal_position_ = waist_kinematics_->xyz_euler_angle_x; // waist roll
+
+	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
+	result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
+
+	result_[joint_id_to_name_[23]]->goal_position_ = head_kinematics_->zyx_euler_angle_z;
+
+	//<---  cartesian space control  --->
+	/*
+	result_[joint_id_to_name_[9]]->goal_position_  = waist_kinematics_->xyz_euler_angle_z;// waist yaw
+	result_[joint_id_to_name_[10]]->goal_position_ = waist_kinematics_->xyz_euler_angle_x; // waist roll
+
+	result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);
+	result_[joint_id_to_name_[13]]->goal_position_ =  l_kinematics_->joint_radian(2,0);
+	result_[joint_id_to_name_[15]]->goal_position_ =  l_kinematics_->joint_radian(3,0);
+
+	result_[joint_id_to_name_[17]]->goal_position_ = -l_kinematics_->joint_radian(4,0);
+	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
+	result_[joint_id_to_name_[21]]->goal_position_ =  l_kinematics_->joint_radian(6,0);
+
+	result_[joint_id_to_name_[12]]->goal_position_ =  r_kinematics_->joint_radian(1,0);
+	result_[joint_id_to_name_[14]]->goal_position_ =  r_kinematics_->joint_radian(2,0);
+	result_[joint_id_to_name_[16]]->goal_position_ =  r_kinematics_->joint_radian(3,0);
+
+	result_[joint_id_to_name_[18]]->goal_position_ =  r_kinematics_->joint_radian(4,0);
+	result_[joint_id_to_name_[20]]->goal_position_ =  r_kinematics_->joint_radian(5,0);
+	result_[joint_id_to_name_[22]]->goal_position_ =  r_kinematics_->joint_radian(6,0);
+
+	result_[joint_id_to_name_[23]]->goal_position_ = head_kinematics_->zyx_euler_angle_z;
+	result_[joint_id_to_name_[24]]->goal_position_ = head_kinematics_->zyx_euler_angle_y;
+	result_[joint_id_to_name_[25]]->goal_position_ = head_kinematics_->zyx_euler_angle_x;*/
 
 
 }

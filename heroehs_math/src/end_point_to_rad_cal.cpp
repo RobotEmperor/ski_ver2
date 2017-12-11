@@ -27,6 +27,12 @@ CalRad::CalRad()
 	current_one_joint_pose.resize(1,2);
 	current_one_joint_pose.fill(0);
 
+	result_joint.resize(6,1); // 6DOF LEG
+	result_joint.fill(0);
+
+	end_point_.resize(6,1);
+	end_point_.fill(0);
+
 	is_moving_check = false;
 
 }
@@ -36,14 +42,6 @@ CalRad::~CalRad()
 }
 Eigen::MatrixXd CalRad::cal_end_point_to_rad(Eigen::MatrixXd eP_) // end point 6 X 8 행렬을 생 6은 xyz roll pitch yaw 8은 trajectory 입력
 {
-	result_joint.resize(6,1); // 6DOF LEG
-	result_joint.fill(0);
-
-	Eigen::MatrixXd end_point_;
-	end_point_.resize(6,1);
-	end_point_.fill(0);
-
-
 	if( cal_end_point_tra_px    -> detect_change_final_value(eP_(0,1), eP_(0,3), eP_(0,7))||
 			cal_end_point_tra_py    -> detect_change_final_value(eP_(1,1), eP_(1,3), eP_(1,7))||
 			cal_end_point_tra_pz    -> detect_change_final_value(eP_(2,1), eP_(2,3), eP_(2,7))||
