@@ -35,14 +35,14 @@ public:
 
 	FifthOrderTrajectory *cal_one_joint_traj_rad;
 
-	Kinematics *kinematics;
 
 	Eigen::MatrixXd current_pose_change;
 	Eigen::MatrixXd current_one_joint_pose;
 
+
+
 private:
 	Eigen::MatrixXd result_joint;
-	Eigen::MatrixXd end_point_;
 
 
 

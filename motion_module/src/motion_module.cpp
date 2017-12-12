@@ -23,9 +23,11 @@ MotionModule::MotionModule()
 	control_mode_ = robotis_framework::PositionControl;
 	pose_ = 0;
 	current_time_ = 0;
+	new_count_ = 0;
 	// Dynamixel initialize ////
 
-	/*
+
+/*
 	result_["l_hip_pitch"] = new robotis_framework::DynamixelState();  // joint 11
 	result_["l_hip_roll"]  = new robotis_framework::DynamixelState();  // joint 13
 
@@ -38,7 +40,8 @@ MotionModule::MotionModule()
 	result_["r_hip_roll"]  = new robotis_framework::DynamixelState();  // joint 14
 	result_["r_hip_yaw"]   = new robotis_framework::DynamixelState();  // joint 16
 	result_["r_knee_pitch"] = new robotis_framework::DynamixelState();  // joint 18
-	 */
+*/
+
 	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
 	result_["r_ankle_roll"]  = new robotis_framework::DynamixelState();  // joint 22
 
@@ -101,6 +104,18 @@ MotionModule::MotionModule()
 	temp_change_value_edge = 0;
 	temp_turn_type = "basic";
 	temp_change_type = "basic";
+  currentFX_l=0.0;
+	currentFY_l=0.0;
+	currentFZ_l=0.0;
+	currentTX_l=0.0;
+	currentTY_l=0.0;
+	currentTZ_l=0.0;
+  currentFX_r=0.0;
+	currentFY_r=0.0;
+	currentFZ_r=0.0;
+	currentTX_r=0.0;
+	currentTY_r=0.0;
+	currentTZ_r=0.0;
 }
 MotionModule::~MotionModule()
 {
@@ -569,12 +584,16 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 				state_iter != dxls.end(); state_iter++)
 		{
 			std::string joint_name = state_iter->first;
-			if(gazebo_check == true)
-				result_[joint_name]->goal_position_ = result_[joint_name]->present_position_; // 가제보 상 초기위치 0
+			robotis_framework::Dynamixel* dxl_info = state_iter->second;
+			if(dxl_info->id_ > 10 && dxl_info->id_ < 23)
+			{
+				if(gazebo_check == true)
+					result_[joint_name]->goal_position_ = result_[joint_name]->present_position_; // 가제보 상 초기위치 0
+			}
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
 
-	  //result_[joint_id_to_name_[20]]->goal_position_ = dxls[joint_id_to_name_[20]]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
-	  //result_[joint_id_to_name_[22]]->goal_position_ = dxls[joint_id_to_name_[22]]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
+		//result_[joint_id_to_name_[20]]->goal_position_ = dxls[joint_id_to_name_[20]]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
+		//result_[joint_id_to_name_[22]]->goal_position_ = dxls[joint_id_to_name_[22]]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
 	}
 	if(is_moving_l_ == false && is_moving_r_ == false) // desired pose
 	{
@@ -587,7 +606,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 		result_end_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
 		result_end_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
 		//<---  read   --->
-		for(int id=10 ; id<23 ; id++)
+		for(int id=11 ; id<23 ; id++)
 		{
 			if(gazebo_check == true)
 				result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo

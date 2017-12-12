@@ -3,7 +3,7 @@ control_cycle = 8   # milliseconds
 
 [ port info ]
 # PORT NAME  | BAUDRATE
-/dev/ttyUSB0| 1000000  | waist_yaw
+/dev/ttyUSB0| 1000000  | head_yaw  
 
 
 [ device info ]
@@ -33,6 +33,6 @@ dynamixel | /dev/ttyUSB0 | 20   | MX-106-2-20   | 2.0      | r_ankle_pitch      
 #dynamixel | /dev/ttyUSB0 | 21   | MX-106-2-21   | 2.0      | l_ankle_roll       | present_position
 dynamixel | /dev/ttyUSB0 | 22   | MX-106-2-22   | 2.0      | r_ankle_roll       | present_position
 
-dynamixel | /dev/ttyUSB0 | 23   | MX-28-23       | 2.0      | head_yaw           | present_position
+dynamixel | /dev/ttyUSB0 | 23   | MX-28-23      | 2.0      | head_yaw           | present_position
 #dynamixel | /dev/ttyUSB0 | 24   | MX-28-2       | 2.0      | head_pitch         | present_position
 #dynamixel | /dev/ttyUSB0 | 25   | MX-28-2       | 2.0      | head_roll          | present_position

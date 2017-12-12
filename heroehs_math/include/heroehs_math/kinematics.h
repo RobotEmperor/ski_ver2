@@ -28,13 +28,7 @@ public:
 	void FowardKnematicsCenterToSensorRight(double joint[7]);
 	void FowardKnematicsCenterToSensorLeft(double joint[7]);
 	void InverseKinematics(double pX_, double pY_, double pZ_, double z_alpha_, double y_betta_, double x_kamma_);
-	void ZYXEulerAnglesSolution(double z, double y, double x);
-	void ZYXEulerAngles(double z, double y, double x);
-	void XYZEulerAnglesSolution(double x, double y, double z);
-	void XYZEulerAngles(double z, double y, double x);
 	Eigen::MatrixXd CenterToGroundTransformation(Eigen::MatrixXd point);
-
-
 
 
 	Eigen::MatrixXd joint_radian;
@@ -44,26 +38,19 @@ public:
 	Eigen::MatrixXd center_to_foot_transform_right_leg;
 
 	double real_theta_public[7];
-	double zyx_euler_angle_x;
-	double zyx_euler_angle_y;
-	double zyx_euler_angle_z;
-
-	double xyz_euler_angle_x;
-	double xyz_euler_angle_y;
-	double xyz_euler_angle_z;
-
 private:
 
-	//forward_kinematics
+	//forward_kinematics leg
 	Eigen::MatrixXd H[8];
 	Eigen::MatrixXd H_ground_to_center;
 
-
-	// inverse_kinematics
+	// inverse_kinematics leg
 	double r11_,r12_,r13_,r21_,r22_,r23_,r31_,r32_,r33_; // euler angle
 	double real_theta[7] , dh_alpha[7] , dh_link[7] , dh_link_d[7]; // dh_convention variables
 	double total_length_;
 	double sensor_length_;
+	Eigen::Matrix4d P_;
+	Eigen::Matrix4d P_inverse_;
 
 	// equation variables
 	double sin_theta5_ , cos_theta5_ , alpha_5_ , betta_5_ , kamma_5_, csai_5_;
@@ -77,6 +64,48 @@ private:
 	double l05_yz_;
 	double l06_yz_;
 
+};
+
+class KinematicsArm
+{
+public:
+	KinematicsArm();
+	~KinematicsArm();
+	void FowardKinematicsArm(double joint[4] , std::string left_right);
+	void InverseKinematicsArm(double pX_, double pY_, double pZ_);
+	Eigen::MatrixXd joint_radian;
+
+private:
+	//forward_kinematics arm
+	Eigen::MatrixXd H_arm[4];
+
+	// inverse_kinematics arm
+	double r11_arm,r12_arm,r13_arm,r21_arm,r22_arm,r23_arm,r31_arm,r32_arm,r33_arm; // euler angle
+	double real_theta_arm[4] , dh_alpha_arm[4] , dh_link_arm[4] , dh_link_d_arm[4]; // dh_convention variables
+	Eigen::Matrix4d P_;
+  Eigen::Matrix4d P_inverse_;
+
+};
+
+class KinematicsEulerAngle
+{
+public:
+	KinematicsEulerAngle();
+	~KinematicsEulerAngle();
+
+	void ZYXEulerAnglesSolution(double z, double y, double x);
+	void ZYXEulerAngles(double z, double y, double x);
+	void XYZEulerAnglesSolution(double x, double y, double z);
+	void XYZEulerAngles(double z, double y, double x);
+
+	double zyx_euler_angle_x;
+	double zyx_euler_angle_y;
+	double zyx_euler_angle_z;
+
+	double xyz_euler_angle_x;
+	double xyz_euler_angle_y;
+	double xyz_euler_angle_z;
+private:
 	//zyx euler angle
 	Eigen::MatrixXd zyx_euler_angle_matrix_;
 

@@ -20,7 +20,8 @@ PoseModule::PoseModule()
 	control_mode_ = robotis_framework::PositionControl;
 
 	// Dynamixel initialize ////
-	/*
+
+/*
 	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["r_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 2
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
@@ -28,17 +29,11 @@ PoseModule::PoseModule()
 	result_["r_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 4
 	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5
 	result_["r_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 6
-	 */
+
 
 	result_["waist_yaw"]        = new robotis_framework::DynamixelState();  // joint 9
 	result_["waist_roll"]       = new robotis_framework::DynamixelState();  // joint 10
 
-	result_["head_yaw"]         = new robotis_framework::DynamixelState();  // joint 23
-
-	result_["r_ankle_pitch"]    = new robotis_framework::DynamixelState();  // joint 20
-	result_["r_ankle_roll"]     = new robotis_framework::DynamixelState();  // joint 22
-
-	/*
 	result_["l_hip_pitch"]      = new robotis_framework::DynamixelState();  // joint 11
 	result_["l_hip_roll"]       = new robotis_framework::DynamixelState();  // joint 13
 	result_["l_hip_yaw"]        = new robotis_framework::DynamixelState();  // joint 15
@@ -53,10 +48,19 @@ PoseModule::PoseModule()
 	result_["r_ankle_pitch"]    = new robotis_framework::DynamixelState();  // joint 20
 	result_["r_ankle_roll"]     = new robotis_framework::DynamixelState();  // joint 22
 
+
 	result_["head_yaw"]         = new robotis_framework::DynamixelState();  // joint 23
 	result_["head_pitch"]       = new robotis_framework::DynamixelState();  // joint 24
 	result_["head_roll"]        = new robotis_framework::DynamixelState();  // joint 25
-	 */
+*/
+	result_["waist_yaw"]        = new robotis_framework::DynamixelState();  // joint 9
+	result_["waist_roll"]       = new robotis_framework::DynamixelState();  // joint 10
+
+	result_["head_yaw"]         = new robotis_framework::DynamixelState();  // joint 23
+
+	result_["r_ankle_pitch"]    = new robotis_framework::DynamixelState();  // joint 20
+	result_["r_ankle_roll"]     = new robotis_framework::DynamixelState();  // joint 22
+
 
 	///////////////////////////
 	l_kinematics_ = new heroehs_math::Kinematics;
@@ -66,11 +70,11 @@ PoseModule::PoseModule()
 	is_moving_l_  = false;
 	is_moving_r_  = false;
 
-	waist_kinematics_ = new heroehs_math::Kinematics;
+	waist_kinematics_ = new heroehs_math::KinematicsEulerAngle;
 	end_to_rad_waist_ = new heroehs_math::CalRad;
 	is_moving_waist   = false;
 
-	head_kinematics_  = new heroehs_math::Kinematics;
+	head_kinematics_  = new heroehs_math::KinematicsEulerAngle;
 	end_to_rad_head_  = new heroehs_math::CalRad;
 	is_moving_head    = false;
 	//////////////////////////
@@ -98,7 +102,6 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 
 		joint_name_to_id_[joint_name] = dxl_info->id_;
 		joint_id_to_name_[dxl_info->id_] = joint_name;
-
 		parsePgainValue(joint_name);
 	}
 	leg_end_point_l_.resize(6,8);
@@ -375,8 +378,8 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	result_[joint_id_to_name_[23]]->goal_position_ = head_kinematics_->zyx_euler_angle_z;
 
 	//<---  cartesian space control  --->
-	/*
-	result_[joint_id_to_name_[9]]->goal_position_  = waist_kinematics_->xyz_euler_angle_z;// waist yaw
+
+	/*result_[joint_id_to_name_[9]]->goal_position_  = waist_kinematics_->xyz_euler_angle_z;// waist yaw
 	result_[joint_id_to_name_[10]]->goal_position_ = waist_kinematics_->xyz_euler_angle_x; // waist roll
 
 	result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);
@@ -397,8 +400,8 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 
 	result_[joint_id_to_name_[23]]->goal_position_ = head_kinematics_->zyx_euler_angle_z;
 	result_[joint_id_to_name_[24]]->goal_position_ = head_kinematics_->zyx_euler_angle_y;
-	result_[joint_id_to_name_[25]]->goal_position_ = head_kinematics_->zyx_euler_angle_x;*/
-
+	result_[joint_id_to_name_[25]]->goal_position_ = head_kinematics_->zyx_euler_angle_x;
+*/
 
 }
 void PoseModule::stop()

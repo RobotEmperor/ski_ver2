@@ -9,13 +9,16 @@
 #include "heroehs_math/kinematics.h"
 
 using namespace heroehs_math;
-
+//////////////////////////////////////////////////////////Leg Kinematics/////////////////////////////////////////////////////////////////////////
 Kinematics::Kinematics()
 {
 	joint_radian.resize(7,1);
 	joint_radian.fill(0);
 
 	// kinematics variables //
+	P_inverse_.fill(0);
+	P_.fill(0);
+
 	sin_theta5_ = 0.0;
 	cos_theta5_ = 0.0;
 	alpha_5_ = 0.0;
@@ -114,8 +117,6 @@ Kinematics::Kinematics()
 			0 , 0, 1, total_length_,
 			0 , 0, 0, 1;
 }
-
-
 Kinematics::~Kinematics()
 {
 }
@@ -294,7 +295,6 @@ void Kinematics::FowardKnematicsCenterToSensorLeft(double joint[7])
 	double sum_theta[7] = {0,0,0,0,0,0,0};
 	double offset_theta[7] = {0, 0, (M_PI)/2, -(M_PI)/2, (M_PI)/2, 0, 0};
 
-
 	for(int i=1; i<7; i++)
 	{
 		sum_theta[i] = joint[i]+ offset_theta[i];
@@ -391,11 +391,6 @@ Eigen::MatrixXd Kinematics::CenterToGroundTransformation(Eigen::MatrixXd point)
 void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_alpha_, double y_betta_, double x_kamma_)
 {
 	bool check_invertible_ = false;
-
-	Eigen::Matrix4d P_;
-	Eigen::Matrix4d P_inverse_;
-	P_inverse_.fill(0);
-	P_.fill(0);
 
 	// Euler angle initialize
 	P_(0,0) = cos(z_alpha_)*cos(y_betta_); //r11
@@ -548,30 +543,215 @@ void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_
 		real_theta_public[i] = real_theta[i];
 
 	joint_radian << 0 , real_theta[1], real_theta[2] , real_theta[3] , real_theta[4] , real_theta[5] , real_theta[6];
+}
+//////////////////////////////////////////////////////////Arm Kinematics/////////////////////////////////////////////////////////////////////////
+KinematicsArm::KinematicsArm()
+{
+	joint_radian.resize(4,1);
+	joint_radian.fill(0);
+	// arm kinematics
+	for(int i=0; i<4; i++)
+	{
+
+		H_arm[i].resize(4,4);
+		H_arm[i].fill(0);
+	}
+	P_inverse_.fill(0);
+	P_.fill(0);
+
+	r11_arm = 0.0;
+	r12_arm = 0.0;
+	r13_arm = 0.0;
+
+	r21_arm = 0.0;
+	r22_arm = 0.0;
+	r23_arm = 0.0;
+
+	r31_arm = 0.0;
+	r32_arm = 0.0;
+	r33_arm = 0.0;
+
+	// DH convention variables
+	dh_alpha_arm[0] = 0;
+	dh_alpha_arm[1] = M_PI/2;
+	dh_alpha_arm[2] = -M_PI/2;
+	dh_alpha_arm[3] = 0;
+
+	dh_link_arm[0] = 0;
+	dh_link_arm[1] = 0;
+	dh_link_arm[2] = 0.1;  // must modify
+	dh_link_arm[3] = 0.05; // must modify
+
+	dh_link_d_arm[0] = 0;
+	dh_link_d_arm[1] = 0;
+	dh_link_d_arm[2] = 0;
+	dh_link_d_arm[3] = 0;
+
+	real_theta_arm[0] = 0;
+	real_theta_arm[1] = 0;
+	real_theta_arm[2] = 0;
+	real_theta_arm[3] = 0;
 
 }
-void Kinematics::ZYXEulerAngles(double z, double y, double x)
+KinematicsArm::~KinematicsArm()
+{
+}
+void KinematicsArm::FowardKinematicsArm(double joint[4], std::string left_right)
+{
+	double sum_theta[4] = {0,0,0,0};
+	double offset_theta[4] = {0, (M_PI)/2,0,0};
+	for(int i=1; i<4; i++)
+	{
+		sum_theta[i] = joint[i]+ offset_theta[i];
+	}
+
+	for(int i=1; i<4; i++)
+	{
+		H_arm[i](0,0) = floor(100000.*(cos(sum_theta[i])+0.000005))/100000.;
+		H_arm[i](0,1) = floor(100000.*(-cos(dh_alpha_arm[i])*sin(sum_theta[i])+0.000005))/100000.;
+		H_arm[i](0,2) = floor(100000.*(sin(dh_alpha_arm[i])*sin(sum_theta[i])+0.000005))/100000.;
+		H_arm[i](0,3) = floor(100000.*(dh_link_arm[i]*cos(sum_theta[i])+0.000005))/100000.;
+
+		H_arm[i](1,0) = floor(100000.*(sin(sum_theta[i])+0.000005))/100000.;
+		H_arm[i](1,1) = floor(100000.*(cos(dh_alpha_arm[i])*cos(sum_theta[i])+0.000005))/100000.;
+		H_arm[i](1,2) = floor(100000.*(-sin(dh_alpha_arm[i])*cos(sum_theta[i])+0.000005))/100000.;
+		H_arm[i](1,3) = floor(100000.*(dh_link_arm[i]*sin(sum_theta[i])+0.000005))/100000.;
+
+		H_arm[i](2,0) =0;
+		H_arm[i](2,1) = floor(100000.*(sin(dh_alpha_arm[i])+0.000005))/100000.;
+		H_arm[i](2,2) = floor(100000.*(cos(dh_alpha_arm[i])+0.000005))/100000.;
+		H_arm[i](2,3) = -dh_link_d_arm[i];
+
+		H_arm[i](3,0) =0;
+		H_arm[i](3,1) =0;
+		H_arm[i](3,2) =0;
+		H_arm[i](3,3) =1;
+
+		H_arm[i](0,0) = cos(sum_theta[i]);
+		H_arm[i](0,1) = -cos(dh_alpha_arm[i])*sin(sum_theta[i]);
+		H_arm[i](0,2) = sin(dh_alpha_arm[i])*sin(sum_theta[i]);
+		H_arm[i](0,3) = dh_link_arm[i]*cos(sum_theta[i]);
+
+		H_arm[i](1,0) = sin(sum_theta[i]);
+		H_arm[i](1,1) = cos(dh_alpha_arm[i])*cos(sum_theta[i]);
+		H_arm[i](1,2) = -sin(dh_alpha_arm[i])*cos(sum_theta[i]);
+		H_arm[i](1,3) = dh_link_arm[i]*sin(sum_theta[i]);
+
+		H_arm[i](2,0) =0;
+		H_arm[i](2,1) = sin(dh_alpha_arm[i]);
+		H_arm[i](2,2) = cos(dh_alpha_arm[i]);
+		H_arm[i](2,3) = -dh_link_d_arm[i];
+
+		H_arm[i](3,0) =0;
+		H_arm[i](3,1) =0;
+		H_arm[i](3,2) =0;
+		H_arm[i](3,3) =1;
+	}
+
+	H_arm[0](0,0) = 1;
+	H_arm[0](0,1) = 0;
+	H_arm[0](0,2) = 0;
+	H_arm[0](0,3) = 0;
+
+	H_arm[0](1,0) = 0;
+	H_arm[0](1,1) = 0;
+	H_arm[0](1,2) = 1;
+	H_arm[0](1,3) = 0;
+
+	H_arm[0](2,0) = 0;
+	H_arm[0](2,1) = -1;
+	H_arm[0](2,2) = 0;
+	H_arm[0](2,3) = 0;
+
+	H_arm[0](3,0) = 0;
+	H_arm[0](3,1) = 0;
+	H_arm[0](3,2) = 0;
+	H_arm[0](3,3) = 1;
+
+	P_ = H_arm[0]*H_arm[1]*H_arm[2]*H_arm[3];
+
+	printf("forward_kinematics arm\n");
+	printf("%f  %f  %f %f \n",P_(0,0),P_(0,1),P_(0,2),P_(0,3));
+	printf("%f  %f  %f %f \n",P_(1,0),P_(1,1),P_(1,2),P_(1,3));
+	printf("%f  %f  %f %f \n",P_(2,0),P_(2,1),P_(2,2),P_(2,3));
+	printf("%f  %f  %f %f \n",P_(3,0),P_(3,1),P_(3,2),P_(3,3));
+}
+
+void KinematicsArm::InverseKinematicsArm(double pX_, double pY_, double pZ_)
+{
+	//dh_link_arm[2] = 0.1;  // must modify
+	//dh_link_arm[3] = 0.05; // must modify
+
+	double l03 = 0;
+	double temp_a = 0;
+	double temp_b = 0;
+	double temp_sin_theta1 = 0;
+	double temp_cos_theta1 = 0;
+
+	l03 = sqrt(pow(pX_,2) + pow(pY_,2) + pow(pZ_,2));
+
+
+	if(isnan(-acos((pow(l03,2)-pow(dh_link_arm[2],2)-pow(dh_link_arm[3],2))/(2*dh_link_arm[2]*dh_link_arm[3]))))
+		return;
+
+	else
+		joint_radian(3,0) = -acos((pow(l03,2)-pow(dh_link_arm[2],2)-pow(dh_link_arm[3],2))/(2*dh_link_arm[2]*dh_link_arm[3]));
+
+
+	if(isnan(asin((pY_)/(dh_link_arm[2] + dh_link_arm[3]*cos(joint_radian(3,0))))))
+		return;
+	else
+  	joint_radian(2,0) = asin((pY_)/(dh_link_arm[2] + dh_link_arm[3]*cos(joint_radian(3,0))));
+
+	temp_a = dh_link_arm[2]*cos(joint_radian(2,0)) + dh_link_arm[3]*cos(joint_radian(2,0))*cos(joint_radian(3,0));
+	temp_b = - dh_link_arm[3]*sin(joint_radian(3,0));
+
+	temp_sin_theta1 = (-temp_a*pX_ - temp_b*pZ_)/(pow(pZ_,2) + pow(pX_,2));
+	temp_cos_theta1 = (-temp_a*pZ_ + temp_b*pX_)/(pow(pZ_,2) + pow(pX_,2));
+
+	if(isnan( atan2(temp_sin_theta1,temp_cos_theta1)))
+		return;
+	else
+		joint_radian(1,0) = atan2(temp_sin_theta1,temp_cos_theta1);
+
+
+}
+//////////////////////////////////////////////////////////Euler Aangle Kinematics/////////////////////////////////////////////////////////////////////////
+KinematicsEulerAngle::KinematicsEulerAngle()
 {
 	zyx_euler_angle_matrix_.resize(3,3);
 	zyx_euler_angle_matrix_.fill(0);
 
-	zyx_euler_angle_matrix_<< cos(y)*cos(z), cos(z)*sin(x)*sin(y) - cos(x)*sin(z), sin(x)*sin(z) + cos(x)*cos(z)*sin(y),
-			                      cos(y)*sin(z), cos(x)*cos(z) + sin(x)*sin(y)*sin(z), cos(x)*sin(y)*sin(z) - cos(z)*sin(x) ,
-			                      -sin(y)      , cos(y)*sin(x)                       , cos(x)*cos(y);
-//printf("zyx angles \n");
-//printf("%f     %f     %f\n",zyx_euler_angle_matrix_(0,0),zyx_euler_angle_matrix_(0,1),zyx_euler_angle_matrix_(0,2));
-//printf("%f     %f     %f\n",zyx_euler_angle_matrix_(1,0),zyx_euler_angle_matrix_(1,1),zyx_euler_angle_matrix_(1,2));
-//printf("%f     %f     %f\n",zyx_euler_angle_matrix_(2,0),zyx_euler_angle_matrix_(2,1),zyx_euler_angle_matrix_(2,2));
-}
-
-void Kinematics::XYZEulerAngles(double x, double y, double z)
-{
 	xyz_euler_angle_matrix_.resize(3,3);
 	xyz_euler_angle_matrix_.fill(0);
 
+	zyx_euler_angle_x = 0;
+	zyx_euler_angle_y = 0;
+	zyx_euler_angle_z = 0;
+	xyz_euler_angle_x = 0;
+	xyz_euler_angle_y = 0;
+	xyz_euler_angle_z = 0;
+}
+KinematicsEulerAngle::~KinematicsEulerAngle()
+{
+
+}
+void KinematicsEulerAngle::ZYXEulerAngles(double z, double y, double x)
+{
+	zyx_euler_angle_matrix_<< cos(y)*cos(z), cos(z)*sin(x)*sin(y) - cos(x)*sin(z), sin(x)*sin(z) + cos(x)*cos(z)*sin(y),
+			cos(y)*sin(z), cos(x)*cos(z) + sin(x)*sin(y)*sin(z), cos(x)*sin(y)*sin(z) - cos(z)*sin(x) ,
+			-sin(y)      , cos(y)*sin(x)                       , cos(x)*cos(y);
+	//printf("zyx angles \n");
+	//printf("%f     %f     %f\n",zyx_euler_angle_matrix_(0,0),zyx_euler_angle_matrix_(0,1),zyx_euler_angle_matrix_(0,2));
+	//printf("%f     %f     %f\n",zyx_euler_angle_matrix_(1,0),zyx_euler_angle_matrix_(1,1),zyx_euler_angle_matrix_(1,2));
+	//printf("%f     %f     %f\n",zyx_euler_angle_matrix_(2,0),zyx_euler_angle_matrix_(2,1),zyx_euler_angle_matrix_(2,2));
+}
+
+void KinematicsEulerAngle::XYZEulerAngles(double x, double y, double z)
+{
 	xyz_euler_angle_matrix_ << cos(y)*cos(z)                       , -cos(y)*sin(z)                      , sin(y)        ,
-			                       cos(x)*sin(z) + cos(z)*sin(x)*sin(y), cos(x)*cos(z) - sin(x)*sin(y)*sin(z), -cos(y)*sin(x),
-														 sin(x)*sin(z) - cos(x)*cos(z)*sin(y), cos(z)*sin(x) + cos(x)*sin(y)*sin(z),  cos(x)*cos(y);
+			cos(x)*sin(z) + cos(z)*sin(x)*sin(y), cos(x)*cos(z) - sin(x)*sin(y)*sin(z), -cos(y)*sin(x),
+			sin(x)*sin(z) - cos(x)*cos(z)*sin(y), cos(z)*sin(x) + cos(x)*sin(y)*sin(z),  cos(x)*cos(y);
 
 	//printf("xyz angles \n");
 	//printf("%f     %f     %f\n",xyz_euler_angle_matrix_(0,0),xyz_euler_angle_matrix_(0,1),xyz_euler_angle_matrix_(0,2));
@@ -579,7 +759,7 @@ void Kinematics::XYZEulerAngles(double x, double y, double z)
 	//printf("%f     %f     %f\n",xyz_euler_angle_matrix_(2,0),xyz_euler_angle_matrix_(2,1),xyz_euler_angle_matrix_(2,2));
 
 }
-void Kinematics::ZYXEulerAnglesSolution(double z, double y, double x)
+void KinematicsEulerAngle::ZYXEulerAnglesSolution(double z, double y, double x)
 {
 	ZYXEulerAngles(z, y, x);
 
@@ -591,8 +771,7 @@ void Kinematics::ZYXEulerAnglesSolution(double z, double y, double x)
 	//ZYXEulerAngles(zyx_euler_angle_z, zyx_euler_angle_y, zyx_euler_angle_x);
 
 }
-
-void Kinematics::XYZEulerAnglesSolution(double x, double y, double z)
+void KinematicsEulerAngle::XYZEulerAnglesSolution(double x, double y, double z)
 {
 	XYZEulerAngles(x, y, z);
 

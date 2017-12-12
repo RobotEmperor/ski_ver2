@@ -101,17 +101,20 @@ private:
 	bool is_moving_head_;
 	bool is_moving_waist_;
 
+
 	//waist kinematics
-	heroehs_math::Kinematics *waist_kinematics_;
+	heroehs_math::KinematicsEulerAngle *waist_kinematics_;
 	heroehs_math::CalRad *end_to_rad_waist_;     // (6*8)
 	Eigen::MatrixXd waist_end_point_;            // (6*1)
 	Eigen::MatrixXd result_rad_waist_;           // (6*1)
 
 	//head kinematics
-	heroehs_math::Kinematics *head_kinematics_;
+	heroehs_math::KinematicsEulerAngle *head_kinematics_;
 	heroehs_math::CalRad *end_to_rad_head_;      // (6*8)
 	Eigen::MatrixXd head_end_point_;             // (6*1)
 	Eigen::MatrixXd result_rad_head_;            // (6*1)
+
+	heroehs_math::KinematicsArm *arm_kinematics_;
 
 };
 

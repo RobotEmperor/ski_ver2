@@ -7,8 +7,6 @@
 
 #include "upper_body_module/upper_body_module.h"
 using namespace upper_body_module;
-
-
 UpperBodyModule::UpperBodyModule()
 : control_cycle_msec_(8)
 {
@@ -27,15 +25,19 @@ UpperBodyModule::UpperBodyModule()
 	result_["waist_roll"] = new robotis_framework::DynamixelState(); // joint 10
 
 	result_["head_yaw"]   = new robotis_framework::DynamixelState(); // joint 23
-//	result_["head_pitch"]   = new robotis_framework::DynamixelState(); // joint 24
-//	result_["head_roll"]   = new robotis_framework::DynamixelState(); // joint 25
+/*
+	result_["head_pitch"]   = new robotis_framework::DynamixelState(); // joint 24
+	result_["head_roll"]   = new robotis_framework::DynamixelState(); // joint 25
+*/
 	///////////////////////////
 
-	waist_kinematics_ = new heroehs_math::Kinematics;
+	waist_kinematics_ = new heroehs_math::KinematicsEulerAngle;
 	end_to_rad_waist_ = new heroehs_math::CalRad;
 
-	head_kinematics_  = new heroehs_math::Kinematics;
+	head_kinematics_  = new heroehs_math::KinematicsEulerAngle;
 	end_to_rad_head_  = new heroehs_math::CalRad;
+
+	arm_kinematics_   = new heroehs_math::KinematicsArm;
 
 	traj_time_test = 4;
 	new_count_ = 1 ;
@@ -137,7 +139,6 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	{
 		return;
 	}
-
 	//// read current position ////
 	if(new_count_ == 1)
 	{
@@ -146,9 +147,12 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 				state_iter != dxls.end(); state_iter++)
 		{
 			std::string joint_name = state_iter->first;
-			if(gazebo_check == true)
-				result_[joint_name]->goal_position_ = result_[joint_name]->present_position_; // 가제보 상 초기위치 0
-			ROS_INFO("Upper Start");
+			if(!joint_name.compare("waist_yaw")|| !joint_name.compare("waist_roll") || !joint_name.compare("head_yaw") ||
+					!joint_name.compare("head_pitch") || !joint_name.compare("head_roll"))
+			{
+				if(gazebo_check == true)
+					result_[joint_name]->goal_position_ = result_[joint_name]->present_position_; // 가제보 상 초기위치 0
+			}
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
 
 		result_rad_waist_ = end_to_rad_waist_ -> cal_end_point_to_rad(waist_end_point_);
@@ -156,6 +160,7 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
 		result_rad_head_ = end_to_rad_head_   -> cal_end_point_to_rad(head_end_point_);
 		head_kinematics_->ZYXEulerAnglesSolution(result_rad_head_(3,0),result_rad_head_(4,0),result_rad_head_(5,0));
+		ROS_INFO("Upper Start");
 	}
 	if(is_moving_waist_ == false && is_moving_head_ == false) // desired pose
 	{
@@ -178,8 +183,20 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	result_[joint_id_to_name_[9]]->goal_position_  = waist_kinematics_ -> xyz_euler_angle_z;// waist yaw
 	result_[joint_id_to_name_[10]]->goal_position_ = waist_kinematics_ -> xyz_euler_angle_x; // waist roll
 
+	//printf("HEAD:::   %f",head_kinematics_ -> zyx_euler_angle_z);
 
 	result_["head_yaw"]->goal_position_ = head_kinematics_ -> zyx_euler_angle_z;
+
+
+	//test ~~~~
+	//double joint[4] = {0,0,0,0};
+
+	//arm_kinematics_ -> FowardKnematicsArm(joint,"left");
+/*	arm_kinematics_ -> InverseKinematicsArm(0.0931,0.0931,-0.0499);
+	joint[1] = arm_kinematics_ -> joint_radian(1,0);
+	joint[2] = arm_kinematics_ -> joint_radian(2,0);
+	joint[3] = arm_kinematics_ -> joint_radian(3,0);
+	arm_kinematics_ -> FowardKinematicsArm(joint,"left");*/
 	//result_[joint_id_to_name_[24]]->goal_position_ = head_kinematics_->zyx_euler_angle_y;
 	//result_[joint_id_to_name_[25]]->goal_position_ = head_kinematics_->zyx_euler_angle_x;
 }

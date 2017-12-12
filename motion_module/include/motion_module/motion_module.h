@@ -124,7 +124,6 @@ private:
 	heroehs_math::Kinematics *r_kinematics_;
 	heroehs_math::CalRad *end_to_rad_l_;
 	heroehs_math::CalRad *end_to_rad_r_;
-	heroehs_math::CalRad *one_joint_;
 
 	Eigen::MatrixXd result_end_l_;
 	Eigen::MatrixXd result_end_r_;

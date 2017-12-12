@@ -58,10 +58,6 @@ public:
 
 
 
-	Eigen::MatrixXd goal_pose;
-	Eigen::MatrixXd goal_velocity;
-
-
 };
 
 
