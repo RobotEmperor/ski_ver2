@@ -42,7 +42,6 @@ include_directories(
  
  add_dependencies(offset_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
  add_dependencies(offset_module offset_module_generate_messages_cpp)
- 
  target_link_libraries(offset_module
    ${catkin_LIBRARIES}
  )

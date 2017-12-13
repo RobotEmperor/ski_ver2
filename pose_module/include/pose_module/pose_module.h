@@ -58,6 +58,8 @@ public:
 	void desiredPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
 	void desiredPoseWaistMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
 	void desiredPoseHeadMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
+	void desiredPoseArmMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
+
 	void gainAdjustmentMsgCallback(const std_msgs::Int16MultiArray::ConstPtr& msg);
 	void finalGainSaveMsgCallback(const std_msgs::Bool::ConstPtr& msg);
 	bool readPgainSrvFunction(pose_module::command::Request  &req, pose_module::command::Response &res);
@@ -82,6 +84,8 @@ private:
 	bool is_moving_r_;
 	bool is_moving_waist;
 	bool is_moving_head;
+	bool is_moving_l_arm;
+	bool is_moving_r_arm;
 
 	double traj_time_;
 
@@ -112,7 +116,18 @@ private:
 	Eigen::MatrixXd head_end_point_;
 	Eigen::MatrixXd result_end_head_;
 
+	//Arm kinematics end point control
+	heroehs_math::KinematicsArm *l_arm_kinematics_;
+	heroehs_math::CalRad *end_to_rad_l_arm_;
+	Eigen::MatrixXd l_arm_end_point_;
+	Eigen::MatrixXd result_end_l_arm_;
 
+	heroehs_math::KinematicsArm *r_arm_kinematics_;
+	heroehs_math::CalRad *end_to_rad_r_arm_;
+	Eigen::MatrixXd r_arm_end_point_;
+	Eigen::MatrixXd result_end_r_arm_;
+
+	//Arm kinematics joint control
 	//one joint control
 	//heroehs_math::CalRad *one_joint_;
 	//double result_rad_one_joint_;

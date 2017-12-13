@@ -74,6 +74,7 @@ public:
 	void FowardKinematicsArm(double joint[4] , std::string left_right);
 	void InverseKinematicsArm(double pX_, double pY_, double pZ_);
 	Eigen::MatrixXd joint_radian;
+	Eigen::Matrix4d P_;
 
 private:
 	//forward_kinematics arm
@@ -82,7 +83,7 @@ private:
 	// inverse_kinematics arm
 	double r11_arm,r12_arm,r13_arm,r21_arm,r22_arm,r23_arm,r31_arm,r32_arm,r33_arm; // euler angle
 	double real_theta_arm[4] , dh_alpha_arm[4] , dh_link_arm[4] , dh_link_d_arm[4]; // dh_convention variables
-	Eigen::Matrix4d P_;
+	//Eigen::Matrix4d P_;
   Eigen::Matrix4d P_inverse_;
 
 };

@@ -40,10 +40,13 @@ MotionModule::MotionModule()
 	result_["r_hip_roll"]  = new robotis_framework::DynamixelState();  // joint 14
 	result_["r_hip_yaw"]   = new robotis_framework::DynamixelState();  // joint 16
 	result_["r_knee_pitch"] = new robotis_framework::DynamixelState();  // joint 18
-*/
-
 	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
 	result_["r_ankle_roll"]  = new robotis_framework::DynamixelState();  // joint 22
+*/
+
+	result_["l_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 19
+	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
+
 
 	///////////////////////////
 	l_kinematics_ = new heroehs_math::Kinematics;
@@ -687,8 +690,11 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	result_[joint_id_to_name_[16]]->goal_position_ = r_kinematics_->joint_radian(3,0);
 
 	result_[joint_id_to_name_[18]]->goal_position_ = r_kinematics_->joint_radian(4,0);*/
+	//result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
+	//result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
+
 	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
-	result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
+	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
 
 	// l_ endpoint xyz
 	state_end_point_pose_msg_.x=  result_pose_l_modified_.x;

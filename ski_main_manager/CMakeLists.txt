@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   pose_module
   motion_module
   upper_body_module
+  arm_module
     
   diana_balance_control
   diana_msgs

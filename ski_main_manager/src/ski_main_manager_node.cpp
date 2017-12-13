@@ -11,6 +11,7 @@
 #include "pose_module/pose_module.h"
 #include "motion_module/motion_module.h"
 #include "upper_body_module/upper_body_module.h"
+#include "arm_module/arm_module.h"
 
 
 int main(int argc, char **argv)
@@ -20,7 +21,7 @@ int main(int argc, char **argv)
   ROS_INFO("ski_main_manager_ver2->init !! start!");
   robotis_framework::RobotisController *controller = robotis_framework::RobotisController::getInstance();
 
-  //controller->DEBUG_PRINT = true;
+  controller->DEBUG_PRINT = true;
   /* Load ROS Parameter */
   std::string offset_file = nh.param<std::string>("offset_table", "");
   std::string robot_file  = nh.param<std::string>("robot_file_path", "");
@@ -41,6 +42,7 @@ int main(int argc, char **argv)
   pose_module::PoseModule::getInstance()->gazebo_check = controller->gazebo_mode_;
   motion_module::MotionModule::getInstance()->gazebo_check = controller->gazebo_mode_;
   upper_body_module::UpperBodyModule::getInstance()->gazebo_check = controller->gazebo_mode_;
+  arm_module::ArmModule::getInstance()->gazebo_check = controller->gazebo_mode_;
 
   if (robot_file == "")
   {
@@ -65,6 +67,8 @@ int main(int argc, char **argv)
   controller->addMotionModule((robotis_framework::MotionModule*) pose_module::PoseModule::getInstance());
   controller->addMotionModule((robotis_framework::MotionModule*) motion_module::MotionModule::getInstance());
   controller->addMotionModule((robotis_framework::MotionModule*) upper_body_module::UpperBodyModule::getInstance());
+  controller->addMotionModule((robotis_framework::MotionModule*) arm_module::ArmModule::getInstance());
+
 
   controller->startTimer();
 
