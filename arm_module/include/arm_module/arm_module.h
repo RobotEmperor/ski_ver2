@@ -62,14 +62,15 @@ public:
 
 	bool gazebo_check;
 
-//	ros::Subscriber head_test;
-//	ros::Subscriber waist_test;
-//	double traj_time_test;
+	//	ros::Subscriber head_test;
+	//	ros::Subscriber waist_test;
+	double traj_time_test;
 
-//	void desiredPoseWaistMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
-//	void desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
+	//	void desiredPoseWaistMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
+	//	void desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
+	void desiredPoseArmMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
 
-/*	// paper messages
+	/*	// paper messages
 	ros::Publisher state_end_point_pose_pub;
 	ros::Publisher state_end_point_orientation_pub;
 	ros::Publisher zmp_point_pub;
@@ -80,8 +81,10 @@ public:
 	ros::Subscriber get_ft_data_sub_;
   ros::Subscriber set_balance_param_sub_;*/
 
+	ros::Subscriber desired_pose_arm_sub_;
+
 	/* ROS Topic Callback Functions */
-/*	void desiredMotionMsgCallback(const std_msgs::Int32::ConstPtr& msg);
+	/*	void desiredMotionMsgCallback(const std_msgs::Int32::ConstPtr& msg);
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
 	void ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg);
   void setBalanceParameterCallback(const diana_msgs::BalanceParam::ConstPtr& msg);
@@ -100,12 +103,21 @@ private:
 	std::map<int, std::string> joint_id_to_name_;
 
 	int new_count_;
-	bool is_moving_l_arm;
-	bool is_moving_r_arm;
+	bool is_moving_l_arm_;
+	bool is_moving_r_arm_;
 
 
 
-	heroehs_math::KinematicsArm *arm_kinematics_;
+	heroehs_math::KinematicsArm *l_arm_kinematics_;
+	heroehs_math::CalRad *end_to_rad_l_arm_;
+	Eigen::MatrixXd l_arm_end_point_;
+	Eigen::MatrixXd result_end_l_arm_;
+
+	heroehs_math::KinematicsArm *r_arm_kinematics_;
+	heroehs_math::CalRad *end_to_rad_r_arm_;
+	Eigen::MatrixXd r_arm_end_point_;
+	Eigen::MatrixXd result_end_r_arm_;
+
 
 };
 

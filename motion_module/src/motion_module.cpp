@@ -54,8 +54,6 @@ MotionModule::MotionModule()
 	end_to_rad_l_ = new heroehs_math::CalRad;
 	end_to_rad_r_ = new heroehs_math::CalRad;
 
-
-
 	//////////////////////////
 	currentGyroX = 0;
 	currentGyroY = 0;
@@ -577,7 +575,6 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 
 	current_time_ = current_time_+ 0.008;
 
-
 	//motion_generater_();
 	//// read current position ////
 	if(new_count_ == 1)
@@ -594,9 +591,6 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 					result_[joint_name]->goal_position_ = result_[joint_name]->present_position_; // 가제보 상 초기위치 0
 			}
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
-
-		//result_[joint_id_to_name_[20]]->goal_position_ = dxls[joint_id_to_name_[20]]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
-		//result_[joint_id_to_name_[22]]->goal_position_ = dxls[joint_id_to_name_[22]]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
 	}
 	if(is_moving_l_ == false && is_moving_r_ == false) // desired pose
 	{
@@ -616,7 +610,6 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 			//else
 			// result_[joint_id_to_name_[id]]->present_position_ = dxls[joint_id_to_name_[id]]->dxl_state_->present_position_; // real robot
 		}
-
 		is_moving_l_ = end_to_rad_l_-> is_moving_check;
 		is_moving_r_ = end_to_rad_r_-> is_moving_check;
 	}
@@ -717,7 +710,6 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	state_end_point_orientation_msg_.y=  result_pose_r_modified_.pitch;
 	state_end_point_orientation_msg_.z=  result_pose_r_modified_.yaw;
 	state_end_point_pose_pub.publish(state_end_point_orientation_msg_);*/
-
 }
 void MotionModule::stop()
 {

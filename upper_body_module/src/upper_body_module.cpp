@@ -142,6 +142,8 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	//// read current position ////
 	if(new_count_ == 1)
 	{
+		is_moving_waist_ = false;
+		is_moving_head_ = false;
 		new_count_ ++;
 		for (std::map<std::string, robotis_framework::Dynamixel*>::iterator state_iter = dxls.begin();
 				state_iter != dxls.end(); state_iter++)
@@ -156,10 +158,8 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
 
 		result_rad_waist_ = end_to_rad_waist_ -> cal_end_point_to_rad(waist_end_point_);
-		waist_kinematics_->XYZEulerAnglesSolution(result_rad_waist_ (5,0),0,result_rad_waist_ (3,0));
-
 		result_rad_head_ = end_to_rad_head_   -> cal_end_point_to_rad(head_end_point_);
-		head_kinematics_->ZYXEulerAnglesSolution(result_rad_head_(3,0),result_rad_head_(4,0),result_rad_head_(5,0));
+
 		ROS_INFO("Upper Start");
 	}
 	if(is_moving_waist_ == false && is_moving_head_ == false) // desired pose
@@ -171,15 +171,15 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 		ROS_INFO("Upper Module Trajectory Start");
 
 		result_rad_waist_ = end_to_rad_waist_ -> cal_end_point_to_rad(waist_end_point_);
-		waist_kinematics_->XYZEulerAnglesSolution(result_rad_waist_(5,0),0,result_rad_waist_ (3,0));
-
 		result_rad_head_ = end_to_rad_head_   -> cal_end_point_to_rad(head_end_point_);
-		head_kinematics_->ZYXEulerAnglesSolution(result_rad_head_(3,0),result_rad_head_(4,0),result_rad_head_(5,0));
 
 		is_moving_waist_ = end_to_rad_waist_ -> is_moving_check;
 		is_moving_head_  = end_to_rad_head_  -> is_moving_check;
 	}
 	///////////////////////////////////////////////////// control //////////////////////////////////////////////////////////
+	waist_kinematics_->XYZEulerAnglesSolution(result_rad_waist_ (5,0),0,result_rad_waist_ (3,0));
+	head_kinematics_->ZYXEulerAnglesSolution(result_rad_head_(3,0),result_rad_head_(4,0),result_rad_head_(5,0));
+
 	result_[joint_id_to_name_[9]]->goal_position_  = waist_kinematics_ -> xyz_euler_angle_z;// waist yaw
 	result_[joint_id_to_name_[10]]->goal_position_ = waist_kinematics_ -> xyz_euler_angle_x; // waist roll
 

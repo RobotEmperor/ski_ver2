@@ -170,6 +170,7 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 	end_to_rad_l_arm_->current_pose_change(2,0) = -0.15;
 	result_end_l_arm_.resize(6,1);
 	result_end_l_arm_.fill(0);
+
 	//right //
 	r_arm_end_point_.resize(6,8);
 	r_arm_end_point_.fill(0);
@@ -265,6 +266,8 @@ void PoseModule::desiredPoseArmMsgCallback(const std_msgs::Float64MultiArray::Co
 
 	is_moving_l_arm = true;
 	is_moving_r_arm = true;
+
+	printf("Receive the value!!!");
 }
 void PoseModule::gainAdjustmentMsgCallback(const std_msgs::Int16MultiArray::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실행
 {
@@ -362,24 +365,15 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 			}
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
 		ROS_INFO("Pose module :: Read position and Send goal position");
-		result_end_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
-		result_end_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
-		//result_rad_one_joint_ = one_joint_ -> cal_one_joint_rad(one_joint_ctrl_);
 
-		l_kinematics_->InverseKinematics(result_end_l_(0,0), result_end_l_(1,0) - 0.105, result_end_l_(2,0), result_end_l_(3,0), result_end_l_(4,0), result_end_l_(5,0)); // pX pY pZ alpha betta kamma
-		r_kinematics_->InverseKinematics(result_end_r_(0,0), result_end_r_(1,0) + 0.105, result_end_r_(2,0), result_end_r_(3,0), result_end_r_(4,0), result_end_r_(5,0)); // pX pY pZ alpha betta kamma
-
+		result_end_l_ = end_to_rad_l_         -> cal_end_point_to_rad(leg_end_point_l_);
+		result_end_r_ = end_to_rad_r_         -> cal_end_point_to_rad(leg_end_point_r_);
 		result_end_waist_ = end_to_rad_waist_ -> cal_end_point_to_rad(waist_end_point_);
-		waist_kinematics_ -> XYZEulerAnglesSolution(result_end_waist_ (5,0),0,result_end_waist_ (3,0));
-
 		result_end_head_ = end_to_rad_head_   -> cal_end_point_to_rad(head_end_point_);
-		head_kinematics_ -> ZYXEulerAnglesSolution(result_end_head_(3,0),result_end_head_(4,0),result_end_head_(5,0));
-
 		result_end_l_arm_ = end_to_rad_l_arm_ -> cal_end_point_to_rad(l_arm_end_point_);
-		l_arm_kinematics_ ->InverseKinematicsArm(result_end_l_arm_(1,0), result_end_l_arm_(2,0), result_end_l_arm_(3,0));
-
 		result_end_r_arm_ = end_to_rad_r_arm_ -> cal_end_point_to_rad(r_arm_end_point_);
-		r_arm_kinematics_ ->InverseKinematicsArm(result_end_r_arm_(1,0), result_end_r_arm_(2,0), result_end_r_arm_(3,0));
+
+		//result_rad_one_joint_ = one_joint_ -> cal_one_joint_rad(one_joint_ctrl_);
 	}
 
 	if(is_moving_l_ == false && is_moving_r_ == false && is_moving_waist == false && is_moving_head == false && is_moving_l_arm == false && is_moving_r_arm == false)
@@ -397,27 +391,15 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		ROS_INFO("Pose Trajectory Start");
 
 		// trajectory is working cartesian space control LEG
-		result_end_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
-		result_end_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
-
-		l_kinematics_->InverseKinematics(result_end_l_(0,0), result_end_l_(1,0) - 0.105, result_end_l_(2,0), result_end_l_(3,0), result_end_l_(4,0), result_end_l_(5,0)); // pX pY pZ alpha betta kamma
-		r_kinematics_->InverseKinematics(result_end_r_(0,0), result_end_r_(1,0) + 0.105, result_end_r_(2,0), result_end_r_(3,0), result_end_r_(4,0), result_end_r_(5,0)); // pX pY pZ alpha betta kamma
-		////////////////////////////////////////////////////
+		result_end_l_ = end_to_rad_l_         -> cal_end_point_to_rad(leg_end_point_l_);
+		result_end_r_ = end_to_rad_r_         -> cal_end_point_to_rad(leg_end_point_r_);
 		// trajectory is working cartesian space control WAIST
 		result_end_waist_ = end_to_rad_waist_ -> cal_end_point_to_rad(waist_end_point_);
-		waist_kinematics_->XYZEulerAnglesSolution(result_end_waist_ (5,0) , 0, result_end_waist_ (3,0));
-
 		// trajectory is working cartesian space control HEAD
 		result_end_head_ = end_to_rad_head_   -> cal_end_point_to_rad(head_end_point_);
-		head_kinematics_->ZYXEulerAnglesSolution(result_end_head_(3,0),result_end_head_(4,0),result_end_head_(5,0));
-
 		// trajectory is working cartesian space control ARM
-		result_end_l_arm_ = end_to_rad_l_arm_ ->cal_end_point_to_rad(l_arm_end_point_);
-		l_arm_kinematics_ ->InverseKinematicsArm(result_end_l_arm_(0,0), result_end_l_arm_(1,0), result_end_l_arm_(2,0));
-		printf("LEFT   %f  ::  %f   :: %f \n", l_arm_kinematics_->joint_radian(1,0), l_arm_kinematics_->joint_radian(2,0), l_arm_kinematics_->joint_radian(3,0));
-
-		result_end_r_arm_ = end_to_rad_r_arm_ ->cal_end_point_to_rad(r_arm_end_point_);
-		r_arm_kinematics_ ->InverseKinematicsArm(result_end_r_arm_(0,0), result_end_r_arm_(1,0), result_end_r_arm_(2,0));
+		result_end_l_arm_ = end_to_rad_l_arm_ -> cal_end_point_to_rad(l_arm_end_point_);
+		result_end_r_arm_ = end_to_rad_r_arm_ -> cal_end_point_to_rad(r_arm_end_point_);
 		/*//<---  read   --->
 		for(int id=10 ; id<23 ; id++)
 		{
@@ -443,19 +425,30 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		is_moving_r_arm  = end_to_rad_r_arm_  -> is_moving_check;
 	}
 
+	//cartesian space control LEG
+	l_kinematics_->InverseKinematics(result_end_l_(0,0), result_end_l_(1,0) - 0.105, result_end_l_(2,0), result_end_l_(3,0), result_end_l_(4,0), result_end_l_(5,0)); // pX pY pZ alpha betta kamma
+	r_kinematics_->InverseKinematics(result_end_r_(0,0), result_end_r_(1,0) + 0.105, result_end_r_(2,0), result_end_r_(3,0), result_end_r_(4,0), result_end_r_(5,0)); // pX pY pZ alpha betta kamma
+	//cartesian space control WAIST
+	waist_kinematics_->XYZEulerAnglesSolution(result_end_waist_ (5,0) , 0, result_end_waist_ (3,0));
+	//cartesian space control HEAD
+	head_kinematics_->ZYXEulerAnglesSolution(result_end_head_(3,0),result_end_head_(4,0),result_end_head_(5,0));
+	//cartesian space control ARM
+	l_arm_kinematics_ ->InverseKinematicsArm(result_end_l_arm_(0,0), result_end_l_arm_(1,0), result_end_l_arm_(2,0));
+	r_arm_kinematics_ ->InverseKinematicsArm(result_end_r_arm_(0,0), result_end_r_arm_(1,0), result_end_r_arm_(2,0));
+
 
 	//<---  catesian space control test --->
-	result_[joint_id_to_name_[9]]->goal_position_  = waist_kinematics_->xyz_euler_angle_z;// waist yaw
-	result_[joint_id_to_name_[10]]->goal_position_ = waist_kinematics_->xyz_euler_angle_x; // waist roll
+	result_[joint_id_to_name_[9]]  -> goal_position_  = waist_kinematics_->xyz_euler_angle_z;// waist yaw
+	result_[joint_id_to_name_[10]] -> goal_position_ = waist_kinematics_->xyz_euler_angle_x; // waist roll
 
-	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
-	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
+	result_[joint_id_to_name_[19]] -> goal_position_ = -l_kinematics_->joint_radian(5,0);
+	result_[joint_id_to_name_[20]] -> goal_position_ = r_kinematics_->joint_radian(5,0);
 
-	result_[joint_id_to_name_[23]]->goal_position_ = head_kinematics_->zyx_euler_angle_z;
+	result_[joint_id_to_name_[23]] -> goal_position_ = head_kinematics_->zyx_euler_angle_z;
 
-	result_[joint_id_to_name_[1]]->goal_position_ = l_arm_kinematics_->joint_radian(1,0);
-	result_[joint_id_to_name_[3]]->goal_position_ = l_arm_kinematics_->joint_radian(2,0);
-	result_[joint_id_to_name_[5]]->goal_position_ = l_arm_kinematics_->joint_radian(3,0);
+	result_[joint_id_to_name_[1]]  -> goal_position_ = l_arm_kinematics_->joint_radian(1,0);
+	result_[joint_id_to_name_[3]]  -> goal_position_ = l_arm_kinematics_->joint_radian(2,0);
+	result_[joint_id_to_name_[5]]  -> goal_position_ = l_arm_kinematics_->joint_radian(3,0);
 
 
 	//<---  cartesian space control  --->
