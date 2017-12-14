@@ -46,8 +46,6 @@ MotionModule::MotionModule()
 
 	result_["l_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 19
 	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
-
-
 	///////////////////////////
 	l_kinematics_ = new heroehs_math::Kinematics;
 	r_kinematics_ = new heroehs_math::Kinematics;
@@ -197,19 +195,18 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 	end_to_rad_r_->current_pose_change(2,0) = -10*DEGREE2RADIAN;
 	end_to_rad_r_->current_pose_change(2,0) = -15*DEGREE2RADIAN;
 
-	one_joint_ctrl_.resize(1,8);
+/*	one_joint_ctrl_.resize(1,8);
 	one_joint_ctrl_.fill(0);
 	one_joint_ctrl_(0,1) = 0;
-	result_rad_one_joint_ = 0;
+	result_rad_one_joint_ = 0;*/
 
 	for(int joint_num_=0; joint_num_< 6 ; joint_num_ ++)
 	{
 		leg_end_point_l_(joint_num_, 7) = traj_time_;
 		leg_end_point_r_(joint_num_, 7) = traj_time_;
 	}
-	one_joint_ctrl_(0,7) = traj_time_;
+	//one_joint_ctrl_(0,7) = traj_time_;
 	//
-
 	balance_ctrl_.initialize(control_cycle_msec);
 	previous_balance_param_.cob_x_offset_m = 0;
 	previous_balance_param_.cob_y_offset_m = 0;
@@ -467,7 +464,6 @@ void MotionModule::parse_motion_data_(int motion_num_)
 		}
 		change_desired_pose_(pose,12) = change_desired_pose_(pose,12)*DEGREE2RADIAN; //waist
 	}
-
 	//속도 계산 완료
 }
 void MotionModule::motion_vel_cal_leg_( int pose_num_, int node_num_)
@@ -546,8 +542,8 @@ void MotionModule::motion_generater_()
 					leg_end_point_l_(m,3) = change_desired_final_vel_(pose-1, m);
 					leg_end_point_r_(m,3) = change_desired_final_vel_(pose-1, m+6);
 				}
-				one_joint_ctrl_(0,1) = change_desired_pose_(pose,12);
-				one_joint_ctrl_(0,7) = change_desired_time_(pose-1,0);
+			//	one_joint_ctrl_(0,1) = change_desired_pose_(pose,12);
+			//	one_joint_ctrl_(0,7) = change_desired_time_(pose-1,0);
 			}
 
 			else if(current_time_ > change_desired_time_(pose-1,0))
@@ -561,7 +557,6 @@ void MotionModule::motion_generater_()
 		}
 	}
 }
-
 void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
 		std::map<std::string, double> sensors)
 {
@@ -665,7 +660,6 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	cop_point_Fx_msg_.point.y = cop_cal->cop_fx_point_y;
 	cop_point_Fx_msg_.point.z = cop_cal->cop_fx_point_z;
 	cop_point_Fx_pub.publish(cop_point_Fx_msg_);
-
 
 	//<---  joint space control --->
 

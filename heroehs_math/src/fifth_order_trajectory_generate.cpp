@@ -92,7 +92,6 @@ double FifthOrderTrajectory::fifth_order_traj_gen(double initial_value_, double 
 		is_moving_traj = false;
 		return current_pose;
 	}
-
 	else
 	{
 		trajectory_final_value = a[0] + a[1]*current_time + a[2]*(pow(current_time,2)) + a[3]*(pow(current_time,3)) + a[4]*(pow(current_time,4)) + a[5]*(pow(current_time,5));

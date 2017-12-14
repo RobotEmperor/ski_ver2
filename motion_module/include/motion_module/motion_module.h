@@ -118,7 +118,6 @@ private:
 
 	Eigen::MatrixXd leg_end_point_l_;
 	Eigen::MatrixXd leg_end_point_r_;
-	Eigen::MatrixXd one_joint_ctrl_;
 
 	heroehs_math::Kinematics *l_kinematics_;
 	heroehs_math::Kinematics *r_kinematics_;
