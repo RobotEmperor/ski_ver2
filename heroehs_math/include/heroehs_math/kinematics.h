@@ -71,10 +71,15 @@ class KinematicsArm
 public:
 	KinematicsArm();
 	~KinematicsArm();
+	// leg kinematics
 	void FowardKinematicsArm(double joint[4] , std::string left_right);
 	void InverseKinematicsArm(double pX_, double pY_, double pZ_);
 	Eigen::MatrixXd joint_radian;
 	Eigen::Matrix4d P_;
+
+	//Arm desired point
+	Eigen::MatrixXd arm_desired_point_;
+	void ArmToOriginTransformation(double waist_yaw,double waist_roll, double x, double y, double z);
 
 private:
 	//forward_kinematics arm
@@ -85,6 +90,15 @@ private:
 	double real_theta_arm[4] , dh_alpha_arm[4] , dh_link_arm[4] , dh_link_d_arm[4]; // dh_convention variables
 	//Eigen::Matrix4d P_;
   Eigen::Matrix4d P_inverse_;
+
+  // transformation matrix
+	Eigen::Matrix4d origin_to_waist_tf_;
+	Eigen::Matrix4d waist_to_arm_tf_;
+	Eigen::Matrix4d origin_to_arm_tf_;
+	Eigen::Matrix4d arm_to_origin_tf_;
+
+	Eigen::MatrixXd origin_desired_point_;
+
 
 };
 
@@ -112,7 +126,6 @@ private:
 
 	//xyz euler angle
 	Eigen::MatrixXd xyz_euler_angle_matrix_;
-
 };
 }
 #endif /* HEROEHS_MATH_KINEMATICS_H_ */

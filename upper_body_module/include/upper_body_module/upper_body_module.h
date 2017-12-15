@@ -67,6 +67,9 @@ public:
 	void desiredPoseWaistMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
 	void desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
 
+
+	ros::Publisher current_waist_pose_pub;
+
 /*	// paper messages
 	ros::Publisher state_end_point_pose_pub;
 	ros::Publisher state_end_point_orientation_pub;
@@ -90,8 +93,6 @@ private:
 	bool running_;
 	int control_cycle_msec_;
 
-	//int new_count_;
-
 	boost::thread queue_thread_;
 
 	std::map<std::string, int> joint_name_to_id_;
@@ -114,7 +115,9 @@ private:
 	Eigen::MatrixXd head_end_point_;             // (6*1)
 	Eigen::MatrixXd result_rad_head_;            // (6*1)
 
-	heroehs_math::KinematicsArm *arm_kinematics_;
+  //arm module data transmit
+	std_msgs::Float64MultiArray current_waist_pose_msg;
+	double temp_waist_yaw_rad, temp_waist_roll_rad;
 
 };
 

@@ -162,12 +162,12 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 	l_arm_end_point_.fill(0);
 	//l_arm_end_point_.(1,0) = ; // y 초기값
 	//l_arm_end_point_.(1,1) = ; //
-	l_arm_end_point_(2,0) = -0.15;
-	l_arm_end_point_(2,1) = -0.15;
+	l_arm_end_point_(2,0) = -0.47;
+	l_arm_end_point_(2,1) = -0.47;
 	//	end_to_rad_l_arm_->cal_end_point_tra_py->current_pose = 0.105;
 	//	end_to_rad_l_arm_->current_pose_change(1,0) = 0.105;
-	end_to_rad_l_arm_->cal_end_point_tra_pz->current_pose = -0.15;
-	end_to_rad_l_arm_->current_pose_change(2,0) = -0.15;
+	end_to_rad_l_arm_->cal_end_point_tra_pz->current_pose = -0.47;
+	end_to_rad_l_arm_->current_pose_change(2,0) = -0.47;
 	result_end_l_arm_.resize(6,1);
 	result_end_l_arm_.fill(0);
 
@@ -178,12 +178,12 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 	result_end_r_arm_.fill(0);
 	//l_arm_end_point_.(1,0) = ; // y 초기값
 	//l_arm_end_point_.(1,1) = ; //
-	r_arm_end_point_(2,0) = -0.15;
-	r_arm_end_point_(2,1) = -0.15;
+	r_arm_end_point_(2,0) = -0.47;
+	r_arm_end_point_(2,1) = -0.47;
 	//	end_to_rad_l_arm_->cal_end_point_tra_py->current_pose = 0.105;
 	//	end_to_rad_l_arm_->current_pose_change(1,0) = 0.105;
-	end_to_rad_r_arm_->cal_end_point_tra_pz->current_pose = -0.15;
-	end_to_rad_r_arm_->current_pose_change(2,0) = -0.15;
+	end_to_rad_r_arm_->cal_end_point_tra_pz->current_pose = -0.47;
+	end_to_rad_r_arm_->current_pose_change(2,0) = -0.47;
 
 	/*one_joint_ctrl_.resize(1,8);
 	one_joint_ctrl_.fill(0);

@@ -69,6 +69,7 @@ public:
 	//	void desiredPoseWaistMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
 	//	void desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
 	void desiredPoseArmMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
+	void currentWaistPoseMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
 
 	/*	// paper messages
 	ros::Publisher state_end_point_pose_pub;
@@ -81,7 +82,9 @@ public:
 	ros::Subscriber get_ft_data_sub_;
   ros::Subscriber set_balance_param_sub_;*/
 
-	ros::Subscriber desired_pose_arm_sub_;
+	// subscriber
+	ros::Subscriber desired_pose_arm_sub_;  // test
+	ros::Subscriber current_waist_pose_sub_;
 
 	/* ROS Topic Callback Functions */
 	/*	void desiredMotionMsgCallback(const std_msgs::Int32::ConstPtr& msg);
@@ -117,6 +120,15 @@ private:
 	heroehs_math::CalRad *end_to_rad_r_arm_;
 	Eigen::MatrixXd r_arm_end_point_;
 	Eigen::MatrixXd result_end_r_arm_;
+
+	// waist pose to transform
+	double waist_yaw_rad_;
+	double waist_roll_rad_;
+	double l_arm_desired_point_x_, l_arm_desired_point_y_, l_arm_desired_point_z_;
+	double r_arm_desired_point_x_, r_arm_desired_point_y_, r_arm_desired_point_z_;
+
+
+
 
 
 };

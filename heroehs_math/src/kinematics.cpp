@@ -579,8 +579,8 @@ KinematicsArm::KinematicsArm()
 
 	dh_link_arm[0] = 0;
 	dh_link_arm[1] = 0;
-	dh_link_arm[2] = 0.1;  // must modify
-	dh_link_arm[3] = 0.05; // must modify
+	dh_link_arm[2] = 0.22;  // must modify
+	dh_link_arm[3] = 0.25; // must modify
 
 	dh_link_d_arm[0] = 0;
 	dh_link_d_arm[1] = 0;
@@ -592,9 +592,47 @@ KinematicsArm::KinematicsArm()
 	real_theta_arm[2] = 0;
 	real_theta_arm[3] = 0;
 
+	origin_to_waist_tf_.fill(0);
+	origin_to_waist_tf_(3,3) = 1;
+	origin_to_arm_tf_.fill(0);
+	arm_to_origin_tf_.fill(0);
+	waist_to_arm_tf_.fill(0);
+	waist_to_arm_tf_<< 1,0,0,    0,
+			               0,1,0,0.205,
+										 0,0,1,0.205,
+										 0,0,0,    1;
+	origin_desired_point_.resize(4,1);
+	origin_desired_point_.fill(0);
+	arm_desired_point_.resize(4,1);
+	arm_desired_point_.fill(0);
 }
 KinematicsArm::~KinematicsArm()
 {
+}
+void KinematicsArm::ArmToOriginTransformation(double waist_yaw, double waist_roll, double x, double y, double z)
+{
+	origin_desired_point_(0,0) = x;
+	origin_desired_point_(1,0) = y;
+	origin_desired_point_(2,0) = z;
+	origin_desired_point_(3,0) = 1;
+
+	origin_to_waist_tf_(0,0) = cos(waist_yaw);
+	origin_to_waist_tf_(0,1) = -sin(waist_yaw);
+
+	origin_to_waist_tf_(1,0) = cos(waist_roll)*sin(waist_yaw);
+	origin_to_waist_tf_(1,1) = cos(waist_roll)*cos(waist_yaw);
+	origin_to_waist_tf_(1,2) = -sin(waist_roll);
+
+	origin_to_waist_tf_(2,0) = sin(waist_roll)*sin(waist_yaw);
+	origin_to_waist_tf_(2,1) = sin(waist_roll)*cos(waist_yaw);
+	origin_to_waist_tf_(2,2) = cos(waist_roll);
+	origin_to_waist_tf_(2,3) = 0.2;
+
+
+	origin_to_arm_tf_  = origin_to_waist_tf_ * waist_to_arm_tf_;
+	arm_to_origin_tf_  = origin_to_arm_tf_.inverse();
+	arm_desired_point_ = arm_to_origin_tf_ * origin_desired_point_;
+	printf("X : %f //  Y:  %f  // Z: %f  \n",arm_desired_point_(0,0), arm_desired_point_(1,0), arm_desired_point_(2,0));
 }
 void KinematicsArm::FowardKinematicsArm(double joint[4], std::string left_right)
 {
@@ -604,7 +642,6 @@ void KinematicsArm::FowardKinematicsArm(double joint[4], std::string left_right)
 	{
 		sum_theta[i] = joint[i]+ offset_theta[i];
 	}
-
 	for(int i=1; i<4; i++)
 	{
 		H_arm[i](0,0) = floor(100000.*(cos(sum_theta[i])+0.000005))/100000.;
@@ -647,7 +684,6 @@ void KinematicsArm::FowardKinematicsArm(double joint[4], std::string left_right)
 		H_arm[i](3,2) =0;
 		H_arm[i](3,3) =1;
 	}
-
 	H_arm[0](0,0) = 1;
 	H_arm[0](0,1) = 0;
 	H_arm[0](0,2) = 0;
@@ -679,8 +715,8 @@ void KinematicsArm::FowardKinematicsArm(double joint[4], std::string left_right)
 
 void KinematicsArm::InverseKinematicsArm(double pX_, double pY_, double pZ_)
 {
-	//dh_link_arm[2] = 0.1;  // must modify
-	//dh_link_arm[3] = 0.05; // must modify
+	//dh_link_arm[2] = 0.22;  // must modify
+	//dh_link_arm[3] = 0.25; // must modify
 
 	double l03 = 0;
 	double temp_a = 0;
@@ -713,8 +749,6 @@ void KinematicsArm::InverseKinematicsArm(double pX_, double pY_, double pZ_)
 		return;
 	else
 		joint_radian(1,0) = atan2(temp_sin_theta1,temp_cos_theta1);
-
-
 }
 //////////////////////////////////////////////////////////Euler Aangle Kinematics/////////////////////////////////////////////////////////////////////////
 KinematicsEulerAngle::KinematicsEulerAngle()

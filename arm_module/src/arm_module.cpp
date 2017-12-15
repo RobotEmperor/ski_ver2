@@ -28,17 +28,23 @@ ArmModule::ArmModule()
 	//result_["r_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 4
 	//result_["r_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 6
 	///////////////////////////
-	l_arm_kinematics_   = new heroehs_math::KinematicsArm;
-	r_arm_kinematics_   = new heroehs_math::KinematicsArm;
-
 	// arm //
 	// Left //
 	l_arm_kinematics_  = new heroehs_math::KinematicsArm;
 	end_to_rad_l_arm_  = new heroehs_math::CalRad;
-
 	//Right //
 	r_arm_kinematics_  = new heroehs_math::KinematicsArm;
 	end_to_rad_r_arm_  = new heroehs_math::CalRad;
+
+	waist_yaw_rad_  = 0;
+	waist_roll_rad_ = 0;
+	l_arm_desired_point_x_ = 0;
+	l_arm_desired_point_y_ = 0;
+	l_arm_desired_point_z_ = 0;
+
+	r_arm_desired_point_x_ = 0;
+	r_arm_desired_point_y_ = 0;
+	r_arm_desired_point_z_ = 0;
 
 	traj_time_test = 4;
 	new_count_ = 1 ;
@@ -64,18 +70,18 @@ void ArmModule::initialize(const int control_cycle_msec, robotis_framework::Robo
 		joint_name_to_id_[joint_name] = dxl_info->id_;
 		joint_id_to_name_[dxl_info->id_] = joint_name;
 	}
-	// arm
+	// arm initialize value in local frame
 	// left //
 	l_arm_end_point_.resize(6,8);
 	l_arm_end_point_.fill(0);
 	//l_arm_end_point_.(1,0) = ; // y 초기값
 	//l_arm_end_point_.(1,1) = ; //
-	l_arm_end_point_(2,0) = -0.12;
-	l_arm_end_point_(2,1) = -0.12;
+	l_arm_end_point_(2,0) = -0.47;
+	l_arm_end_point_(2,1) = -0.47;
 	//	end_to_rad_l_arm_->cal_end_point_tra_py->current_pose = 0.105;
 	//	end_to_rad_l_arm_->current_pose_change(1,0) = 0.105;
-	end_to_rad_l_arm_->cal_end_point_tra_pz->current_pose = -0.12;
-	end_to_rad_l_arm_->current_pose_change(2,0) = -0.12;
+	end_to_rad_l_arm_->cal_end_point_tra_pz->current_pose = -0.47;
+	end_to_rad_l_arm_->current_pose_change(2,0) = -0.47;
 	result_end_l_arm_.resize(6,1);
 	result_end_l_arm_.fill(0);
 	//right //
@@ -85,12 +91,12 @@ void ArmModule::initialize(const int control_cycle_msec, robotis_framework::Robo
 	result_end_r_arm_.fill(0);
 	//l_arm_end_point_.(1,0) = ; // y 초기값
 	//l_arm_end_point_.(1,1) = ; //
-	r_arm_end_point_(2,0) = -0.12;
-	r_arm_end_point_(2,1) = -0.12;
+	r_arm_end_point_(2,0) = -0.47;
+	r_arm_end_point_(2,1) = -0.47;
 	//	end_to_rad_l_arm_->cal_end_point_tra_py->current_pose = 0.105;
 	//	end_to_rad_l_arm_->current_pose_change(1,0) = 0.105;
-	end_to_rad_r_arm_->cal_end_point_tra_pz->current_pose = -0.12;
-	end_to_rad_r_arm_->current_pose_change(2,0) = -0.12;
+	end_to_rad_r_arm_->cal_end_point_tra_pz->current_pose = -0.47;
+	end_to_rad_r_arm_->current_pose_change(2,0) = -0.47;
 
 	for(int joint_num_= 0; joint_num_< 6 ; joint_num_ ++)
 	{
@@ -111,20 +117,26 @@ void ArmModule::queueThread()
 	get_ft_data_sub_ = ros_node.subscribe("/diana/force_torque_data", 100, &MotionModule::ftDataMsgCallback, this);
 	 */
 	// subscriber topics
-	desired_pose_arm_sub_ = ros_node.subscribe("/desired_pose_arm", 5, &ArmModule::desiredPoseArmMsgCallbackTEST, this);
+	desired_pose_arm_sub_   = ros_node.subscribe("/desired_pose_arm", 5, &ArmModule::desiredPoseArmMsgCallbackTEST, this);
+	current_waist_pose_sub_ = ros_node.subscribe("/current_waist_pose", 5, &ArmModule::currentWaistPoseMsgCallbackTEST, this);
 	ros::WallDuration duration(control_cycle_msec_ / 1000.0);
 	while(ros_node.ok())
 		callback_queue.callAvailable(duration);
 }
+void ArmModule::currentWaistPoseMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg)
+{
+	waist_yaw_rad_  = msg->data[0];// waist yaw
+	waist_roll_rad_ = msg->data[1];// waist roll
+}
 void ArmModule::desiredPoseArmMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg)
 {
-	l_arm_end_point_(0, 1) = msg->data[0]; // yaw  트레젝토리 6 * 8 은 xyz yaw(z) pitch(y) roll(x) 이며 8은 처음 위치 나중 위치 / 속도 속도 / 가속도 가속도 / 시간 시간 / 임
-	l_arm_end_point_(1, 1) = msg->data[1];
-	l_arm_end_point_(2, 1) = msg->data[2]; // roll
+	l_arm_desired_point_x_ = msg->data[0]; // orientation
+	l_arm_desired_point_y_ = msg->data[1];
+	l_arm_desired_point_z_ = msg->data[2];
 
-	r_arm_end_point_(0, 1) = msg->data[3]; // yaw  트레젝토리 6 * 8 은 xyz yaw(z) pitch(y) roll(x) 이며 8은 처음 위치 나중 위치 / 속도 속도 / 가속도 가속도 / 시간 시간 / 임
-	r_arm_end_point_(1, 1) = msg->data[4];
-	r_arm_end_point_(2, 1) = msg->data[5];
+	r_arm_desired_point_x_ = msg->data[3];
+	r_arm_desired_point_y_ = msg->data[4];
+	r_arm_desired_point_z_ = msg->data[5];
 
 	is_moving_l_arm_ = true;
 	is_moving_r_arm_ = true;
@@ -168,7 +180,17 @@ void ArmModule::process(std::map<std::string, robotis_framework::Dynamixel *> dx
 	}
 	else
 	{
-		ROS_INFO("Arm Module Trajectory Start");
+	  ROS_INFO("Arm Module Trajectory Start");
+		l_arm_kinematics_ -> ArmToOriginTransformation(waist_yaw_rad_ , waist_roll_rad_, l_arm_desired_point_x_, l_arm_desired_point_y_, l_arm_desired_point_z_);
+		r_arm_kinematics_ -> ArmToOriginTransformation(waist_yaw_rad_ , waist_roll_rad_, r_arm_desired_point_x_, r_arm_desired_point_y_, r_arm_desired_point_z_);
+
+		l_arm_end_point_(0, 1) = l_arm_kinematics_ -> arm_desired_point_(0,0);// yaw  트레젝토리 6 * 8 은 xyz yaw(z) pitch(y) roll(x) 이며 8은 처음 위치 나중 위치 / 속도 속도 / 가속도 가속도 / 시간 시간 / 임
+		l_arm_end_point_(1, 1) = l_arm_kinematics_ -> arm_desired_point_(1,0);
+		l_arm_end_point_(2, 1) = l_arm_kinematics_ -> arm_desired_point_(2,0);
+		r_arm_end_point_(0, 1) = r_arm_kinematics_ -> arm_desired_point_(0,0);
+		r_arm_end_point_(1, 1) = r_arm_kinematics_ -> arm_desired_point_(1,0);
+		r_arm_end_point_(2, 1) = r_arm_kinematics_ -> arm_desired_point_(2,0);
+
 		result_end_l_arm_ = end_to_rad_l_arm_ -> cal_end_point_to_rad(l_arm_end_point_);
 		result_end_r_arm_ = end_to_rad_r_arm_ -> cal_end_point_to_rad(r_arm_end_point_);
 
@@ -179,9 +201,9 @@ void ArmModule::process(std::map<std::string, robotis_framework::Dynamixel *> dx
 	l_arm_kinematics_ ->InverseKinematicsArm(result_end_l_arm_(0,0), result_end_l_arm_(1,0), result_end_l_arm_(2,0));
 	r_arm_kinematics_ ->InverseKinematicsArm(result_end_r_arm_(0,0), result_end_r_arm_(1,0), result_end_r_arm_(2,0));
 
-	result_[joint_id_to_name_[1]]->goal_position_ = l_arm_kinematics_->joint_radian(1,0);
-	result_[joint_id_to_name_[3]]->goal_position_ = l_arm_kinematics_->joint_radian(2,0);
-	result_[joint_id_to_name_[5]]->goal_position_ = l_arm_kinematics_->joint_radian(3,0);
+	//result_[joint_id_to_name_[1]]->goal_position_ = l_arm_kinematics_->joint_radian(1,0);
+	//result_[joint_id_to_name_[3]]->goal_position_ = l_arm_kinematics_->joint_radian(2,0);
+	//result_[joint_id_to_name_[5]]->goal_position_ = l_arm_kinematics_->joint_radian(3,0);
 
 	//result_[joint_id_to_name_[2]]->goal_position_ = r_arm_kinematics_->joint_radian(1,0);
 	//result_[joint_id_to_name_[4]]->goal_position_ = r_arm_kinematics_->joint_radian(2,0);

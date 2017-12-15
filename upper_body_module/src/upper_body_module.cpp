@@ -37,11 +37,10 @@ UpperBodyModule::UpperBodyModule()
 	head_kinematics_  = new heroehs_math::KinematicsEulerAngle;
 	end_to_rad_head_  = new heroehs_math::CalRad;
 
-	arm_kinematics_   = new heroehs_math::KinematicsArm;
-
 	traj_time_test = 4;
 	new_count_ = 1 ;
-
+	temp_waist_yaw_rad   = 0;
+	temp_waist_roll_rad  = 0;
 }
 UpperBodyModule::~UpperBodyModule()
 {
@@ -105,7 +104,10 @@ void UpperBodyModule::queueThread()
 	ros::Subscriber motion_num_msg_sub = ros_node.subscribe("/motion_num", 5, &MotionModule::desiredMotionMsgCallback, this);
 	ros::Subscriber center_change_msg_sub = ros_node.subscribe("/diana/center_change", 5, &MotionModule::desiredCenterChangeMsgCallback, this);
 	 */
+	// publish waist pose for arm module.
+	current_waist_pose_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/current_waist_pose",100);
 
+	// test desired pose
 	head_test = ros_node.subscribe("/desired_pose_head", 5, &UpperBodyModule::desiredPoseHeadMsgCallbackTEST, this);
 	waist_test = ros_node.subscribe("/desired_pose_waist", 5, &UpperBodyModule::desiredPoseWaistMsgCallbackTEST, this);
 
@@ -183,11 +185,7 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	result_[joint_id_to_name_[9]]->goal_position_  = waist_kinematics_ -> xyz_euler_angle_z;// waist yaw
 	result_[joint_id_to_name_[10]]->goal_position_ = waist_kinematics_ -> xyz_euler_angle_x; // waist roll
 
-	//printf("HEAD:::   %f",head_kinematics_ -> zyx_euler_angle_z);
-
 	result_["head_yaw"]->goal_position_ = head_kinematics_ -> zyx_euler_angle_z;
-
-
 	//test ~~~~
 	//double joint[4] = {0,0,0,0};
 
@@ -199,6 +197,15 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	arm_kinematics_ -> FowardKinematicsArm(joint,"left");*/
 	//result_[joint_id_to_name_[24]]->goal_position_ = head_kinematics_->zyx_euler_angle_y;
 	//result_[joint_id_to_name_[25]]->goal_position_ = head_kinematics_->zyx_euler_angle_x;
+
+	//arm module transmitted
+	temp_waist_yaw_rad   = dxls["waist_yaw"]->dxl_state_->present_position_;
+	temp_waist_roll_rad  = -dxls["waist_roll"]->dxl_state_->present_position_; // direction must define!
+
+	current_waist_pose_msg.data.push_back(temp_waist_yaw_rad);
+	current_waist_pose_msg.data.push_back(temp_waist_roll_rad);
+	current_waist_pose_pub.publish(current_waist_pose_msg);
+	current_waist_pose_msg.data.clear();
 }
 void UpperBodyModule::stop()
 {
