@@ -78,10 +78,12 @@ public:
 	Eigen::Matrix4d P_;
 
 	//Arm desired point
-	Eigen::MatrixXd arm_desired_point_;
-	Eigen::MatrixXd arm_point_from_origin;
 	void ArmToOriginTransformationCommand(double waist_yaw,double waist_roll, double x, double y, double z);
 	void OriginToArmTransformationPoint(double waist_yaw, double waist_roll, double shoulder_pitch, double shoulder_roll, double elbow_pitch);
+
+	Eigen::MatrixXd arm_desired_point_;
+	Eigen::MatrixXd arm_point_from_origin;
+	Eigen::Matrix4d origin_to_arm_end_point_tf_;
 
 private:
 	//forward_kinematics arm
@@ -99,7 +101,8 @@ private:
 	Eigen::Matrix4d origin_to_arm_tf_;
 	Eigen::Matrix4d arm_to_origin_tf_;
 	Eigen::MatrixXd origin_desired_point_;
-	Eigen::Matrix4d origin_to_arm_end_point_tf_;
+	//Eigen::Matrix4d origin_to_arm_end_point_tf_;
+
 
 
 

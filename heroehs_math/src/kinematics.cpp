@@ -599,9 +599,9 @@ KinematicsArm::KinematicsArm()
 	arm_to_origin_tf_.fill(0);
 	waist_to_arm_tf_.fill(0);
 	waist_to_arm_tf_<< 1,0,0,    0,
-			               0,1,0,0.205,
-										 0,0,1,0.205,
-										 0,0,0,    1;
+			0,1,0,0.205,
+			0,0,1,0.205,
+			0,0,0,    1;
 	origin_desired_point_.resize(4,1);
 	origin_desired_point_.fill(0);
 	arm_desired_point_.resize(4,1);
@@ -652,11 +652,9 @@ void KinematicsArm::OriginToArmTransformationPoint(double waist_yaw, double wais
 	origin_to_waist_tf_(2,2) = cos(waist_roll);
 	origin_to_waist_tf_(2,3) = 0.2;
 	FowardKinematicsArm(temp_joint,"left");
-	origin_to_arm_end_point_tf_  = origin_to_waist_tf_ * waist_to_arm_tf_*P_;
 
-	printf("!!!!!!!!!!!!!!!!! arm\n");
-	printf("%f  %f  %f %f \n",origin_to_arm_end_point_tf_(0,3),origin_to_arm_end_point_tf_(1,3),origin_to_arm_end_point_tf_(2,3),origin_to_arm_end_point_tf_(3,3));
-
+	origin_to_arm_end_point_tf_  = origin_to_waist_tf_ * waist_to_arm_tf_* P_;
+	//printf("%f  %f  %f %f \n",origin_to_arm_end_point_tf_(0,3),origin_to_arm_end_point_tf_(1,3),origin_to_arm_end_point_tf_(2,3), origin_to_arm_end_point_tf_(3,3));
 }
 void KinematicsArm::FowardKinematicsArm(double joint[4], std::string left_right)
 {
@@ -730,9 +728,9 @@ void KinematicsArm::FowardKinematicsArm(double joint[4], std::string left_right)
 	H_arm[0](3,2) = 0;
 	H_arm[0](3,3) = 1;
 
-	P_ = H_arm[0]*H_arm[1]*H_arm[2]*H_arm[3];
-
-/*	printf("forward_kinematics arm\n");
+		P_ = H_arm[0]*H_arm[1]*H_arm[2]*H_arm[3];
+		/*
+  printf("forward_kinematics arm\n");
 	printf("%f  %f  %f %f \n",P_(0,0),P_(0,1),P_(0,2),P_(0,3));
 	printf("%f  %f  %f %f \n",P_(1,0),P_(1,1),P_(1,2),P_(1,3));
 	printf("%f  %f  %f %f \n",P_(2,0),P_(2,1),P_(2,2),P_(2,3));
@@ -763,7 +761,7 @@ void KinematicsArm::InverseKinematicsArm(double pX_, double pY_, double pZ_)
 	if(isnan(asin((pY_)/(dh_link_arm[2] + dh_link_arm[3]*cos(joint_radian(3,0))))))
 		return;
 	else
-  	joint_radian(2,0) = asin((pY_)/(dh_link_arm[2] + dh_link_arm[3]*cos(joint_radian(3,0))));
+		joint_radian(2,0) = asin((pY_)/(dh_link_arm[2] + dh_link_arm[3]*cos(joint_radian(3,0))));
 
 	temp_a = dh_link_arm[2]*cos(joint_radian(2,0)) + dh_link_arm[3]*cos(joint_radian(2,0))*cos(joint_radian(3,0));
 	temp_b = - dh_link_arm[3]*sin(joint_radian(3,0));

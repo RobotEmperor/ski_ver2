@@ -220,6 +220,8 @@ void PoseModule::queueThread()
 
 	ros_node.setCallbackQueue(&callback_queue);
 
+	current_arm_state_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/current_arm_state",100);
+
 	/* subscribe topics */
 	// for gui
 	ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/desired_pose_leg", 5, &PoseModule::desiredPoseMsgCallback, this);
@@ -449,21 +451,33 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	waist_yaw_rad_    = dxls["waist_yaw"]->dxl_state_->present_position_;
 	waist_roll_rad_   = -dxls["waist_roll"]->dxl_state_->present_position_; // direction must define!;
 
-	l_arm_kinematics_ ->OriginToArmTransformationPoint(waist_yaw_rad_ , waist_roll_rad_,dxls["l_shoulder_pitch"]->dxl_state_->present_position_, dxls["l_shoulder_roll"]->dxl_state_->present_position_, dxls["l_elbow_pitch"]->dxl_state_->present_position_);
-
+	 //l_arm_kinematics_ -> OriginToArmTransformationPoint(waist_yaw_rad_ , waist_roll_rad_,dxls["l_shoulder_pitch"]->dxl_state_->present_position_, dxls["l_shoulder_roll"]->dxl_state_->present_position_, dxls["l_elbow_pitch"]->dxl_state_->present_position_);
+	 //r_arm_kinematics_ ->OriginToArmTransformationPoint(waist_yaw_rad_ , waist_roll_rad_,dxls["r_shoulder_pitch"]->dxl_state_->present_position_, dxls["r_shoulder_roll"]->dxl_state_->present_position_, dxls["r_elbow_pitch"]->dxl_state_->present_position_);
+	l_arm_kinematics_ ->OriginToArmTransformationPoint(waist_kinematics_->xyz_euler_angle_z , waist_kinematics_->xyz_euler_angle_x, l_arm_kinematics_->joint_radian(1,0), l_arm_kinematics_->joint_radian(2,0), l_arm_kinematics_->joint_radian(3,0));
+	//r_arm_kinematics_ ->OriginToArmTransformationPoint(waist_kinematics_->xyz_euler_angle_z , waist_kinematics_->xyz_euler_angle_x, r_arm_kinematics_->joint_radian(1,0), r_arm_kinematics_->joint_radian(2,0), r_arm_kinematics_->joint_radian(3,0));
 
 	//<---  catesian space control test --->
 	result_[joint_id_to_name_[9]]  -> goal_position_  = waist_kinematics_->xyz_euler_angle_z;// waist yaw
-	result_[joint_id_to_name_[10]] -> goal_position_ = waist_kinematics_->xyz_euler_angle_x; // waist roll
+	result_[joint_id_to_name_[10]] -> goal_position_  = waist_kinematics_->xyz_euler_angle_x; // waist roll
 
-	result_[joint_id_to_name_[19]] -> goal_position_ = -l_kinematics_->joint_radian(5,0);
-	result_[joint_id_to_name_[20]] -> goal_position_ = r_kinematics_->joint_radian(5,0);
+	result_[joint_id_to_name_[19]] -> goal_position_  = -l_kinematics_->joint_radian(5,0);
+	result_[joint_id_to_name_[20]] -> goal_position_  = r_kinematics_->joint_radian(5,0);
 
-	result_[joint_id_to_name_[23]] -> goal_position_ = head_kinematics_->zyx_euler_angle_z;
+	result_[joint_id_to_name_[23]] -> goal_position_  = head_kinematics_->zyx_euler_angle_z;
 
-	result_[joint_id_to_name_[1]]  -> goal_position_ = l_arm_kinematics_->joint_radian(1,0);
-	result_[joint_id_to_name_[3]]  -> goal_position_ = l_arm_kinematics_->joint_radian(2,0);
-	result_[joint_id_to_name_[5]]  -> goal_position_ = l_arm_kinematics_->joint_radian(3,0);
+	result_[joint_id_to_name_[1]]  -> goal_position_  = l_arm_kinematics_->joint_radian(1,0);
+	result_[joint_id_to_name_[3]]  -> goal_position_  = l_arm_kinematics_->joint_radian(2,0);
+	result_[joint_id_to_name_[5]]  -> goal_position_  = l_arm_kinematics_->joint_radian(3,0);
+
+	current_arm_state_msg.data.push_back(l_arm_kinematics_ -> origin_to_arm_end_point_tf_(0,3));
+	current_arm_state_msg.data.push_back(l_arm_kinematics_ -> origin_to_arm_end_point_tf_(1,3));
+	current_arm_state_msg.data.push_back(l_arm_kinematics_ -> origin_to_arm_end_point_tf_(2,3));
+	current_arm_state_msg.data.push_back(r_arm_kinematics_ -> origin_to_arm_end_point_tf_(0,3));
+	current_arm_state_msg.data.push_back(r_arm_kinematics_ -> origin_to_arm_end_point_tf_(1,3));
+	current_arm_state_msg.data.push_back(r_arm_kinematics_ -> origin_to_arm_end_point_tf_(2,3));
+
+	current_arm_state_pub.publish(current_arm_state_msg);
+	current_arm_state_msg.data.clear();
 	//<---  cartesian space control  --->
 	/*
 

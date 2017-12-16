@@ -67,6 +67,8 @@ public:
 	void savePgainValue();
 	ros::ServiceServer read_p_gain_value_srv;
 
+	ros::Publisher current_arm_state_pub;
+
 
 private:
 	void queueThread();
@@ -131,6 +133,8 @@ private:
 	double waist_roll_rad_;
 	double l_arm_desired_point_x_, l_arm_desired_point_y_, l_arm_desired_point_z_;
 	double r_arm_desired_point_x_, r_arm_desired_point_y_, r_arm_desired_point_z_;
+	// Gui arm state publisher
+	std_msgs::Float64MultiArray current_arm_state_msg;
 
 	//Arm kinematics joint control
 	//one joint control

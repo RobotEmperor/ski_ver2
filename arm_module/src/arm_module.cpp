@@ -189,9 +189,8 @@ void ArmModule::process(std::map<std::string, robotis_framework::Dynamixel *> dx
 		is_moving_r_arm_  = end_to_rad_r_arm_  -> is_moving_check;
 	}
 	///////////////////////////////////////////////////// control //////////////////////////////////////////////////////////
-	l_arm_kinematics_ ->InverseKinematicsArm(result_end_l_arm_(0,0), result_end_l_arm_(1,0), result_end_l_arm_(2,0));
-	r_arm_kinematics_ ->InverseKinematicsArm(result_end_r_arm_(0,0), result_end_r_arm_(1,0), result_end_r_arm_(2,0));
-
+	l_arm_kinematics_ -> InverseKinematicsArm(result_end_l_arm_(0,0), result_end_l_arm_(1,0), result_end_l_arm_(2,0));
+	r_arm_kinematics_ -> InverseKinematicsArm(result_end_r_arm_(0,0), result_end_r_arm_(1,0), result_end_r_arm_(2,0));
 
 
 	//result_[joint_id_to_name_[1]]->goal_position_ = l_arm_kinematics_->joint_radian(1,0);
