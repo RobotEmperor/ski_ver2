@@ -127,6 +127,11 @@ private:
 	Eigen::MatrixXd r_arm_end_point_;
 	Eigen::MatrixXd result_end_r_arm_;
 
+	double waist_yaw_rad_;
+	double waist_roll_rad_;
+	double l_arm_desired_point_x_, l_arm_desired_point_y_, l_arm_desired_point_z_;
+	double r_arm_desired_point_x_, r_arm_desired_point_y_, r_arm_desired_point_z_;
+
 	//Arm kinematics joint control
 	//one joint control
 	//heroehs_math::CalRad *one_joint_;

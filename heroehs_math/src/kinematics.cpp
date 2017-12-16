@@ -595,6 +595,7 @@ KinematicsArm::KinematicsArm()
 	origin_to_waist_tf_.fill(0);
 	origin_to_waist_tf_(3,3) = 1;
 	origin_to_arm_tf_.fill(0);
+	origin_to_arm_end_point_tf_.fill(0);
 	arm_to_origin_tf_.fill(0);
 	waist_to_arm_tf_.fill(0);
 	waist_to_arm_tf_<< 1,0,0,    0,
@@ -605,11 +606,13 @@ KinematicsArm::KinematicsArm()
 	origin_desired_point_.fill(0);
 	arm_desired_point_.resize(4,1);
 	arm_desired_point_.fill(0);
+	arm_point_from_origin.resize(4,1);
+	arm_point_from_origin.fill(0);
 }
 KinematicsArm::~KinematicsArm()
 {
 }
-void KinematicsArm::ArmToOriginTransformation(double waist_yaw, double waist_roll, double x, double y, double z)
+void KinematicsArm::ArmToOriginTransformationCommand(double waist_yaw, double waist_roll, double x, double y, double z)
 {
 	origin_desired_point_(0,0) = x;
 	origin_desired_point_(1,0) = y;
@@ -634,8 +637,31 @@ void KinematicsArm::ArmToOriginTransformation(double waist_yaw, double waist_rol
 	arm_desired_point_ = arm_to_origin_tf_ * origin_desired_point_;
 	printf("X : %f //  Y:  %f  // Z: %f  \n",arm_desired_point_(0,0), arm_desired_point_(1,0), arm_desired_point_(2,0));
 }
+void KinematicsArm::OriginToArmTransformationPoint(double waist_yaw, double waist_roll, double shoulder_pitch, double shoulder_roll, double elbow_pitch)
+{
+	double temp_joint[4] ={0, shoulder_pitch, shoulder_roll, elbow_pitch};
+	origin_to_waist_tf_(0,0) = cos(waist_yaw);
+	origin_to_waist_tf_(0,1) = -sin(waist_yaw);
+
+	origin_to_waist_tf_(1,0) = cos(waist_roll)*sin(waist_yaw);
+	origin_to_waist_tf_(1,1) = cos(waist_roll)*cos(waist_yaw);
+	origin_to_waist_tf_(1,2) = -sin(waist_roll);
+
+	origin_to_waist_tf_(2,0) = sin(waist_roll)*sin(waist_yaw);
+	origin_to_waist_tf_(2,1) = sin(waist_roll)*cos(waist_yaw);
+	origin_to_waist_tf_(2,2) = cos(waist_roll);
+	origin_to_waist_tf_(2,3) = 0.2;
+	FowardKinematicsArm(temp_joint,"left");
+	origin_to_arm_end_point_tf_  = origin_to_waist_tf_ * waist_to_arm_tf_*P_;
+
+	printf("!!!!!!!!!!!!!!!!! arm\n");
+	printf("%f  %f  %f %f \n",origin_to_arm_end_point_tf_(0,3),origin_to_arm_end_point_tf_(1,3),origin_to_arm_end_point_tf_(2,3),origin_to_arm_end_point_tf_(3,3));
+
+}
 void KinematicsArm::FowardKinematicsArm(double joint[4], std::string left_right)
 {
+	//dh_link_arm[2] = 0.22;  // must modify
+	//dh_link_arm[3] = 0.25; // must modify
 	double sum_theta[4] = {0,0,0,0};
 	double offset_theta[4] = {0, (M_PI)/2,0,0};
 	for(int i=1; i<4; i++)
@@ -706,11 +732,11 @@ void KinematicsArm::FowardKinematicsArm(double joint[4], std::string left_right)
 
 	P_ = H_arm[0]*H_arm[1]*H_arm[2]*H_arm[3];
 
-	printf("forward_kinematics arm\n");
+/*	printf("forward_kinematics arm\n");
 	printf("%f  %f  %f %f \n",P_(0,0),P_(0,1),P_(0,2),P_(0,3));
 	printf("%f  %f  %f %f \n",P_(1,0),P_(1,1),P_(1,2),P_(1,3));
 	printf("%f  %f  %f %f \n",P_(2,0),P_(2,1),P_(2,2),P_(2,3));
-	printf("%f  %f  %f %f \n",P_(3,0),P_(3,1),P_(3,2),P_(3,3));
+	printf("%f  %f  %f %f \n",P_(3,0),P_(3,1),P_(3,2),P_(3,3));*/
 }
 
 void KinematicsArm::InverseKinematicsArm(double pX_, double pY_, double pZ_)

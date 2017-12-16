@@ -91,6 +91,16 @@ PoseModule::PoseModule()
 	end_to_rad_r_arm_  = new heroehs_math::CalRad;
 	is_moving_r_arm    = false;
 
+	waist_yaw_rad_  = 0;
+	waist_roll_rad_ = 0;
+	l_arm_desired_point_x_ = 0;
+	l_arm_desired_point_y_ = 0;
+	l_arm_desired_point_z_ = 0;
+
+	r_arm_desired_point_x_ = 0;
+	r_arm_desired_point_y_ = 0;
+	r_arm_desired_point_z_ = 0;
+
 	traj_time_ = 4.0;
 	////
 	p_gain_adjust_check = false;
@@ -255,19 +265,15 @@ void PoseModule::desiredPoseHeadMsgCallback(const std_msgs::Float64MultiArray::C
 }
 void PoseModule::desiredPoseArmMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실행
 {
-
-	l_arm_end_point_(0, 1) = msg->data[0]; // yaw  트레젝토리 6 * 8 은 xyz yaw(z) pitch(y) roll(x) 이며 8은 처음 위치 나중 위치 / 속도 속도 / 가속도 가속도 / 시간 시간 / 임
+	l_arm_end_point_(0, 1) = msg->data[0];// yaw  트레젝토리 6 * 8 은 xyz yaw(z) pitch(y) roll(x) 이며 8은 처음 위치 나중 위치 / 속도 속도 / 가속도 가속도 / 시간 시간 / 임
 	l_arm_end_point_(1, 1) = msg->data[1];
-	l_arm_end_point_(2, 1) = msg->data[2]; // roll
-
-	r_arm_end_point_(0, 1) = msg->data[3]; // yaw  트레젝토리 6 * 8 은 xyz yaw(z) pitch(y) roll(x) 이며 8은 처음 위치 나중 위치 / 속도 속도 / 가속도 가속도 / 시간 시간 / 임
+	l_arm_end_point_(2, 1) = msg->data[2];
+	r_arm_end_point_(0, 1) = msg->data[3];
 	r_arm_end_point_(1, 1) = msg->data[4];
 	r_arm_end_point_(2, 1) = msg->data[5];
 
 	is_moving_l_arm = true;
 	is_moving_r_arm = true;
-
-	printf("Receive the value!!!");
 }
 void PoseModule::gainAdjustmentMsgCallback(const std_msgs::Int16MultiArray::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실행
 {
@@ -388,7 +394,10 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	}
 	else
 	{
+
 		ROS_INFO("Pose Trajectory Start");
+		//l_arm_kinematics_ -> ArmToOriginTransformation(waist_yaw_rad_ , waist_roll_rad_, l_arm_desired_point_x_, l_arm_desired_point_y_, l_arm_desired_point_z_);
+		//r_arm_kinematics_ -> ArmToOriginTransformation(waist_yaw_rad_ , waist_roll_rad_, r_arm_desired_point_x_, r_arm_desired_point_y_, r_arm_desired_point_z_);
 
 		// trajectory is working cartesian space control LEG
 		result_end_l_ = end_to_rad_l_         -> cal_end_point_to_rad(leg_end_point_l_);
@@ -437,6 +446,12 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	r_arm_kinematics_ ->InverseKinematicsArm(result_end_r_arm_(0,0), result_end_r_arm_(1,0), result_end_r_arm_(2,0));
 
 
+	waist_yaw_rad_    = dxls["waist_yaw"]->dxl_state_->present_position_;
+	waist_roll_rad_   = -dxls["waist_roll"]->dxl_state_->present_position_; // direction must define!;
+
+	l_arm_kinematics_ ->OriginToArmTransformationPoint(waist_yaw_rad_ , waist_roll_rad_,dxls["l_shoulder_pitch"]->dxl_state_->present_position_, dxls["l_shoulder_roll"]->dxl_state_->present_position_, dxls["l_elbow_pitch"]->dxl_state_->present_position_);
+
+
 	//<---  catesian space control test --->
 	result_[joint_id_to_name_[9]]  -> goal_position_  = waist_kinematics_->xyz_euler_angle_z;// waist yaw
 	result_[joint_id_to_name_[10]] -> goal_position_ = waist_kinematics_->xyz_euler_angle_x; // waist roll
@@ -449,8 +464,6 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	result_[joint_id_to_name_[1]]  -> goal_position_ = l_arm_kinematics_->joint_radian(1,0);
 	result_[joint_id_to_name_[3]]  -> goal_position_ = l_arm_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[5]]  -> goal_position_ = l_arm_kinematics_->joint_radian(3,0);
-
-
 	//<---  cartesian space control  --->
 	/*
 

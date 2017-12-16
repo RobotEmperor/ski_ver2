@@ -130,14 +130,12 @@ void ArmModule::currentWaistPoseMsgCallbackTEST(const std_msgs::Float64MultiArra
 }
 void ArmModule::desiredPoseArmMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg)
 {
-	l_arm_desired_point_x_ = msg->data[0]; // orientation
-	l_arm_desired_point_y_ = msg->data[1];
-	l_arm_desired_point_z_ = msg->data[2];
-
-	r_arm_desired_point_x_ = msg->data[3];
-	r_arm_desired_point_y_ = msg->data[4];
-	r_arm_desired_point_z_ = msg->data[5];
-
+	l_arm_end_point_(0, 1) = msg->data[0];// yaw  트레젝토리 6 * 8 은 xyz yaw(z) pitch(y) roll(x) 이며 8은 처음 위치 나중 위치 / 속도 속도 / 가속도 가속도 / 시간 시간 / 임
+	l_arm_end_point_(1, 1) = msg->data[1];
+	l_arm_end_point_(2, 1) = msg->data[2];
+	r_arm_end_point_(0, 1) = msg->data[3];
+	r_arm_end_point_(1, 1) = msg->data[4];
+	r_arm_end_point_(2, 1) = msg->data[5];
 	is_moving_l_arm_ = true;
 	is_moving_r_arm_ = true;
 }
@@ -180,16 +178,9 @@ void ArmModule::process(std::map<std::string, robotis_framework::Dynamixel *> dx
 	}
 	else
 	{
-	  ROS_INFO("Arm Module Trajectory Start");
-		l_arm_kinematics_ -> ArmToOriginTransformation(waist_yaw_rad_ , waist_roll_rad_, l_arm_desired_point_x_, l_arm_desired_point_y_, l_arm_desired_point_z_);
-		r_arm_kinematics_ -> ArmToOriginTransformation(waist_yaw_rad_ , waist_roll_rad_, r_arm_desired_point_x_, r_arm_desired_point_y_, r_arm_desired_point_z_);
-
-		l_arm_end_point_(0, 1) = l_arm_kinematics_ -> arm_desired_point_(0,0);// yaw  트레젝토리 6 * 8 은 xyz yaw(z) pitch(y) roll(x) 이며 8은 처음 위치 나중 위치 / 속도 속도 / 가속도 가속도 / 시간 시간 / 임
-		l_arm_end_point_(1, 1) = l_arm_kinematics_ -> arm_desired_point_(1,0);
-		l_arm_end_point_(2, 1) = l_arm_kinematics_ -> arm_desired_point_(2,0);
-		r_arm_end_point_(0, 1) = r_arm_kinematics_ -> arm_desired_point_(0,0);
-		r_arm_end_point_(1, 1) = r_arm_kinematics_ -> arm_desired_point_(1,0);
-		r_arm_end_point_(2, 1) = r_arm_kinematics_ -> arm_desired_point_(2,0);
+		ROS_INFO("Arm Module Trajectory Start");
+		//l_arm_kinematics_ -> ArmToOriginTransformation(waist_yaw_rad_ , waist_roll_rad_, l_arm_desired_point_x_, l_arm_desired_point_y_, l_arm_desired_point_z_);
+		//r_arm_kinematics_ -> ArmToOriginTransformation(waist_yaw_rad_ , waist_roll_rad_, r_arm_desired_point_x_, r_arm_desired_point_y_, r_arm_desired_point_z_);
 
 		result_end_l_arm_ = end_to_rad_l_arm_ -> cal_end_point_to_rad(l_arm_end_point_);
 		result_end_r_arm_ = end_to_rad_r_arm_ -> cal_end_point_to_rad(r_arm_end_point_);
@@ -200,6 +191,8 @@ void ArmModule::process(std::map<std::string, robotis_framework::Dynamixel *> dx
 	///////////////////////////////////////////////////// control //////////////////////////////////////////////////////////
 	l_arm_kinematics_ ->InverseKinematicsArm(result_end_l_arm_(0,0), result_end_l_arm_(1,0), result_end_l_arm_(2,0));
 	r_arm_kinematics_ ->InverseKinematicsArm(result_end_r_arm_(0,0), result_end_r_arm_(1,0), result_end_r_arm_(2,0));
+
+
 
 	//result_[joint_id_to_name_[1]]->goal_position_ = l_arm_kinematics_->joint_radian(1,0);
 	//result_[joint_id_to_name_[3]]->goal_position_ = l_arm_kinematics_->joint_radian(2,0);
