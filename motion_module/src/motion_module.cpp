@@ -27,7 +27,7 @@ MotionModule::MotionModule()
 	// Dynamixel initialize ////
 
 
-/*
+
 	result_["l_hip_pitch"] = new robotis_framework::DynamixelState();  // joint 11
 	result_["l_hip_roll"]  = new robotis_framework::DynamixelState();  // joint 13
 
@@ -42,10 +42,10 @@ MotionModule::MotionModule()
 	result_["r_knee_pitch"] = new robotis_framework::DynamixelState();  // joint 18
 	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
 	result_["r_ankle_roll"]  = new robotis_framework::DynamixelState();  // joint 22
-*/
 
-	result_["l_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 19
-	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
+// test
+//	result_["l_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 19
+//	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
 	///////////////////////////
 	l_kinematics_ = new heroehs_math::Kinematics;
 	r_kinematics_ = new heroehs_math::Kinematics;
@@ -215,6 +215,10 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 	previous_balance_param_.foot_pitch_gyro_p_gain = 0;
 	previous_balance_param_.foot_pitch_gyro_d_gain = 0;
 
+	tf_current_gyro_x = 0;
+	tf_current_gyro_y = 0;
+	tf_current_gyro_z = 0;
+
 	ROS_INFO("< -------  Initialize Module : Motion Module !!  ------->");
 }
 void MotionModule::queueThread()
@@ -295,9 +299,24 @@ void MotionModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange
 void MotionModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) // gyro data get
 {
 	currentGyroX = (double) msg->angular_velocity.x;
-	currentGyroY = (double) -msg->angular_velocity.y;
+	currentGyroY = (double) msg->angular_velocity.y;
 	currentGyroZ = (double) msg->angular_velocity.z;
-	balance_ctrl_.setCurrentGyroSensorOutput(currentGyroY, currentGyroX);
+	gyroRotationTransformation(currentGyroX, currentGyroY, currentGyroZ);
+	balance_ctrl_.setCurrentGyroSensorOutput(tf_current_gyro_x, tf_current_gyro_y);
+}
+void MotionModule::gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x)
+{
+	Eigen::MatrixXd tf_gyro_value;
+	tf_gyro_value.resize(3,1);
+	tf_gyro_value.fill(0);
+	tf_gyro_value(0,0) =  gyro_x;
+	tf_gyro_value(1,0) =  gyro_y;
+	tf_gyro_value(2,0) =  gyro_z;
+
+	tf_gyro_value = (robotis_framework::getRotationZ(M_PI/2)*robotis_framework::getRotationZ(-M_PI))*tf_gyro_value;
+  tf_current_gyro_x = tf_gyro_value(0,0);
+  tf_current_gyro_y = tf_gyro_value(1,0);
+  tf_current_gyro_z = tf_gyro_value(2,0);
 }
 void MotionModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg)// force torque sensor data get
 {
@@ -611,9 +630,9 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	///////////////////////////////////////////////////// control //////////////////////////////////////////////////////////
 	//////balance
 	result_mat_l_ = robotis_framework::getTransformationXYZRPY(result_end_l_.coeff(0,0), result_end_l_.coeff(1,0), result_end_l_.coeff(2,0),
-			result_end_l_.coeff(3,0), result_end_l_.coeff(4,0), result_end_l_.coeff(5,0));
+			result_end_l_.coeff(5,0), result_end_l_.coeff(4,0), result_end_l_.coeff(3,0));
 	result_mat_r_ = robotis_framework::getTransformationXYZRPY(result_end_r_.coeff(0,0), result_end_r_.coeff(1,0), result_end_r_.coeff(2,0),
-			result_end_r_.coeff(3,0), result_end_r_.coeff(4,0), result_end_r_.coeff(5,0));
+			result_end_r_.coeff(5,0), result_end_r_.coeff(4,0), result_end_r_.coeff(3,0));
 
 	//future work : cob must be calculated.
 	result_mat_cob_modified_ = result_mat_cob_;
@@ -628,9 +647,9 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 
 	//IK
 	l_kinematics_->InverseKinematics(result_pose_l_modified_.x, result_pose_l_modified_.y - 0.105, result_pose_l_modified_.z,
-			result_pose_l_modified_.roll, result_pose_l_modified_.pitch, result_pose_l_modified_.yaw); // pX pY pZ alpha betta kamma
+			result_pose_l_modified_.yaw, result_pose_l_modified_.pitch, result_pose_l_modified_.roll); // pX pY pZ alpha betta kamma
 	r_kinematics_->InverseKinematics(result_pose_r_modified_.x, result_pose_r_modified_.y + 0.105, result_pose_r_modified_.z,
-			result_pose_r_modified_.roll, result_pose_r_modified_.pitch, result_pose_r_modified_.yaw); // pX pY pZ alpha betta kamma
+			result_pose_r_modified_.yaw, result_pose_r_modified_.pitch, result_pose_r_modified_.roll); // pX pY pZ alpha betta kamma
 
 	// cop
 	cop_cal->jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
@@ -664,7 +683,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	//<---  joint space control --->
 
 	//<---  cartesian space control  --->
-	/*result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);//
+	result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);//
 	result_[joint_id_to_name_[13]]->goal_position_ = l_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[15]]->goal_position_ = l_kinematics_->joint_radian(3,0);
 
@@ -676,12 +695,12 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	result_[joint_id_to_name_[14]]->goal_position_ = r_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[16]]->goal_position_ = r_kinematics_->joint_radian(3,0);
 
-	result_[joint_id_to_name_[18]]->goal_position_ = r_kinematics_->joint_radian(4,0);*/
-	//result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
-	//result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
-
+	result_[joint_id_to_name_[18]]->goal_position_ = r_kinematics_->joint_radian(4,0);
 	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
-	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
+	result_[joint_id_to_name_[22]]->goal_position_ = r_kinematics_->joint_radian(6,0);
+
+//	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
+//	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
 
 	// l_ endpoint xyz
 	state_end_point_pose_msg_.x=  result_pose_l_modified_.x;

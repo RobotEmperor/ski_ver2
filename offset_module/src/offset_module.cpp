@@ -60,13 +60,18 @@ OffsetModule::OffsetModule()
 	result_["head_pitch"]       = new robotis_framework::DynamixelState();  // joint 24
 	result_["head_roll"]        = new robotis_framework::DynamixelState();  // joint 25
 */
+	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
+	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
+	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5
+
 	result_["waist_yaw"]        = new robotis_framework::DynamixelState();  // joint 9
 	result_["waist_roll"]       = new robotis_framework::DynamixelState();  // joint 10
 
 	result_["head_yaw"]         = new robotis_framework::DynamixelState();  // joint 23
 
-	result_["r_ankle_pitch"]    = new robotis_framework::DynamixelState();  // joint 20
-	result_["r_ankle_roll"]     = new robotis_framework::DynamixelState();  // joint 22
+	result_["l_ankle_pitch"]    = new robotis_framework::DynamixelState();  // joint 19
+	result_["r_ankle_pitch"]     = new robotis_framework::DynamixelState(); // joint 20
+
 
 
 	///////////////////////////

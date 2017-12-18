@@ -138,6 +138,8 @@ private:
 
   // balance gyro
   void updateBalanceParameter();
+  void gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x);
+  double tf_current_gyro_x, tf_current_gyro_y, tf_current_gyro_z;
   diana_msgs::BalanceParam previous_balance_param_, desired_balance_param_;
   robotis_framework::FifthOrderPolynomialTrajectory balance_param_update_coeff_;
   double balance_updating_duration_sec_;
