@@ -176,7 +176,7 @@ void BalanceControlUsingPDController::checkBalanceLimit()
   pose_left_foot_adjustment_.coeffRef(5) = 0;
 
   // check limitation
-  if((fabs(pose_cob_adjustment_.coeff(0)) == cob_adjustment_abs_max_m_rad_.coeff(0)) ||
+  if( (fabs(pose_cob_adjustment_.coeff(0)) == cob_adjustment_abs_max_m_rad_.coeff(0)) ||
       (fabs(pose_cob_adjustment_.coeff(1)) == cob_adjustment_abs_max_m_rad_.coeff(1)) ||
       (fabs(pose_cob_adjustment_.coeff(2)) == cob_adjustment_abs_max_m_rad_.coeff(2)) ||
       (fabs(pose_cob_adjustment_.coeff(3)) == cob_adjustment_abs_max_m_rad_.coeff(3)) ||

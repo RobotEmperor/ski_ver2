@@ -23,10 +23,11 @@
 #include <fstream>
 #include <stdio.h>
 
+#include <geometry_msgs/PointStamped.h>
 #include "robotis_framework_common/motion_module.h"
 #include "robotis_controller_msgs/StatusMsg.h"
 #include "robotis_math/robotis_math.h"
-
+#include "diana_msgs/ForceTorque.h"
 
 
 #include "heroehs_math/fifth_order_trajectory_generate.h"
@@ -63,11 +64,21 @@ public:
 	void gainAdjustmentMsgCallback(const std_msgs::Int16MultiArray::ConstPtr& msg);
 	void finalGainSaveMsgCallback(const std_msgs::Bool::ConstPtr& msg);
 	bool readPgainSrvFunction(pose_module::command::Request  &req, pose_module::command::Response &res);
+
+	void ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg);
+
 	void parsePgainValue(std::string joint_name_);
 	void savePgainValue();
 	ros::ServiceServer read_p_gain_value_srv;
 
 	ros::Publisher current_arm_state_pub;
+	ros::Publisher cop_point_Fz_pub;
+	ros::Publisher cop_point_Fy_pub;
+	ros::Publisher cop_point_Fx_pub;
+
+	geometry_msgs::PointStamped cop_point_Fz_msg_;
+	geometry_msgs::PointStamped cop_point_Fy_msg_;
+	geometry_msgs::PointStamped cop_point_Fx_msg_;
 
 
 private:
@@ -147,7 +158,9 @@ private:
 	bool p_gain_adjust_check;
 
 	//cop experiment
-	diana::CopCalculationFunc cop_cal;
+	diana::CopCalculationFunc *cop_cal;
+  double currentFX_l,currentFY_l,currentFZ_l,currentTX_l,currentTY_l,currentTZ_l;
+  double currentFX_r,currentFY_r,currentFZ_r,currentTX_r,currentTY_r,currentTZ_r;
 };
 
 }

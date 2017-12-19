@@ -85,9 +85,6 @@ void CopCalculationFunc::jointStateGetForTransForm(Eigen::MatrixXd joint_state_l
 	double joint_l[7] = {0,joint_state_l(1,0),joint_state_l(2,0),joint_state_l(3,0),joint_state_l(4,0),joint_state_l(5,0),joint_state_l(6,0)};
 	double joint_r[7] = {0,joint_state_r(1,0),joint_state_r(2,0),joint_state_r(3,0),joint_state_r(4,0),joint_state_r(5,0),joint_state_r(6,0)};
 
-	//transformation_.FowardKnematics(joint_l,"left");
-	//transformation_.FowardKnematics(joint_r,"right");
-
 	transformation_.FowardKnematicsCenterToSensorLeft(joint_l);
 	transformation_.FowardKnematicsCenterToSensorRight(joint_r);
 

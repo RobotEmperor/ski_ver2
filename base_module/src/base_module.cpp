@@ -20,6 +20,7 @@ BaseModule::BaseModule()
 	// Dynamixel initialize ////
 
 
+
 	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["r_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 2
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
@@ -51,7 +52,9 @@ BaseModule::BaseModule()
 	result_["head_pitch"]       = new robotis_framework::DynamixelState();  // joint 24
 	result_["head_roll"]        = new robotis_framework::DynamixelState();  // joint 25
 
+
 	// TEST
+
 /*
 	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
@@ -65,6 +68,7 @@ BaseModule::BaseModule()
 	result_["l_ankle_pitch"]    = new robotis_framework::DynamixelState();  // joint 19
 	result_["r_ankle_pitch"]     = new robotis_framework::DynamixelState(); // joint 20
 */
+
 
 
 	new_count_ = 1;
@@ -137,7 +141,6 @@ void BaseModule::parse_init_pose_data_(const std::string &path)
 		base_module_state->joint_ini_pose_goal.coeffRef(id, 0) = value * DEGREE2RADIAN; // YAML에 로드된 초기 포즈 값을 라디안으로 바꾸고, eigen matrix 에 id 개수만큼 열을 생성한다.
 	}
 }
-
 void BaseModule::initPoseMsgCallback(const std_msgs::String::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실
 {
 	std::string init_pose_path = ros::package::getPath("base_module") + "/data/ini_pose.yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
@@ -201,7 +204,7 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		ROS_INFO("Base Trajectory Start");
 
 		// 허리 (9 , 10), 다리 (11 ~ 22), 머리 (23 ~ 25) 다이나믹셀 초기화
-			for(int id=9 ; id<26 ; id++)
+		for(int id=9 ; id<26 ; id++)
 		{
 			if(id == 10 || id == 11 || id == 17 || id == 19) // 방향 반대인 다이나믹셀
 			{
@@ -223,7 +226,7 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		// 팔 다이나믹셀 초기화
 		for(int id=1 ; id<7 ; id++)
 		{
-			if(id == 8) // 방향 반대인 다이나믹셀
+			if(id == 2 || id == 3 || id == 4 || id == 6) // 방향 반대인 다이나믹셀
 			{
 				result_[joint_id_to_name_[id]]->goal_position_ = - motion_trajectory[id]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(id,0),
 						base_module_state->joint_ini_pose_goal(id,0),0,0,0,0,0,base_module_state->mov_time_state);

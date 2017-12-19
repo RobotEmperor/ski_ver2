@@ -63,11 +63,9 @@ public:
 	bool gazebo_check;
 
 	// paper messages
+	ros::Publisher current_leg_pose_pub;
 	ros::Publisher state_end_point_pose_pub;
 	ros::Publisher state_end_point_orientation_pub;
-	ros::Publisher cop_point_Fz_pub;
-	ros::Publisher cop_point_Fy_pub;
-	ros::Publisher cop_point_Fx_pub;
 
 	// sensor data & balance on off
 	ros::Subscriber get_imu_data_sub_;
@@ -75,7 +73,6 @@ public:
   ros::Subscriber set_balance_param_sub_;
 
 	/* ROS Topic Callback Functions */
-	void desiredMotionMsgCallback(const std_msgs::Int32::ConstPtr& msg);
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
 	void ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg);
   void setBalanceParameterCallback(const diana_msgs::BalanceParam::ConstPtr& msg);
@@ -88,27 +85,15 @@ private:
 
 	int new_count_;
 
+
+	std_msgs::Float64MultiArray current_leg_pose_msg_;
 	geometry_msgs::Vector3 state_end_point_pose_msg_;
 	geometry_msgs::Vector3 state_end_point_orientation_msg_;
-	geometry_msgs::PointStamped cop_point_Fz_msg_;
-	geometry_msgs::PointStamped cop_point_Fy_msg_;
-	geometry_msgs::PointStamped cop_point_Fx_msg_;
 
 	boost::thread queue_thread_;
 
 	std::map<std::string, int> joint_name_to_id_;
 	std::map<int, std::string> joint_id_to_name_;
-
-	void parse_motion_data_(int motion_num_); // 모션 데이터 읽어온다.
-	void motion_vel_cal_leg_(int pose_num_ , int node_num_); // 속도 계산
-	void motion_generater_(); // 모션 생성
-	int motion_command_, pre_motion_command_ , motion_seq_;
-	int pose_;
-	double current_time_;
-	Eigen::MatrixXd change_desired_pose_;
-	Eigen::MatrixXd change_desired_final_vel_;
-	Eigen::MatrixXd change_desired_initial_vel_;
-	Eigen::MatrixXd change_desired_time_;
 
 	double traj_time_;
 
@@ -124,6 +109,7 @@ private:
 	heroehs_math::CalRad *end_to_rad_l_;
 	heroehs_math::CalRad *end_to_rad_r_;
 
+	 // balance gyro
 	Eigen::MatrixXd result_end_l_;
 	Eigen::MatrixXd result_end_r_;
 	Eigen::Matrix4d result_mat_cob_, result_mat_cob_modified_;
@@ -132,13 +118,10 @@ private:
   robotis_framework::Pose3D result_pose_l_modified_;
   robotis_framework::Pose3D result_pose_r_modified_;
 
-	double result_rad_one_joint_;
   diana::BalanceControlUsingPDController balance_ctrl_;
-  double currentGyroX,currentGyroY,currentGyroZ;
-
-  // balance gyro
   void updateBalanceParameter();
   void gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x);
+  double currentGyroX,currentGyroY,currentGyroZ;
   double tf_current_gyro_x, tf_current_gyro_y, tf_current_gyro_z;
   diana_msgs::BalanceParam previous_balance_param_, desired_balance_param_;
   robotis_framework::FifthOrderPolynomialTrajectory balance_param_update_coeff_;
@@ -146,7 +129,7 @@ private:
   double balance_updating_sys_time_sec_;
   bool balance_update_;
 
-  // zmp
+  // cop
   diana::CopCalculationFunc *cop_cal;
   double currentFX_l,currentFY_l,currentFZ_l,currentTX_l,currentTY_l,currentTZ_l;
   double currentFX_r,currentFY_r,currentFZ_r,currentTX_r,currentTY_r,currentTZ_r;

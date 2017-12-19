@@ -70,10 +70,10 @@ Kinematics::Kinematics()
 	dh_link[3] = 0;
 	dh_link[4] = 0.225;
 	dh_link[5] = 0;
-	dh_link[6] = 0.12;
+	dh_link[6] = 0.135;
 
-	total_length_ = 0.57;
-	sensor_length_ = 0.06;
+	total_length_ = 0.585;
+	sensor_length_ = 0.135;
 
 	dh_link_d[0] = 0;
 	dh_link_d[1] = 0;
@@ -390,6 +390,7 @@ Eigen::MatrixXd Kinematics::CenterToGroundTransformation(Eigen::MatrixXd point)
 
 void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_alpha_, double y_betta_, double x_kamma_)
 {
+
 	bool check_invertible_ = false;
 
 	// Euler angle initialize
@@ -445,7 +446,6 @@ void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_
 
 	if((pow(l05_xz_,2) - pow(dh_link_d[3],2) - pow(dh_link[4],2))/(2*dh_link_d[3]*dh_link[4]) > 1.0 || (pow(l05_xz_,2) - pow(dh_link_d[3],2) - pow(dh_link[4],2))/(2*dh_link_d[3]*dh_link[4]) < -1.0)
 	{
-		//real_theta[4] = 0;
 		return;
 	}
 	else
@@ -464,11 +464,11 @@ void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_
 
 	l05_yz_ = sqrt(pow(P_inverse_(1,3),2) + pow(P_inverse_(2,3)-dh_link[6],2));
 
-	if((pow(l06_yz_,2) - pow(l05_yz_,2) - pow(dh_link[6],2))/ (2*l05_yz_*dh_link[6]) > 1.0 || (pow(l06_yz_,2) - pow(l05_yz_,2) - pow(dh_link[6],2))/ (2*l05_yz_*dh_link[6]) < -1.0)
+	if(floor(100000.*((pow(l06_yz_,2) - pow(l05_yz_,2) - pow(dh_link[6],2))/ (2*l05_yz_*dh_link[6]))+0.000005)/100000. > 1.0
+			|| floor(100000.*((pow(l06_yz_,2) - pow(l05_yz_,2) - pow(dh_link[6],2))/ (2*l05_yz_*dh_link[6]))+0.000005)/100000.  < -1.0)
 	{
-		//	real_theta[6] = 0;
+		printf("real_theta   %f :: \n",(pow(l06_yz_,2) - pow(l05_yz_,2) - pow(dh_link[6],2))/ (2*l05_yz_*dh_link[6]));
 		return;
-
 	}
 	else
 	{

@@ -21,7 +21,6 @@ PoseModule::PoseModule()
 
 	// Dynamixel initialize ////
 
-
 	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["r_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 2
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
@@ -29,7 +28,6 @@ PoseModule::PoseModule()
 	result_["r_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 4
 	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5
 	result_["r_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 6
-
 
 	result_["waist_yaw"]        = new robotis_framework::DynamixelState();  // joint 9
 	result_["waist_roll"]       = new robotis_framework::DynamixelState();  // joint 10
@@ -53,7 +51,9 @@ PoseModule::PoseModule()
 	result_["head_pitch"]       = new robotis_framework::DynamixelState();  // joint 24
 	result_["head_roll"]        = new robotis_framework::DynamixelState();  // joint 25
 
+
 	// TEST
+
 /*
 	result_["waist_yaw"]        = new robotis_framework::DynamixelState();  // joint 9
 	result_["waist_roll"]       = new robotis_framework::DynamixelState();  // joint 10
@@ -67,6 +67,7 @@ PoseModule::PoseModule()
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
 	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5
 */
+
 
 	//leg ///////////////////////////
 	l_kinematics_ = new heroehs_math::Kinematics;
@@ -108,6 +109,20 @@ PoseModule::PoseModule()
 	////
 	p_gain_adjust_check = false;
 	id_select = 23;
+	//cop calculate
+	cop_cal = new diana::CopCalculationFunc;
+	currentFX_l = 0;
+	currentFY_l = 0;
+	currentFZ_l = 0;
+	currentTX_l = 0;
+	currentTY_l = 0;
+	currentTZ_l = 0;
+	currentFX_r = 0;
+	currentFY_r = 0;
+	currentFZ_r = 0;
+	currentTX_r = 0;
+	currentTY_r = 0;
+	currentTZ_r = 0;
 }
 PoseModule::~PoseModule()
 {
@@ -198,22 +213,15 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 	end_to_rad_r_arm_->cal_end_point_tra_pz->current_pose = -0.47;
 	end_to_rad_r_arm_->current_pose_change(2,0) = -0.47;
 
-	/*one_joint_ctrl_.resize(1,8);
-	one_joint_ctrl_.fill(0);
-	one_joint_ctrl_(0,1) = 0;
-	result_rad_one_joint_ = 0;*/
-
 	for(int joint_num_= 0; joint_num_< 6 ; joint_num_ ++)
 	{
-		leg_end_point_l_(joint_num_, 7)  = traj_time_;
-		leg_end_point_r_(joint_num_, 7)  = traj_time_;
-		waist_end_point_(joint_num_, 7)  = traj_time_;
-		head_end_point_ (joint_num_, 7)  = traj_time_;
-		l_arm_end_point_ (joint_num_, 7) = traj_time_;
-		r_arm_end_point_ (joint_num_, 7) = traj_time_;
+		leg_end_point_l_ (joint_num_, 7)  = traj_time_;
+		leg_end_point_r_ (joint_num_, 7)  = traj_time_;
+		waist_end_point_ (joint_num_, 7)  = traj_time_;
+		head_end_point_  (joint_num_, 7)  = traj_time_;
+		l_arm_end_point_ (joint_num_, 7)  = traj_time_;
+		r_arm_end_point_ (joint_num_, 7)  = traj_time_;
 	}
-	//one_joint_ctrl_(0,7) = traj_time_;
-
 	ROS_INFO("< -------  Initialize Module : Pose Module !!  ------->");
 }
 void PoseModule::queueThread()
@@ -224,6 +232,10 @@ void PoseModule::queueThread()
 	ros_node.setCallbackQueue(&callback_queue);
 
 	current_arm_state_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/current_arm_state",100);
+	/* publisher topics */
+	cop_point_Fz_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fz",100);
+	cop_point_Fy_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fy",100);
+	cop_point_Fx_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fx",100);
 
 	/* subscribe topics */
 	// for gui
@@ -234,6 +246,7 @@ void PoseModule::queueThread()
 
 	ros::Subscriber gain_adjustment_sub = ros_node.subscribe("/gain_adjustment", 5, &PoseModule::gainAdjustmentMsgCallback, this);
 	ros::Subscriber final_gain_save_sub = ros_node.subscribe("/final_gain_save", 5, &PoseModule::finalGainSaveMsgCallback, this);
+	ros::Subscriber get_ft_data_sub_ = ros_node.subscribe("/diana/force_torque_data", 100, &PoseModule::ftDataMsgCallback, this);
 
 	read_p_gain_value_srv = ros_node.advertiseService("/read_p_gain_value", &PoseModule::readPgainSrvFunction, this);
 
@@ -302,6 +315,32 @@ bool PoseModule::readPgainSrvFunction(pose_module::command::Request  &req, pose_
 		res.dxl_state[id] = p_gain_data_[id]; // GUI 에서 요청한 모든 조인트의 p gain 값을 저장함 .
 	}
 	return true;
+}
+void PoseModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg)// force torque sensor data get
+{
+	currentFX_l =  (double) msg->force_x_raw_l;
+	currentFY_l =  (double) msg->force_y_raw_l;
+	currentFZ_l = -(double) msg->force_z_raw_l;
+
+	currentTX_l =  (double) msg->torque_x_raw_l;
+	currentTY_l =  (double) msg->torque_y_raw_l;
+	currentTZ_l = -(double) msg->torque_z_raw_l;
+	//		currentFX_r = (double) msg->force_x_raw_r;
+	//		currentFY_r = (double) msg->force_y_raw_r;
+	//		currentFZ_r = (double) msg->force_z_raw_r;
+
+	currentFX_r = 1;
+	currentFY_r = 1;
+	currentFZ_r = 98.1;
+	//		currentTX_r = (double) msg->torque_x_raw_r;
+	//		currentTY_r = (double) msg->torque_y_raw_r;
+	//		currentTZ_r = (double) msg->torque_z_raw_r;
+	currentTX_r = 0;
+	currentTY_r = 0;
+	currentTZ_r = 0;
+
+	cop_cal->ftSensorDataLeftGet(currentFX_l, currentFY_l, currentFZ_l, currentTX_l, currentTY_l, currentTZ_l);
+	cop_cal->ftSensorDataRightGet(currentFX_r, currentFY_r, currentFZ_r, currentTX_r, currentTY_r, currentTZ_r);
 }
 void PoseModule::parsePgainValue(std::string joint_name_)
 {
@@ -375,8 +414,6 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 				result_[joint_name]->goal_position_ = dxls[joint_name]->dxl_state_->present_position_; // 다이나믹셀에서 읽어옴
 			}
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
-		ROS_INFO("Pose module :: Read position and Send goal position");
-
 		result_end_l_ = end_to_rad_l_         -> cal_end_point_to_rad(leg_end_point_l_);
 		result_end_r_ = end_to_rad_r_         -> cal_end_point_to_rad(leg_end_point_r_);
 		result_end_waist_ = end_to_rad_waist_ -> cal_end_point_to_rad(waist_end_point_);
@@ -384,7 +421,7 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		result_end_l_arm_ = end_to_rad_l_arm_ -> cal_end_point_to_rad(l_arm_end_point_);
 		result_end_r_arm_ = end_to_rad_r_arm_ -> cal_end_point_to_rad(r_arm_end_point_);
 
-		//result_rad_one_joint_ = one_joint_ -> cal_one_joint_rad(one_joint_ctrl_);
+		ROS_INFO("Pose module :: Read position and Send goal position");
 	}
 
 	if(is_moving_l_ == false && is_moving_r_ == false && is_moving_waist == false && is_moving_head == false && is_moving_l_arm == false && is_moving_r_arm == false)
@@ -399,7 +436,6 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	}
 	else
 	{
-
 		ROS_INFO("Pose Trajectory Start");
 		//l_arm_kinematics_ -> ArmToOriginTransformation(waist_yaw_rad_ , waist_roll_rad_, l_arm_desired_point_x_, l_arm_desired_point_y_, l_arm_desired_point_z_);
 		//r_arm_kinematics_ -> ArmToOriginTransformation(waist_yaw_rad_ , waist_roll_rad_, r_arm_desired_point_x_, r_arm_desired_point_y_, r_arm_desired_point_z_);
@@ -414,23 +450,7 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		// trajectory is working cartesian space control ARM
 		result_end_l_arm_ = end_to_rad_l_arm_ -> cal_end_point_to_rad(l_arm_end_point_);
 		result_end_r_arm_ = end_to_rad_r_arm_ -> cal_end_point_to_rad(r_arm_end_point_);
-		/*//<---  read   --->
-		for(int id=10 ; id<23 ; id++)
-		{
-			if(gazebo_check == true)
-				result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
-			else
-			{
-				result_[joint_id_to_name_[id]]->present_position_ = dxls[joint_id_to_name_[id]]->dxl_state_->present_position_; // real robot
-			}
-		}*/
 
-		/*
-		cop_cal.ftSensorDataLeftGet(0, 0, 98.1, 0, 0, 0);
-		cop_cal.ftSensorDataRightGet(0, 0, 98.1, 0, 0, 0);
-		cop_cal.jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
-		cop_cal.copCalculationResult();
-		 */
 		is_moving_l_     = end_to_rad_l_      -> is_moving_check;
 		is_moving_r_     = end_to_rad_r_      -> is_moving_check;
 		is_moving_waist  = end_to_rad_waist_  -> is_moving_check;
@@ -438,29 +458,33 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		is_moving_l_arm  = end_to_rad_l_arm_  -> is_moving_check;
 		is_moving_r_arm  = end_to_rad_r_arm_  -> is_moving_check;
 	}
-
 	//cartesian space control LEG
-	l_kinematics_->InverseKinematics(result_end_l_(0,0), result_end_l_(1,0) - 0.105, result_end_l_(2,0), result_end_l_(3,0), result_end_l_(4,0), result_end_l_(5,0)); // pX pY pZ alpha betta kamma
-	r_kinematics_->InverseKinematics(result_end_r_(0,0), result_end_r_(1,0) + 0.105, result_end_r_(2,0), result_end_r_(3,0), result_end_r_(4,0), result_end_r_(5,0)); // pX pY pZ alpha betta kamma
+	l_kinematics_-> InverseKinematics(result_end_l_(0,0), result_end_l_(1,0) - 0.105, result_end_l_(2,0), result_end_l_(3,0), result_end_l_(4,0), result_end_l_(5,0)); // pX pY pZ alpha betta kamma
+	r_kinematics_-> InverseKinematics(result_end_r_(0,0), result_end_r_(1,0) + 0.105, result_end_r_(2,0), result_end_r_(3,0), result_end_r_(4,0), result_end_r_(5,0)); // pX pY pZ alpha betta kamma
+
 	//cartesian space control WAIST
-	waist_kinematics_->XYZEulerAnglesSolution(result_end_waist_ (5,0) , 0, result_end_waist_ (3,0));
+	waist_kinematics_-> XYZEulerAnglesSolution(result_end_waist_ (5,0) , 0, result_end_waist_ (3,0));
 	//cartesian space control HEAD
-	head_kinematics_->ZYXEulerAnglesSolution(result_end_head_(3,0),result_end_head_(4,0),result_end_head_(5,0));
+	head_kinematics_ -> ZYXEulerAnglesSolution(result_end_head_(3,0),result_end_head_(4,0),result_end_head_(5,0));
 	//cartesian space control ARM
-	l_arm_kinematics_ ->InverseKinematicsArm(result_end_l_arm_(0,0), result_end_l_arm_(1,0), result_end_l_arm_(2,0));
-	r_arm_kinematics_ ->InverseKinematicsArm(result_end_r_arm_(0,0), result_end_r_arm_(1,0), result_end_r_arm_(2,0));
+	l_arm_kinematics_ -> InverseKinematicsArm(result_end_l_arm_(0,0), result_end_l_arm_(1,0), result_end_l_arm_(2,0));
+	r_arm_kinematics_ -> InverseKinematicsArm(result_end_r_arm_(0,0), result_end_r_arm_(1,0), result_end_r_arm_(2,0));
 
 
 	waist_yaw_rad_    = dxls["waist_yaw"]->dxl_state_->present_position_;
 	waist_roll_rad_   = -dxls["waist_roll"]->dxl_state_->present_position_; // direction must define!;
 
-	l_arm_kinematics_ -> OriginToArmTransformationPoint(waist_yaw_rad_ , waist_roll_rad_,dxls["l_shoulder_pitch"]->dxl_state_->present_position_, -dxls["l_shoulder_roll"]->dxl_state_->present_position_, dxls["l_elbow_pitch"]->dxl_state_->present_position_);
+	//l_arm_kinematics_ -> OriginToArmTransformationPoint(waist_yaw_rad_ , waist_roll_rad_,dxls["l_shoulder_pitch"]->dxl_state_->present_position_, -dxls["l_shoulder_roll"]->dxl_state_->present_position_, dxls["l_elbow_pitch"]->dxl_state_->present_position_);
 	//r_arm_kinematics_ ->OriginToArmTransformationPoint(waist_yaw_rad_ , waist_roll_rad_,dxls["r_shoulder_pitch"]->dxl_state_->present_position_, dxls["r_shoulder_roll"]->dxl_state_->present_position_, dxls["r_elbow_pitch"]->dxl_state_->present_position_);
-	//l_arm_kinematics_ ->OriginToArmTransformationPoint(waist_kinematics_->xyz_euler_angle_z , waist_kinematics_->xyz_euler_angle_x, l_arm_kinematics_->joint_radian(1,0), l_arm_kinematics_->joint_radian(2,0), l_arm_kinematics_->joint_radian(3,0));
+	l_arm_kinematics_ ->OriginToArmTransformationPoint(waist_kinematics_->xyz_euler_angle_z , waist_kinematics_->xyz_euler_angle_x, l_arm_kinematics_->joint_radian(1,0), l_arm_kinematics_->joint_radian(2,0), l_arm_kinematics_->joint_radian(3,0));
 	r_arm_kinematics_ ->OriginToArmTransformationPoint(waist_kinematics_->xyz_euler_angle_z , waist_kinematics_->xyz_euler_angle_x, r_arm_kinematics_->joint_radian(1,0), r_arm_kinematics_->joint_radian(2,0), r_arm_kinematics_->joint_radian(3,0));
 
+	cop_cal->jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
+	cop_cal->copCalculationResult();
 	//<---  catesian space control test --->
-/*	result_[joint_id_to_name_[9]]  -> goal_position_  = waist_kinematics_->xyz_euler_angle_z;// waist yaw
+
+
+/*	result_[joint_id_to_name_[9]] -> goal_position_  = waist_kinematics_->xyz_euler_angle_z;// waist yaw
 	result_[joint_id_to_name_[10]] -> goal_position_  = waist_kinematics_->xyz_euler_angle_x; // waist roll
 
 	result_[joint_id_to_name_[19]] -> goal_position_  = -l_kinematics_->joint_radian(5,0);
@@ -470,23 +494,20 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 
 	result_[joint_id_to_name_[1]]  -> goal_position_  = l_arm_kinematics_->joint_radian(1,0);
 	result_[joint_id_to_name_[3]]  -> goal_position_  = -l_arm_kinematics_->joint_radian(2,0);
-	result_[joint_id_to_name_[5]]  -> goal_position_  = l_arm_kinematics_->joint_radian(3,0);
+	result_[joint_id_to_name_[5]]  -> goal_position_  = l_arm_kinematics_->joint_radian(3,0);*/
 
-	current_arm_state_msg.data.push_back(l_arm_kinematics_ -> origin_to_arm_end_point_tf_(0,3));
-	current_arm_state_msg.data.push_back(l_arm_kinematics_ -> origin_to_arm_end_point_tf_(1,3));
-	current_arm_state_msg.data.push_back(l_arm_kinematics_ -> origin_to_arm_end_point_tf_(2,3));
-	current_arm_state_msg.data.push_back(r_arm_kinematics_ -> origin_to_arm_end_point_tf_(0,3));
-	current_arm_state_msg.data.push_back(r_arm_kinematics_ -> origin_to_arm_end_point_tf_(1,3));
-	current_arm_state_msg.data.push_back(r_arm_kinematics_ -> origin_to_arm_end_point_tf_(2,3));
-
-	current_arm_state_pub.publish(current_arm_state_msg);
-	current_arm_state_msg.data.clear();*/
 	//<---  cartesian space control  --->
 
+	result_[joint_id_to_name_[1]]  -> goal_position_  =  l_arm_kinematics_->joint_radian(1,0);
+	result_[joint_id_to_name_[3]]  -> goal_position_  = -l_arm_kinematics_->joint_radian(2,0);
+	result_[joint_id_to_name_[5]]  -> goal_position_  =  l_arm_kinematics_->joint_radian(3,0);
 
+	result_[joint_id_to_name_[2]]  -> goal_position_  = -r_arm_kinematics_->joint_radian(1,0);
+	result_[joint_id_to_name_[4]]  -> goal_position_  = -r_arm_kinematics_->joint_radian(2,0);
+	result_[joint_id_to_name_[6]]  -> goal_position_  = -r_arm_kinematics_->joint_radian(3,0);
 
-	result_[joint_id_to_name_[9]]->goal_position_  = waist_kinematics_->xyz_euler_angle_z;// waist yaw
-	result_[joint_id_to_name_[10]]->goal_position_   = waist_kinematics_->xyz_euler_angle_x; // waist roll
+	result_[joint_id_to_name_[9]]->goal_position_    =  waist_kinematics_->xyz_euler_angle_z;// waist yaw
+	result_[joint_id_to_name_[10]]->goal_position_   = -waist_kinematics_->xyz_euler_angle_x; // waist roll
 
 	result_[joint_id_to_name_[11]]->goal_position_   = -l_kinematics_->joint_radian(1,0);
 	result_[joint_id_to_name_[13]]->goal_position_   =  l_kinematics_->joint_radian(2,0);
@@ -504,10 +525,59 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	result_[joint_id_to_name_[20]]->goal_position_   =  r_kinematics_->joint_radian(5,0);
 	result_[joint_id_to_name_[22]]->goal_position_   =  r_kinematics_->joint_radian(6,0);
 
-	result_[joint_id_to_name_[23]]->goal_position_   = head_kinematics_->zyx_euler_angle_z;
-	result_[joint_id_to_name_[24]]->goal_position_   = head_kinematics_->zyx_euler_angle_y;
-	result_[joint_id_to_name_[25]]->goal_position_   = head_kinematics_->zyx_euler_angle_x;
+	result_[joint_id_to_name_[23]]->goal_position_   = -head_kinematics_->zyx_euler_angle_z;
+	result_[joint_id_to_name_[24]]->goal_position_   = -head_kinematics_->zyx_euler_angle_y;
+	result_[joint_id_to_name_[25]]->goal_position_   = -head_kinematics_->zyx_euler_angle_x;
 
+	//printf("%f  ::  %f  :: %f  ::  %f  :: %f  ::  %f  \n",l_kinematics_->joint_radian(1,0), l_kinematics_->joint_radian(2,0),
+		//	l_kinematics_->joint_radian(3,0), l_kinematics_->joint_radian(4,0), l_kinematics_->joint_radian(5,0), l_kinematics_->joint_radian(6,0));
+
+	//<---  publisher  --->
+	current_arm_state_msg.data.push_back(l_arm_kinematics_ -> origin_to_arm_end_point_tf_(0,3));
+	current_arm_state_msg.data.push_back(l_arm_kinematics_ -> origin_to_arm_end_point_tf_(1,3));
+	current_arm_state_msg.data.push_back(l_arm_kinematics_ -> origin_to_arm_end_point_tf_(2,3));
+	current_arm_state_msg.data.push_back(r_arm_kinematics_ -> origin_to_arm_end_point_tf_(0,3));
+	current_arm_state_msg.data.push_back(r_arm_kinematics_ -> origin_to_arm_end_point_tf_(1,3));
+	current_arm_state_msg.data.push_back(r_arm_kinematics_ -> origin_to_arm_end_point_tf_(2,3));
+
+	current_arm_state_pub.publish(current_arm_state_msg);
+	current_arm_state_msg.data.clear();
+	// display cop to rviz
+	cop_point_Fz_msg_.header.stamp = ros::Time();
+	cop_point_Fy_msg_.header.stamp = ros::Time();
+	cop_point_Fx_msg_.header.stamp = ros::Time();
+
+	std::string frame = "/pelvis";
+	cop_point_Fz_msg_.header.frame_id = frame.c_str();
+	cop_point_Fy_msg_.header.frame_id = frame.c_str();
+	cop_point_Fx_msg_.header.frame_id = frame.c_str();
+
+	cop_point_Fz_msg_.point.x = cop_cal -> cop_fz_point_x;
+	cop_point_Fz_msg_.point.y = cop_cal -> cop_fz_point_y;
+	cop_point_Fz_msg_.point.z = 0;
+	cop_point_Fz_pub.publish(cop_point_Fz_msg_);
+
+	cop_point_Fy_msg_.point.x = cop_cal -> cop_fy_point_x;
+	cop_point_Fy_msg_.point.y = 0;
+	cop_point_Fy_msg_.point.z = cop_cal -> cop_fy_point_z;
+	cop_point_Fy_pub.publish(cop_point_Fy_msg_);
+
+	cop_point_Fx_msg_.point.x = 0;
+	cop_point_Fx_msg_.point.y = cop_cal -> cop_fx_point_y;
+	cop_point_Fx_msg_.point.z = cop_cal -> cop_fx_point_z;
+	cop_point_Fx_pub.publish(cop_point_Fx_msg_);
+
+	//<---  read   --->
+		/*		for(int id=10 ; id<23 ; id++)
+				{
+					if(gazebo_check == true)
+						result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
+					else
+					{
+						result_[joint_id_to_name_[id]]->present_position_ = dxls[joint_id_to_name_[id]]->dxl_state_->present_position_; // real robot
+					}
+				}
+*/
 
 }
 void PoseModule::stop()

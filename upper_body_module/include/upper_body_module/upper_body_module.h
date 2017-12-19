@@ -59,34 +59,30 @@ public:
 	bool isRunning();
 
 	bool gazebo_check;
+	double traj_time_test;
+  // publisher
+	ros::Publisher  current_waist_pose_pub;
+	ros::Publisher cop_point_Fz_pub;
+	ros::Publisher cop_point_Fy_pub;
+	ros::Publisher cop_point_Fx_pub;
 
+	// Subscriber
 	ros::Subscriber head_test;
 	ros::Subscriber waist_test;
-	double traj_time_test;
+	ros::Subscriber current_leg_pose_sub;
+	ros::Subscriber get_ft_data_sub_;
+	ros::Subscriber get_imu_data_sub_;
 
 	void desiredPoseWaistMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
 	void desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
-
-
-	ros::Publisher current_waist_pose_pub;
-
-/*	// paper messages
-	ros::Publisher state_end_point_pose_pub;
-	ros::Publisher state_end_point_orientation_pub;
-	ros::Publisher zmp_point_pub;
-	ros::Publisher zmp_point_pub_temp;
-
-	// sensor data & balance on off
-	ros::Subscriber get_imu_data_sub_;
-	ros::Subscriber get_ft_data_sub_;
-  ros::Subscriber set_balance_param_sub_;*/
-
-	/* ROS Topic Callback Functions */
-/*	void desiredMotionMsgCallback(const std_msgs::Int32::ConstPtr& msg);
+	void currentLegPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
+	//sensor
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
 	void ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg);
-  void setBalanceParameterCallback(const diana_msgs::BalanceParam::ConstPtr& msg);
-  void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg);*/
+
+	geometry_msgs::PointStamped cop_point_Fz_msg_;
+	geometry_msgs::PointStamped cop_point_Fy_msg_;
+	geometry_msgs::PointStamped cop_point_Fx_msg_;
 
 private:
 	void queueThread();
@@ -118,6 +114,20 @@ private:
   //arm module data transmit
 	std_msgs::Float64MultiArray current_waist_pose_msg;
 	double temp_waist_yaw_rad, temp_waist_roll_rad;
+
+	// cop calculation
+  diana::CopCalculationFunc *cop_cal_waist;
+  double currentFX_l,currentFY_l,currentFZ_l,currentTX_l,currentTY_l,currentTZ_l;
+  double currentFX_r,currentFY_r,currentFZ_r,currentTX_r,currentTY_r,currentTZ_r;
+  Eigen::MatrixXd l_leg_real_joint;
+  Eigen::MatrixXd r_leg_real_joint;
+
+  // gyro
+  void gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x);
+  double currentGyroX,currentGyroY,currentGyroZ;
+  double tf_current_gyro_x, tf_current_gyro_y, tf_current_gyro_z;
+
+
 
 };
 
