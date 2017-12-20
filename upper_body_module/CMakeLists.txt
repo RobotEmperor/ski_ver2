@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   heroehs_math
   diana_balance_control
   diana_msgs
+  ski_main_manager
 )
 
 find_package(Eigen REQUIRED)
@@ -55,6 +56,7 @@ include_directories(
 
 add_library(upper_body_module
   src/upper_body_module.cpp
+  src/center_change_upper_lib.cpp
 )
 
 add_dependencies(upper_body_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

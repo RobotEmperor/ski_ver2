@@ -25,6 +25,7 @@ add_message_files(
   JointFeedBackGain.msg
   ForceTorque.msg
   CenterChange.msg
+  BalanceParamWaist.msg
 )
 
 generate_messages(

@@ -4,9 +4,10 @@
  *  Created on: Dec 04, 2017
  *      Author: robotemperor
  */
-
 #include "upper_body_module/upper_body_module.h"
+
 using namespace upper_body_module;
+
 UpperBodyModule::UpperBodyModule()
 : control_cycle_msec_(8)
 {
@@ -32,8 +33,12 @@ UpperBodyModule::UpperBodyModule()
 
 //	result_["head_yaw"]   = new robotis_framework::DynamixelState(); // joint 23
 
-
 	///////////////////////////
+	//center change waist
+	center_change_ = new diana_motion_waist::CenterChange;
+	temp_change_value_center = 0.0;
+	temp_turn_type = "basic";
+	temp_change_type = "basic";
 
 	// motion control variables
 	waist_kinematics_ = new heroehs_math::KinematicsEulerAngle;
@@ -106,11 +111,12 @@ void UpperBodyModule::initialize(const int control_cycle_msec, robotis_framework
 	result_rad_head_.resize(6,1);
 	result_rad_head_.fill(0);
 
-	for(int joint_num_= 0; joint_num_< 6 ; joint_num_ ++)
+	for(int joint_num_= 3; joint_num_< 6 ; joint_num_ ++)  // waist 3, 5번 // head 345 초기화
 	{
 		waist_end_point_(joint_num_, 7) = traj_time_test;
 		head_end_point_ (joint_num_, 7) = traj_time_test;
 	}
+	waist_end_point_(4, 7) = 0;
 	ROS_INFO("< -------  Initialize Module : Upper Body Module  [HEAD  && WAIST] !!  ------->");
 }
 void UpperBodyModule::queueThread()
@@ -129,6 +135,8 @@ void UpperBodyModule::queueThread()
 	get_imu_data_sub_ = ros_node.subscribe("/imu/data", 100, &UpperBodyModule::imuDataMsgCallback, this);
 	get_ft_data_sub_ = ros_node.subscribe("/diana/force_torque_data", 100, &UpperBodyModule::ftDataMsgCallback, this);
 
+	center_change_msg_sub = ros_node.subscribe("/diana/center_change", 5, &UpperBodyModule::desiredCenterChangeMsgCallback, this);
+
 	// test desired pose
 	head_test = ros_node.subscribe("/desired_pose_head", 5, &UpperBodyModule::desiredPoseHeadMsgCallbackTEST, this);
 	waist_test = ros_node.subscribe("/desired_pose_waist", 5, &UpperBodyModule::desiredPoseWaistMsgCallbackTEST, this);
@@ -142,14 +150,14 @@ void UpperBodyModule::desiredPoseWaistMsgCallbackTEST(const std_msgs::Float64Mul
 {
 	waist_end_point_(3, 1) = msg->data[0]; // yaw  트레젝토리 6 * 8 은 xyz yaw(z) pitch(y) roll(x) 이며 8은 처음 위치 나중 위치 / 속도 속도 / 가속도 가속도 / 시간 시간 / 임
 	waist_end_point_(5, 1) = msg->data[1]; // roll
-	is_moving_waist_ = true;
+	//is_moving_waist_ = true;
 }
 void UpperBodyModule::desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg)
 {
 	head_end_point_(3, 1) = msg->data[0]; // yaw  트레젝토리 6 * 8 은 xyz yaw(z) pitch(y) roll(x) 이며 8은 처음 위치 나중 위치 / 속도 속도 / 가속도 가속도 / 시간 시간 / 임
 	head_end_point_(4, 1) = msg->data[1];
 	head_end_point_(5, 1) = msg->data[2]; // roll
-	is_moving_head_ = true;
+	//is_moving_head_ = true;
 }
 
 void UpperBodyModule::currentLegPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
@@ -207,6 +215,29 @@ void UpperBodyModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr&
 	cop_cal_waist->ftSensorDataLeftGet(currentFX_l, currentFY_l, currentFZ_l, currentTX_l, currentTY_l, currentTZ_l);
 	cop_cal_waist->ftSensorDataRightGet(currentFX_r, currentFY_r, currentFZ_r, currentTX_r, currentTY_r, currentTZ_r);
 }
+void UpperBodyModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg) // GUI 에서 motion_num topic을 sub 받아 실행 모션 번호 디텍트
+{
+	if (temp_change_value_center != msg->center_change || temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
+	{
+		center_change_->parseMotionData(msg->turn_type, msg->change_type);
+	  center_change_->calculateStepEndPointValue(msg->center_change,100,msg->change_type); // 0.01 단위로 조정 가능.
+
+		for(int m = 0 ; m<2 ; m++)
+		{
+			waist_end_point_(2*m+3,1) = center_change_->step_end_point_value[m];
+			waist_end_point_(2*m+3,7) = msg->time_change_waist;
+		}
+		temp_change_value_center = msg->center_change;
+		temp_turn_type    = msg->turn_type;
+		temp_change_type  = msg->change_type; // 이전값 저장
+		ROS_INFO("Turn !!  Change");
+		is_moving_waist_ = true;
+	} // 변한 것이 있으면 값을 계산
+	else
+	{  ROS_INFO("Nothing to change");
+	return;
+	}
+}
 bool UpperBodyModule::isRunning()
 {
 	return running_;
@@ -214,7 +245,6 @@ bool UpperBodyModule::isRunning()
 void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
 		std::map<std::string, double> sensors)
 {
-
 	if (enable_ == false)
 	{
 		return;
@@ -222,8 +252,8 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	//// read current position ////
 	if(new_count_ == 1)
 	{
-		is_moving_waist_ = false;
-		is_moving_head_ = false;
+		//is_moving_waist_ = false;
+		//is_moving_head_ = false;
 		new_count_ ++;
 		for (std::map<std::string, robotis_framework::Dynamixel*>::iterator state_iter = dxls.begin();
 				state_iter != dxls.end(); state_iter++)
@@ -236,10 +266,6 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 					result_[joint_name]->goal_position_ = result_[joint_name]->present_position_; // 가제보 상 초기위치 0
 			}
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
-
-		result_rad_waist_ = end_to_rad_waist_ -> cal_end_point_to_rad(waist_end_point_);
-		result_rad_head_  = end_to_rad_head_  -> cal_end_point_to_rad(head_end_point_);
-
 		ROS_INFO("Upper Start");
 	}
 	if(is_moving_waist_ == false && is_moving_head_ == false) // desired pose
@@ -251,23 +277,24 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 		ROS_INFO("Upper Module Trajectory Start");
 
 		result_rad_waist_ = end_to_rad_waist_ -> cal_end_point_to_rad(waist_end_point_);
-		result_rad_head_ = end_to_rad_head_   -> cal_end_point_to_rad(head_end_point_);
+		result_rad_head_  = end_to_rad_head_  -> cal_end_point_to_rad(head_end_point_);
 
 		is_moving_waist_ = end_to_rad_waist_ -> is_moving_check;
 		is_moving_head_  = end_to_rad_head_  -> is_moving_check;
 	}
 	///////////////////////////////////////////////////// control //////////////////////////////////////////////////////////
-	waist_kinematics_->XYZEulerAnglesSolution(result_rad_waist_ (5,0),0,result_rad_waist_ (3,0));
-	head_kinematics_->ZYXEulerAnglesSolution(result_rad_head_(3,0),result_rad_head_(4,0),result_rad_head_(5,0));
+	waist_kinematics_-> XYZEulerAnglesSolution(result_rad_waist_ (5,0),0,result_rad_waist_ (3,0));
+	head_kinematics_ -> ZYXEulerAnglesSolution(result_rad_head_(3,0),result_rad_head_(4,0),result_rad_head_(5,0));
 
 	// real test
-	result_[joint_id_to_name_[9]]->goal_position_  = waist_kinematics_ -> xyz_euler_angle_z;// waist yaw
-	result_[joint_id_to_name_[10]]->goal_position_ = waist_kinematics_ -> xyz_euler_angle_x; // waist roll
+	result_[joint_id_to_name_[9]] -> goal_position_  = waist_kinematics_ -> xyz_euler_angle_z;// waist yaw
+	result_[joint_id_to_name_[10]]-> goal_position_  = waist_kinematics_ -> xyz_euler_angle_x; // waist roll
 
-	result_[joint_id_to_name_[23]]->goal_position_ = head_kinematics_ -> zyx_euler_angle_z;
+
+	result_[joint_id_to_name_[23]]-> goal_position_ = head_kinematics_ -> zyx_euler_angle_z;
 	//gazebo
-	result_[joint_id_to_name_[24]]->goal_position_ = head_kinematics_->zyx_euler_angle_y;
-	result_[joint_id_to_name_[25]]->goal_position_ = head_kinematics_->zyx_euler_angle_x;
+/*	result_[joint_id_to_name_[24]]-> goal_position_ = head_kinematics_ -> zyx_euler_angle_y;
+	result_[joint_id_to_name_[25]]-> goal_position_ = head_kinematics_ -> zyx_euler_angle_x;*/
 
 	//arm module transmitted
 	temp_waist_yaw_rad   =  dxls["waist_yaw"] -> dxl_state_->present_position_;
@@ -281,8 +308,6 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	// cop
 	cop_cal_waist->jointStateGetForTransForm(l_leg_real_joint, r_leg_real_joint);
 	cop_cal_waist->copCalculationResult();
-
-
 
 
 	// display cop to rviz

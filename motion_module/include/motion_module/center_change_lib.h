@@ -28,7 +28,7 @@ namespace diana_motion
   	CenterChange();
   	~CenterChange();
 
-  	void parseMotionData(std::string turn_type, std::string change_type , std::string module_name);
+  	void parseMotionData(std::string turn_type, std::string change_type);
   	void calculateStepEndPointValue(double desired_value, double step_value, std::string change_type);
 
   	double step_end_point_value[2][6];

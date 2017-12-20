@@ -255,7 +255,7 @@ void MotionModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange
 
 	if (temp_change_value_center != msg->center_change || temp_change_value_edge != msg->edge_change|| temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
 	{
-		center_change_->parseMotionData(msg->turn_type, msg->change_type, "motion_module");
+		center_change_->parseMotionData(msg->turn_type, msg->change_type);
 
 		if(!msg->change_type.compare("edge_change"))
 			center_change_->calculateStepEndPointValue(msg->edge_change,100,msg->change_type); // 0.01 단위로 조정 가능.
@@ -472,10 +472,10 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 
 	//<---  test control --->
 
-	//result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
-	//result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
+	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
+	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
 	//<---  cartesian space control  --->
-	result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);
+/*	result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);
 	result_[joint_id_to_name_[13]]->goal_position_ =  l_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[15]]->goal_position_ =  l_kinematics_->joint_radian(3,0);
 
@@ -492,7 +492,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	result_[joint_id_to_name_[22]]->goal_position_ =  r_kinematics_->joint_radian(6,0);
 
 	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
-	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
+	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);*/
 
 	//	cop_cal->jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
 	//	cop_cal->copCalculationResult();

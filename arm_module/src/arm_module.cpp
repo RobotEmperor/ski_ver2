@@ -21,6 +21,7 @@ ArmModule::ArmModule()
 
 	// Dynamixel initialize ////
 
+/*
 	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
 	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5
@@ -28,13 +29,14 @@ ArmModule::ArmModule()
 	result_["r_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 2
 	result_["r_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 4
 	result_["r_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 6
+*/
 
 
-/*
+
 	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
 	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5
-*/
+
 	///////////////////////////
 	// arm //
 	// Left //
@@ -205,9 +207,9 @@ void ArmModule::process(std::map<std::string, robotis_framework::Dynamixel *> dx
 	result_[joint_id_to_name_[3]]->goal_position_ = l_arm_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[5]]->goal_position_ = l_arm_kinematics_->joint_radian(3,0);
 
-	result_[joint_id_to_name_[2]]->goal_position_ = r_arm_kinematics_->joint_radian(1,0);
+/*	result_[joint_id_to_name_[2]]->goal_position_ = r_arm_kinematics_->joint_radian(1,0);
 	result_[joint_id_to_name_[4]]->goal_position_ = r_arm_kinematics_->joint_radian(2,0);
-	result_[joint_id_to_name_[6]]->goal_position_ = r_arm_kinematics_->joint_radian(3,0);
+	result_[joint_id_to_name_[6]]->goal_position_ = r_arm_kinematics_->joint_radian(3,0);*/
 }
 void ArmModule::stop()
 {

@@ -23,6 +23,7 @@
 #include "heroehs_math/end_point_to_rad_cal.h"
 #include "diana_balance_control/diana_balance_control.h"
 #include "diana_balance_control/cop_calculation_function.h"
+#include "upper_body_module/center_change_upper_lib.h"
 
 //message
 //m - standard
@@ -72,10 +73,13 @@ public:
 	ros::Subscriber current_leg_pose_sub;
 	ros::Subscriber get_ft_data_sub_;
 	ros::Subscriber get_imu_data_sub_;
+	ros::Subscriber center_change_msg_sub;
+
+	void currentLegPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
+	void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg);
 
 	void desiredPoseWaistMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
 	void desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
-	void currentLegPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
 	//sensor
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
 	void ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg);
@@ -101,14 +105,14 @@ private:
 
 	//waist kinematics
 	heroehs_math::KinematicsEulerAngle *waist_kinematics_;
-	heroehs_math::CalRad *end_to_rad_waist_;     // (6*8)
-	Eigen::MatrixXd waist_end_point_;            // (6*1)
+	heroehs_math::CalRad *end_to_rad_waist_;     //
+	Eigen::MatrixXd waist_end_point_;            // (6*8)
 	Eigen::MatrixXd result_rad_waist_;           // (6*1)
 
 	//head kinematics
 	heroehs_math::KinematicsEulerAngle *head_kinematics_;
-	heroehs_math::CalRad *end_to_rad_head_;      // (6*8)
-	Eigen::MatrixXd head_end_point_;             // (6*1)
+	heroehs_math::CalRad *end_to_rad_head_;      //
+	Eigen::MatrixXd head_end_point_;             // (6*8)
 	Eigen::MatrixXd result_rad_head_;            // (6*1)
 
   //arm module data transmit
@@ -127,6 +131,12 @@ private:
   double currentGyroX,currentGyroY,currentGyroZ;
   double tf_current_gyro_x, tf_current_gyro_y, tf_current_gyro_z;
 
+
+  //center change lib
+  diana_motion_waist::CenterChange *center_change_;
+  double temp_change_value_center;
+  std::string temp_turn_type;
+  std::string temp_change_type;
 
 
 };

@@ -10,7 +10,7 @@ using namespace diana_motion;
 
 CenterChange::CenterChange()
 {
-	std::string path_ = ros::package::getPath("motion_module") + "/data/turn/initialize.yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
+	std::string path_ = ros::package::getPath("ski_main_manager") + "/data/turn/initialize.yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
 	YAML::Node doc; // YAML file class 선언!
 	try
 	{
@@ -19,7 +19,7 @@ CenterChange::CenterChange()
 
 	}catch(const std::exception& e) // 에러 점검
 	{
-		ROS_ERROR("Fail to load yaml file!");
+		ROS_ERROR("Fail to load LEG initialize yaml file!");
 		return;
 	}
 	// motion data load initialize//
@@ -85,10 +85,9 @@ CenterChange::CenterChange()
 CenterChange::~CenterChange()
 {}
 
-void CenterChange::parseMotionData(std::string turn_type, std::string change_type, std::string module_name)
+void CenterChange::parseMotionData(std::string turn_type, std::string change_type)
 {
-	std::string path_ = ros::package::getPath(module_name) + "/data/turn/"+ turn_type + ".yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
-
+	std::string path_ = ros::package::getPath("ski_main_manager") + "/data/turn/"+ turn_type + ".yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
 	YAML::Node doc; // YAML file class 선언!
 	try
 	{
@@ -97,7 +96,7 @@ void CenterChange::parseMotionData(std::string turn_type, std::string change_typ
 
 	}catch(const std::exception& e) // 에러 점검
 	{
-		ROS_ERROR("Fail to load yaml file!");
+		ROS_ERROR("Fail to load LEG parse data yaml file!");
 		return;
 	}
 	// motion data load initialize//

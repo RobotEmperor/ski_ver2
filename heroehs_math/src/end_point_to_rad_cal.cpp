@@ -39,7 +39,6 @@ CalRad::~CalRad()
 }
 Eigen::MatrixXd CalRad::cal_end_point_to_rad(Eigen::MatrixXd eP_) // end point 6 X 8 행렬을 생 6은 xyz roll pitch yaw 8은 trajectory 입력
 {
-
 	if( cal_end_point_tra_px    -> detect_change_final_value(eP_(0,1), eP_(0,3), eP_(0,7))||
 			cal_end_point_tra_py    -> detect_change_final_value(eP_(1,1), eP_(1,3), eP_(1,7))||
 			cal_end_point_tra_pz    -> detect_change_final_value(eP_(2,1), eP_(2,3), eP_(2,7))||
@@ -82,7 +81,13 @@ Eigen::MatrixXd CalRad::cal_end_point_to_rad(Eigen::MatrixXd eP_) // end point 6
 	result_joint(5,0) = cal_end_point_tra_kamma -> fifth_order_traj_gen(current_pose_change(5,0), eP_(5,1), current_pose_change(5,1), eP_(5,3), eP_(5,4), eP_(5,5), eP_(5,6), eP_(5,7));
 
 
-	is_moving_check = cal_end_point_tra_px->is_moving_traj;
+	if( cal_end_point_tra_px->is_moving_traj || cal_end_point_tra_py->is_moving_traj || cal_end_point_tra_pz->is_moving_traj ||
+			cal_end_point_tra_alpha ->is_moving_traj || cal_end_point_tra_betta ->is_moving_traj  || cal_end_point_tra_kamma ->is_moving_traj)
+	{
+		is_moving_check = true;
+	}
+	else
+		is_moving_check = false;
 
 	return result_joint;
 }

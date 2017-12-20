@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   heroehs_math
   diana_balance_control
   diana_msgs
+  ski_main_manager
 )
 
 find_package(Eigen REQUIRED)

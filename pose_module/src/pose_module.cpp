@@ -21,6 +21,7 @@ PoseModule::PoseModule()
 
 	// Dynamixel initialize ////
 
+/*
 	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["r_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 2
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
@@ -50,11 +51,12 @@ PoseModule::PoseModule()
 	result_["head_yaw"]         = new robotis_framework::DynamixelState();  // joint 23
 	result_["head_pitch"]       = new robotis_framework::DynamixelState();  // joint 24
 	result_["head_roll"]        = new robotis_framework::DynamixelState();  // joint 25
+*/
 
 
 	// TEST
 
-/*
+
 	result_["waist_yaw"]        = new robotis_framework::DynamixelState();  // joint 9
 	result_["waist_roll"]       = new robotis_framework::DynamixelState();  // joint 10
 
@@ -66,7 +68,7 @@ PoseModule::PoseModule()
 	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
 	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5
-*/
+
 
 
 	//leg ///////////////////////////
@@ -484,7 +486,7 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	//<---  catesian space control test --->
 
 
-/*	result_[joint_id_to_name_[9]] -> goal_position_  = waist_kinematics_->xyz_euler_angle_z;// waist yaw
+	result_[joint_id_to_name_[9]] -> goal_position_  = waist_kinematics_->xyz_euler_angle_z;// waist yaw
 	result_[joint_id_to_name_[10]] -> goal_position_  = waist_kinematics_->xyz_euler_angle_x; // waist roll
 
 	result_[joint_id_to_name_[19]] -> goal_position_  = -l_kinematics_->joint_radian(5,0);
@@ -494,11 +496,11 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 
 	result_[joint_id_to_name_[1]]  -> goal_position_  = l_arm_kinematics_->joint_radian(1,0);
 	result_[joint_id_to_name_[3]]  -> goal_position_  = -l_arm_kinematics_->joint_radian(2,0);
-	result_[joint_id_to_name_[5]]  -> goal_position_  = l_arm_kinematics_->joint_radian(3,0);*/
+	result_[joint_id_to_name_[5]]  -> goal_position_  = l_arm_kinematics_->joint_radian(3,0);
 
 	//<---  cartesian space control  --->
 
-	result_[joint_id_to_name_[1]]  -> goal_position_  =  l_arm_kinematics_->joint_radian(1,0);
+/*	result_[joint_id_to_name_[1]]  -> goal_position_  =  l_arm_kinematics_->joint_radian(1,0);
 	result_[joint_id_to_name_[3]]  -> goal_position_  = -l_arm_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[5]]  -> goal_position_  =  l_arm_kinematics_->joint_radian(3,0);
 
@@ -527,7 +529,7 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 
 	result_[joint_id_to_name_[23]]->goal_position_   = -head_kinematics_->zyx_euler_angle_z;
 	result_[joint_id_to_name_[24]]->goal_position_   = -head_kinematics_->zyx_euler_angle_y;
-	result_[joint_id_to_name_[25]]->goal_position_   = -head_kinematics_->zyx_euler_angle_x;
+	result_[joint_id_to_name_[25]]->goal_position_   = -head_kinematics_->zyx_euler_angle_x;*/
 
 	//printf("%f  ::  %f  :: %f  ::  %f  :: %f  ::  %f  \n",l_kinematics_->joint_radian(1,0), l_kinematics_->joint_radian(2,0),
 		//	l_kinematics_->joint_radian(3,0), l_kinematics_->joint_radian(4,0), l_kinematics_->joint_radian(5,0), l_kinematics_->joint_radian(6,0));
