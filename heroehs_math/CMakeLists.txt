@@ -34,6 +34,7 @@ include_directories(
    src/fifth_order_trajectory_generate.cpp
    src/kinematics.cpp
    src/end_point_to_rad_cal.cpp
+   src/control_function.cpp
  )
 
 

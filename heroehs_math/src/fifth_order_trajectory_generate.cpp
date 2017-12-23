@@ -26,22 +26,22 @@ FifthOrderTrajectory::FifthOrderTrajectory()
 	d_t = 0;
 	trajectory_final_value = 0;
 
- initial_time = 0.0;
- initial_pose = 0.0;
- initial_velocity = 0.0;
- initial_acc = 0.0;
+	initial_time = 0.0;
+	initial_pose = 0.0;
+	initial_velocity = 0.0;
+	initial_acc = 0.0;
 
 
- current_time = 0.0;
- current_pose = 0.0;
- current_velocity = 0.0;
- current_acc = 0.0;
+	current_time = 0.0;
+	current_pose = 0.0;
+	current_velocity = 0.0;
+	current_acc = 0.0;
 
 
- final_time = 0.0;
- final_pose = 0.0;
- final_velocity = 0.0;
- final_acc = 0.0;
+	final_time = 0.0;
+	final_pose = 0.0;
+	final_velocity = 0.0;
+	final_acc = 0.0;
 
 }
 
@@ -105,4 +105,18 @@ double FifthOrderTrajectory::fifth_order_traj_gen(double initial_value_, double 
 		return trajectory_final_value;
 	}
 
+}
+
+double FifthOrderTrajectory::fifth_order_traj_gen_one_value(Eigen::MatrixXd joint_)
+{
+	double result_one_joint_;
+
+	if(detect_change_final_value(joint_(0,1), joint_(0,3), joint_(0,7)))
+	{
+		current_time = 0;
+		ROS_INFO("One Value Change!");
+	}
+	result_one_joint_ = fifth_order_traj_gen(current_pose, joint_(0,1), current_velocity, joint_(0,3), joint_(0,4), joint_(0,5), joint_(0,6), joint_(0,7));
+
+	return result_one_joint_;
 }

@@ -12,7 +12,3 @@ float64 foot_roll_gyro_d_gain
 float64 foot_pitch_gyro_p_gain
 float64 foot_pitch_gyro_d_gain
 
-float64 waist_roll_gyro_p_gain
-float64 waist_roll_gyro_d_gain
-float64 waist_pitch_gyro_p_gain
-float64 waist_pitch_gyro_d_gain

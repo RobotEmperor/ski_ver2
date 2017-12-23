@@ -30,7 +30,8 @@ public:
 			double initial_time_, double final_time_);
 
 
-	bool detect_change_final_value(double pose, double velocity_, double time_);
+	bool   detect_change_final_value(double pose, double velocity_, double time_);
+	double fifth_order_traj_gen_one_value(Eigen::MatrixXd joint_);
 
 	bool is_moving_traj;
 

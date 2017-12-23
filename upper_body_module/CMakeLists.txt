@@ -57,6 +57,7 @@ include_directories(
 add_library(upper_body_module
   src/upper_body_module.cpp
   src/center_change_upper_lib.cpp
+  src/upper_body_module_state.cpp
 )
 
 add_dependencies(upper_body_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

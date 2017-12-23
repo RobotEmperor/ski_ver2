@@ -56,6 +56,7 @@ include_directories(
 
 add_library(motion_module
   src/motion_module.cpp
+  src/motion_module_state.cpp
   src/center_change_lib.cpp
 )
 

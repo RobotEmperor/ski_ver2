@@ -6,63 +6,6 @@
  */
 #include "arm_module/arm_module.h"
 using namespace arm_module;
-
-ArmModule::ArmModule()
-: control_cycle_msec_(8)
-{
-	running_ = false;
-	gazebo_check = false;
-	is_moving_l_arm_ = false;
-	is_moving_r_arm_ = false;
-
-	enable_       = false;
-	module_name_  = "arm_module";
-	control_mode_ = robotis_framework::PositionControl;
-
-	// Dynamixel initialize ////
-
-/*
-	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
-	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
-	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5
-
-	result_["r_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 2
-	result_["r_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 4
-	result_["r_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 6
-*/
-
-
-
-	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
-	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
-	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5
-
-	///////////////////////////
-	// arm //
-	// Left //
-	l_arm_kinematics_  = new heroehs_math::KinematicsArm;
-	end_to_rad_l_arm_  = new heroehs_math::CalRad;
-	//Right //
-	r_arm_kinematics_  = new heroehs_math::KinematicsArm;
-	end_to_rad_r_arm_  = new heroehs_math::CalRad;
-
-	waist_yaw_rad_  = 0;
-	waist_roll_rad_ = 0;
-	l_arm_desired_point_x_ = 0;
-	l_arm_desired_point_y_ = 0;
-	l_arm_desired_point_z_ = 0;
-
-	r_arm_desired_point_x_ = 0;
-	r_arm_desired_point_y_ = 0;
-	r_arm_desired_point_z_ = 0;
-
-	traj_time_test = 4;
-	new_count_ = 1 ;
-}
-ArmModule::~ArmModule()
-{
-	queue_thread_.join();
-}
 void ArmModule::initialize(const int control_cycle_msec, robotis_framework::Robot *robot)
 {
 	is_moving_l_arm_ = false;
@@ -115,44 +58,32 @@ void ArmModule::initialize(const int control_cycle_msec, robotis_framework::Robo
 	}
 	ROS_INFO("< -------  Initialize Module : Arm Module  !!  ------->");
 }
-void ArmModule::queueThread()
-{
-	ros::NodeHandle ros_node;
-	ros::CallbackQueue callback_queue;
-	ros_node.setCallbackQueue(&callback_queue);
-
-	/* publisher topics
-	 subscribe topics
-	get_imu_data_sub_ = ros_node.subscribe("/imu/data", 100, &MotionModule::imuDataMsgCallback, this);
-	get_ft_data_sub_ = ros_node.subscribe("/diana/force_torque_data", 100, &MotionModule::ftDataMsgCallback, this);
-	 */
-	// subscriber topics
-	desired_pose_arm_sub_   = ros_node.subscribe("/desired_pose_arm", 5, &ArmModule::desiredPoseArmMsgCallbackTEST, this);
-	current_waist_pose_sub_ = ros_node.subscribe("/current_waist_pose", 5, &ArmModule::currentWaistPoseMsgCallbackTEST, this);
-	ros::WallDuration duration(control_cycle_msec_ / 1000.0);
-	while(ros_node.ok())
-		callback_queue.callAvailable(duration);
-}
-void ArmModule::currentWaistPoseMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg)
-{
-	waist_yaw_rad_  = msg->data[0];// waist yaw
-	waist_roll_rad_ = msg->data[1];// waist roll
-}
-void ArmModule::desiredPoseArmMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg)
-{
-	l_arm_end_point_(0, 1) = msg->data[0];// yaw  트레젝토리 6 * 8 은 xyz yaw(z) pitch(y) roll(x) 이며 8은 처음 위치 나중 위치 / 속도 속도 / 가속도 가속도 / 시간 시간 / 임
-	l_arm_end_point_(1, 1) = msg->data[1];
-	l_arm_end_point_(2, 1) = msg->data[2];
-	r_arm_end_point_(0, 1) = msg->data[3];
-	r_arm_end_point_(1, 1) = msg->data[4];
-	r_arm_end_point_(2, 1) = msg->data[5];
-	is_moving_l_arm_ = true;
-	is_moving_r_arm_ = true;
-}
 bool ArmModule::isRunning()
 {
 	return running_;
 }
+void ArmModule::updateBalanceGyroParameter()
+{
+	Eigen::MatrixXd value;
+	value.resize(1,8);
+	value.fill(0);
+	value(0,7) = updating_duration;
+	value(0,1) = gyro_roll_p_gain;
+	gyro_roll_function->kp_ = gain_roll_p_adjustment -> fifth_order_traj_gen_one_value(value);
+	value(0,1) = gyro_roll_d_gain;
+	gyro_roll_function->kd_ = gain_roll_d_adjustment -> fifth_order_traj_gen_one_value(value);
+
+	value(0,1) = gyro_pitch_p_gain;
+	gyro_pitch_function->kp_ = gain_pitch_p_adjustment -> fifth_order_traj_gen_one_value(value);
+	value(0,1) = gyro_pitch_d_gain;
+	gyro_pitch_function->kd_ = gain_pitch_d_adjustment -> fifth_order_traj_gen_one_value(value);
+
+	value(0,1) = gyro_yaw_p_gain;
+	gyro_yaw_function->kp_ = gain_yaw_p_adjustment -> fifth_order_traj_gen_one_value(value);
+	value(0,1) = gyro_yaw_d_gain;
+	gyro_yaw_function->kd_ = gain_yaw_d_adjustment -> fifth_order_traj_gen_one_value(value);
+}
+
 void ArmModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
 		std::map<std::string, double> sensors)
 {
@@ -161,6 +92,7 @@ void ArmModule::process(std::map<std::string, robotis_framework::Dynamixel *> dx
 	{
 		return;
 	}
+	updateBalanceGyroParameter();
 	//// read current position ////
 	if(new_count_ == 1)
 	{
@@ -202,10 +134,13 @@ void ArmModule::process(std::map<std::string, robotis_framework::Dynamixel *> dx
 	l_arm_kinematics_ -> InverseKinematicsArm(result_end_l_arm_(0,0), result_end_l_arm_(1,0), result_end_l_arm_(2,0));
 	r_arm_kinematics_ -> InverseKinematicsArm(result_end_r_arm_(0,0), result_end_r_arm_(1,0), result_end_r_arm_(2,0));
 
+	gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);
+	gyro_roll_function->PID_calculate(0,tf_current_gyro_x);
+	gyro_pitch_function->PID_calculate(0,tf_current_gyro_y);
 
-	result_[joint_id_to_name_[1]]->goal_position_ = l_arm_kinematics_->joint_radian(1,0);
-	result_[joint_id_to_name_[3]]->goal_position_ = l_arm_kinematics_->joint_radian(2,0);
-	result_[joint_id_to_name_[5]]->goal_position_ = l_arm_kinematics_->joint_radian(3,0);
+	result_[joint_id_to_name_[1]]->goal_position_ =  l_arm_kinematics_->joint_radian(1,0) + gyro_pitch_function->PID_calculate(0,tf_current_gyro_y);// + gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);
+	result_[joint_id_to_name_[3]]->goal_position_ = -l_arm_kinematics_->joint_radian(2,0) + gyro_roll_function->PID_calculate(0,tf_current_gyro_x); // - gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);
+	result_[joint_id_to_name_[5]]->goal_position_ =  l_arm_kinematics_->joint_radian(3,0);
 
 /*	result_[joint_id_to_name_[2]]->goal_position_ = r_arm_kinematics_->joint_radian(1,0);
 	result_[joint_id_to_name_[4]]->goal_position_ = r_arm_kinematics_->joint_radian(2,0);

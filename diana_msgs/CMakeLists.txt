@@ -26,6 +26,7 @@ add_message_files(
   ForceTorque.msg
   CenterChange.msg
   BalanceParamWaist.msg
+  BalanceParamArm.msg
 )
 
 generate_messages(

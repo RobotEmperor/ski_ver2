@@ -60,6 +60,7 @@ include_directories(
 
 add_library(pose_module
   src/pose_module.cpp
+  src/pose_module_state.cpp
 )
 
 add_dependencies(pose_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

@@ -21,6 +21,7 @@
 #include "heroehs_math/fifth_order_trajectory_generate.h"
 #include "heroehs_math/kinematics.h"
 #include "heroehs_math/end_point_to_rad_cal.h"
+#include "heroehs_math/control_function.h"
 #include "diana_balance_control/diana_balance_control.h"
 #include "diana_balance_control/cop_calculation_function.h"
 #include "upper_body_module/center_change_upper_lib.h"
@@ -38,6 +39,7 @@
 
 //m - personal
 #include "diana_msgs/BalanceParam.h"
+#include "diana_msgs/BalanceParamWaist.h"
 #include "diana_msgs/ForceTorque.h"
 #include "robotis_controller_msgs/StatusMsg.h"
 #include "diana_msgs/CenterChange.h"
@@ -61,7 +63,7 @@ public:
 
 	bool gazebo_check;
 	double traj_time_test;
-  // publisher
+	// publisher
 	ros::Publisher  current_waist_pose_pub;
 	ros::Publisher cop_point_Fz_pub;
 	ros::Publisher cop_point_Fy_pub;
@@ -74,6 +76,7 @@ public:
 	ros::Subscriber get_ft_data_sub_;
 	ros::Subscriber get_imu_data_sub_;
 	ros::Subscriber center_change_msg_sub;
+	ros::Subscriber balance_param_waist_sub;
 
 	void currentLegPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
 	void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg);
@@ -83,6 +86,8 @@ public:
 	//sensor
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
 	void ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg);
+	//pid gain value for gyro
+	void balanceParameterWaistMsgCallback(const diana_msgs::BalanceParamWaist::ConstPtr& msg);
 
 	geometry_msgs::PointStamped cop_point_Fz_msg_;
 	geometry_msgs::PointStamped cop_point_Fy_msg_;
@@ -115,28 +120,40 @@ private:
 	Eigen::MatrixXd head_end_point_;             // (6*8)
 	Eigen::MatrixXd result_rad_head_;            // (6*1)
 
-  //arm module data transmit
+	//arm module data transmit
 	std_msgs::Float64MultiArray current_waist_pose_msg;
 	double temp_waist_yaw_rad, temp_waist_roll_rad;
 
 	// cop calculation
-  diana::CopCalculationFunc *cop_cal_waist;
-  double currentFX_l,currentFY_l,currentFZ_l,currentTX_l,currentTY_l,currentTZ_l;
-  double currentFX_r,currentFY_r,currentFZ_r,currentTX_r,currentTY_r,currentTZ_r;
-  Eigen::MatrixXd l_leg_real_joint;
-  Eigen::MatrixXd r_leg_real_joint;
+	diana::CopCalculationFunc *cop_cal_waist;
+	double currentFX_l,currentFY_l,currentFZ_l,currentTX_l,currentTY_l,currentTZ_l;
+	double currentFX_r,currentFY_r,currentFZ_r,currentTX_r,currentTY_r,currentTZ_r;
+	Eigen::MatrixXd l_leg_real_joint;
+	Eigen::MatrixXd r_leg_real_joint;
 
-  // gyro
-  void gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x);
-  double currentGyroX,currentGyroY,currentGyroZ;
-  double tf_current_gyro_x, tf_current_gyro_y, tf_current_gyro_z;
+	// gyro
+	void gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x);
+	void updateBalanceGyroParameter();
+	double currentGyroX,currentGyroY,currentGyroZ;
+	double tf_current_gyro_x, tf_current_gyro_y, tf_current_gyro_z;
+	heroehs_math::FifthOrderTrajectory *gain_roll_p_adjustment;
+	heroehs_math::FifthOrderTrajectory *gain_roll_d_adjustment;
+	heroehs_math::FifthOrderTrajectory *gain_yaw_p_adjustment;
+	heroehs_math::FifthOrderTrajectory *gain_yaw_d_adjustment;
+	control_function::PID_function *gyro_roll_function;
+	control_function::PID_function *gyro_yaw_function;
+	double updating_duration;
+	double gyro_roll_p_gain;
+	double gyro_roll_d_gain;
+	double gyro_yaw_p_gain;
+	double gyro_yaw_d_gain;
 
 
-  //center change lib
-  diana_motion_waist::CenterChange *center_change_;
-  double temp_change_value_center;
-  std::string temp_turn_type;
-  std::string temp_change_type;
+	//center change lib
+	diana_motion_waist::CenterChange *center_change_;
+	double temp_change_value_center;
+	std::string temp_turn_type;
+	std::string temp_change_type;
 
 
 };

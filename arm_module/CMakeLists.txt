@@ -55,6 +55,7 @@ include_directories(
 
 add_library(arm_module
   src/arm_module.cpp
+  src/arm_module_state.cpp
 )
 
 add_dependencies(arm_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

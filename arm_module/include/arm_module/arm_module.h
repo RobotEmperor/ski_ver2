@@ -25,6 +25,7 @@
 #include "heroehs_math/fifth_order_trajectory_generate.h"
 #include "heroehs_math/kinematics.h"
 #include "heroehs_math/end_point_to_rad_cal.h"
+#include "heroehs_math/control_function.h"
 #include "diana_balance_control/diana_balance_control.h"
 #include "diana_balance_control/cop_calculation_function.h"
 
@@ -44,6 +45,7 @@
 #include "diana_msgs/ForceTorque.h"
 #include "robotis_controller_msgs/StatusMsg.h"
 #include "diana_msgs/CenterChange.h"
+#include "diana_msgs/BalanceParamArm.h"
 
 namespace arm_module
 {
@@ -62,36 +64,27 @@ public:
 
 	bool gazebo_check;
 
-	//	ros::Subscriber head_test;
-	//	ros::Subscriber waist_test;
 	double traj_time_test;
 
-	//	void desiredPoseWaistMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
-	//	void desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
-	void desiredPoseArmMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
-	void currentWaistPoseMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
 
-	/*	// paper messages
-	ros::Publisher state_end_point_pose_pub;
-	ros::Publisher state_end_point_orientation_pub;
-	ros::Publisher zmp_point_pub;
-	ros::Publisher zmp_point_pub_temp;
+
 
 	// sensor data & balance on off
+	ros::Subscriber desired_pose_arm_sub_;
+	ros::Subscriber current_waist_pose_sub_;
 	ros::Subscriber get_imu_data_sub_;
 	ros::Subscriber get_ft_data_sub_;
-  ros::Subscriber set_balance_param_sub_;*/
+	ros::Subscriber balance_param_arm_sub;
 
-	// subscriber
-	ros::Subscriber desired_pose_arm_sub_;  // test
-	ros::Subscriber current_waist_pose_sub_;
 
-	/* ROS Topic Callback Functions */
-	/*	void desiredMotionMsgCallback(const std_msgs::Int32::ConstPtr& msg);
+
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
-	void ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg);
-  void setBalanceParameterCallback(const diana_msgs::BalanceParam::ConstPtr& msg);
-  void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg);*/
+	void balanceParameterArmMsgCallback(const diana_msgs::BalanceParamArm::ConstPtr& msg);
+
+	void desiredPoseArmMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
+	void currentWaistPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
+
+	//void ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg);
 
 private:
 	void queueThread();
@@ -126,6 +119,32 @@ private:
 	double waist_roll_rad_;
 	double l_arm_desired_point_x_, l_arm_desired_point_y_, l_arm_desired_point_z_;
 	double r_arm_desired_point_x_, r_arm_desired_point_y_, r_arm_desired_point_z_;
+
+  // gyro compensation
+	void gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x);
+	void updateBalanceGyroParameter();
+	double currentGyroX,currentGyroY,currentGyroZ;
+	double tf_current_gyro_x, tf_current_gyro_y, tf_current_gyro_z;
+
+	heroehs_math::FifthOrderTrajectory *gain_roll_p_adjustment;
+	heroehs_math::FifthOrderTrajectory *gain_roll_d_adjustment;
+	heroehs_math::FifthOrderTrajectory *gain_pitch_p_adjustment;
+	heroehs_math::FifthOrderTrajectory *gain_pitch_d_adjustment;
+	heroehs_math::FifthOrderTrajectory *gain_yaw_p_adjustment;
+	heroehs_math::FifthOrderTrajectory *gain_yaw_d_adjustment;
+
+	control_function::PID_function *gyro_roll_function;
+	control_function::PID_function *gyro_pitch_function;
+	control_function::PID_function *gyro_yaw_function;
+
+	double updating_duration;
+	double gyro_roll_p_gain;
+	double gyro_roll_d_gain;
+	double gyro_pitch_p_gain;
+	double gyro_pitch_d_gain;
+	double gyro_yaw_p_gain;
+	double gyro_yaw_d_gain;
+
 
 
 
