@@ -9,7 +9,6 @@
 
 using namespace diana;
 
-
 CopCalculationFunc::CopCalculationFunc(){
 
 	force_data_l.resize(4,1);
@@ -77,8 +76,6 @@ void CopCalculationFunc::ftSensorDataRightGet(double force_sensor_data_x, double
 	torque_data_r << torque_sensor_data_x, torque_sensor_data_y, torque_sensor_data_z, 1;
 
 }
-
-
 void CopCalculationFunc::jointStateGetForTransForm(Eigen::MatrixXd joint_state_l, Eigen::MatrixXd joint_state_r)
 {
 
@@ -129,12 +126,142 @@ void CopCalculationFunc::copCalculationResult()
 	cop_fx_point_y = (- cf_py_l*cf_fx_l - cf_py_r*cf_fx_r + cf_tz_l + cf_tz_r )/(cf_fx_l + cf_fx_r);
 	cop_fx_point_z = (  cf_pz_l*cf_fx_l + cf_pz_r*cf_fx_r + cf_ty_l + cf_ty_r )/(cf_fx_l + cf_fx_r);
 
-
-
-
 	printf("Fz  X  %f ::Y  %f  \n\n", cop_fz_point_x, cop_fz_point_x);
 	printf("Fy  X  %f ::z  %f  \n\n", cop_fy_point_x, cop_fy_point_z);
 	printf("Fx  Y  %f ::z  %f  \n\n", cop_fx_point_y, cop_fx_point_z);
+}
+CopCompensationFunc::CopCompensationFunc()
+{
+	reference_point_Fz_x = 0;
+	reference_point_Fz_y = 0;
+
+	reference_point_Fy_x = 0;
+	reference_point_Fy_z = 0;
+
+	reference_point_Fx_y = 0;
+	reference_point_Fx_z = 0;
+
+	margin_pflug_bogen_l_fz_x = 0;
+	margin_pflug_bogen_r_fz_x = 0;
+	margin_pflug_bogen_l_fz_y = 0;
+	margin_pflug_bogen_r_fz_y = 0;
+
+	margin_pflug_bogen_l_fy_x = 0;
+	margin_pflug_bogen_r_fy_x = 0;
+	margin_pflug_bogen_l_fy_z = 0;
+	margin_pflug_bogen_r_fy_z = 0;
+
+	margin_pflug_bogen_l_fx_y = 0;
+	margin_pflug_bogen_r_fx_y = 0;
+	margin_pflug_bogen_l_fx_z = 0;
+	margin_pflug_bogen_r_fx_z = 0;
+
+	margin_carving_turn_l_fz_x = 0;
+	margin_carving_turn_r_fz_x = 0;
+	margin_carving_turn_l_fz_y = 0;
+	margin_carving_turn_r_fz_y = 0;
+
+	margin_carving_turn_l_fy_x = 0;
+	margin_carving_turn_r_fy_x = 0;
+	margin_carving_turn_l_fy_z = 0;
+	margin_carving_turn_r_fy_z = 0;
+
+	margin_carving_turn_l_fx_z = 0;
+	margin_carving_turn_r_fx_z = 0;
+	margin_carving_turn_l_fx_y = 0;
+	margin_carving_turn_r_fx_y = 0;
+	pidControllerFz_x = new control_function::PID_function(0.008,0.1,-0.1,0,0,0);
+	pidControllerFz_y = new control_function::PID_function(0.008,0.1,-0.1,0,0,0);
+	pidControllerFx = new control_function::PID_function(0.008,0.1,-0.1,0,0,0);
+	pidControllerFy = new control_function::PID_function(0.008,0.1,-0.1,0,0,0);
+}
+CopCompensationFunc::~CopCompensationFunc()
+{
+}
+void CopCompensationFunc::parse_margin_data()
+{
+	YAML::Node doc; // YAML file class 선언!
+	std::string path_ = ros::package::getPath("ski_main_manager") + "/data/cop/control_value.yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
+	try
+	{
+		// load yaml
+		doc = YAML::LoadFile(path_.c_str()); // 파일 경로를 입력하여 파일을 로드 한다.
+
+	}catch(const std::exception& e) // 에러 점검
+	{
+		ROS_ERROR("Fail to load yaml file!");
+		return;
+	}
+
+	//margin load //
+	margin_pflug_bogen_l_fz_x = doc["pflug_bogen_l_fz"][0].as<double>();
+	margin_pflug_bogen_l_fz_y = doc["pflug_bogen_l_fz"][1].as<double>();
+
+	margin_pflug_bogen_r_fz_x = doc["pflug_bogen_r_fz"][0].as<double>();
+	margin_pflug_bogen_r_fz_y = doc["pflug_bogen_r_fz"][1].as<double>();
+}
+void CopCompensationFunc::centerOfPressureReferencePoint(std::string turn_type, double cur_l_point_x, double cur_l_point_y, double cur_l_point_z, double cur_r_point_x, double cur_r_point_y, double cur_r_point_z, double current_control_value)
+{
+	if(!turn_type.compare("pflug_bogen"))
+	{
+		if(current_control_value > 0)//right
+		{
+			reference_point_Fz_x = cur_l_point_x - cur_l_point_x*margin_pflug_bogen_l_fz_x;
+			reference_point_Fz_y = cur_l_point_y - cur_l_point_y*margin_pflug_bogen_l_fz_y;
+
+			reference_point_Fy_x = cur_l_point_x - cur_l_point_x*margin_pflug_bogen_l_fy_x;
+			reference_point_Fy_z = cur_l_point_z - cur_l_point_z*margin_pflug_bogen_l_fy_z;
+
+			reference_point_Fx_y = cur_l_point_y - cur_l_point_y*margin_pflug_bogen_l_fx_y;
+			reference_point_Fx_z = cur_l_point_z - cur_l_point_z*margin_pflug_bogen_l_fx_z;
+		}
+		else if(current_control_value < 0)//left
+		{
+			reference_point_Fz_x = cur_r_point_x - cur_r_point_x*margin_pflug_bogen_r_fz_x;
+			reference_point_Fz_y = cur_r_point_y - cur_r_point_y*margin_pflug_bogen_r_fz_y;
+
+			reference_point_Fy_x = cur_r_point_x - cur_r_point_x*margin_pflug_bogen_r_fy_x;
+			reference_point_Fy_z = cur_r_point_z - cur_r_point_z*margin_pflug_bogen_r_fy_z;
+
+			reference_point_Fx_y = cur_r_point_y - cur_r_point_y*margin_pflug_bogen_r_fx_y;
+			reference_point_Fx_z = cur_r_point_z - cur_r_point_z*margin_pflug_bogen_r_fx_z;
+		}
+		else // zero position
+		{
+			reference_point_Fz_x = (cur_r_point_x + cur_l_point_x)/2;
+			reference_point_Fz_y = (cur_r_point_y + cur_l_point_y)/2;
+
+			reference_point_Fy_x = (cur_r_point_x + cur_l_point_x)/2;
+			reference_point_Fy_z = (cur_r_point_z + cur_l_point_z)/2;
+
+			reference_point_Fx_y = (cur_r_point_y + cur_l_point_y)/2;
+			reference_point_Fx_z = (cur_r_point_z + cur_l_point_z)/2;
+		}
+		// retain center position (reference point is center)
+	}
+	if(!turn_type.compare("carving_turn"))
+	{
+		return; // Don't write until carving turn algorithm is completed
+	}
+	else
+		return;
+
+}
+void CopCompensationFunc::centerOfPressureCompensationFz(double current_point_x, double current_point_y, double current_control_value)
+{
+	pidControllerFz_x->PID_calculate(reference_point_Fz_x, current_point_x);
+	pidControllerFz_y->PID_calculate(reference_point_Fz_y, current_point_y);
 
 
+	return 0;
+}
+void CopCompensationFunc::centerOfPressureCompensationFy(double current_point_x, double current_point_z, double current_control_value)
+{
+
+	return 0;
+}
+void CopCompensationFunc::centerOfPressureCompensationFx(double current_point_y, double current_point_z, double current_control_value)
+{
+
+	return 0;
 }

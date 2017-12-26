@@ -134,6 +134,9 @@ private:
   double currentFX_l,currentFY_l,currentFZ_l,currentTX_l,currentTY_l,currentTZ_l;
   double currentFX_r,currentFY_r,currentFZ_r,currentTX_r,currentTY_r,currentTZ_r;
 
+  //cop compensation
+  diana::CopCompensationFunc *cop_compensation;
+
   //center change lib
   diana_motion::CenterChange *center_change_;
   double temp_change_value_edge, temp_change_value_center;

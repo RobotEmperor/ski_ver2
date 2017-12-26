@@ -113,6 +113,8 @@ MotionModule::MotionModule()
 	currentTX_r=0.0;
 	currentTY_r=0.0;
 	currentTZ_r=0.0;
+
+	cop_compensation = new diana::CopCompensationFunc;
 }
 MotionModule::~MotionModule()
 {

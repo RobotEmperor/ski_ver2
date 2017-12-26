@@ -18,6 +18,10 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(Eigen REQUIRED)
 
+set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${CATKIN_DEVEL_PREFIX}/lib/pkgconfig")
+find_package(PkgConfig)
+pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
+
 ################################################################################
 # Declare ROS messages, services and actions
 ################################################################################
@@ -48,12 +52,14 @@ add_library(diana_balance_control
   src/balance_pd_control.cpp
   src/balance_pid_control.cpp
   src/cop_calculation_function.cpp
+  src/control_function.cpp
 )
 
 add_dependencies(diana_balance_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(diana_balance_control
   ${catkin_LIBRARIES}
+  ${yaml_cpp_LIBRARIES}
 )
 
 

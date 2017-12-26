@@ -1,10 +1,10 @@
 /*
  * control_function.cpp
  *
- *  Created on: Dec 21, 2017
+ *  Created on: Dec 26, 2017
  *      Author: robotemperor
  */
-#include "heroehs_math/control_function.h"
+#include "diana_balance_control/control_function.h"
 
 using namespace control_function;
 

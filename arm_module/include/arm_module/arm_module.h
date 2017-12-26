@@ -25,7 +25,7 @@
 #include "heroehs_math/fifth_order_trajectory_generate.h"
 #include "heroehs_math/kinematics.h"
 #include "heroehs_math/end_point_to_rad_cal.h"
-#include "heroehs_math/control_function.h"
+#include "diana_balance_control/control_function.h"
 #include "diana_balance_control/diana_balance_control.h"
 #include "diana_balance_control/cop_calculation_function.h"
 
