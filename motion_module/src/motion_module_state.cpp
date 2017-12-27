@@ -127,8 +127,14 @@ void MotionModule::queueThread()
 	ros::CallbackQueue callback_queue;
 	ros_node.setCallbackQueue(&callback_queue);
 	/* publisher topics */
-	state_end_point_pose_pub = ros_node.advertise<geometry_msgs::Vector3>("/state_end_point_pose",100);
-	state_end_point_orientation_pub = ros_node.advertise<geometry_msgs::Vector3>("/state_end_point_orientation",100);
+	l_leg_point_xyz_pub = ros_node.advertise<geometry_msgs::Vector3>("/l_leg_point_xyz",100);
+	l_leg_point_rpy_pub = ros_node.advertise<geometry_msgs::Vector3>("/l_leg_point_rpy",100);
+
+	r_leg_point_xyz_pub = ros_node.advertise<geometry_msgs::Vector3>("/r_leg_point_xyz",100);
+	r_leg_point_rpy_pub = ros_node.advertise<geometry_msgs::Vector3>("/r_leg_point_rpy",100);
+
+	cop_fz_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/cop_fz",100);
+
 	current_leg_pose_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/current_leg_pose",100);
 
 	/* subscribe topics */

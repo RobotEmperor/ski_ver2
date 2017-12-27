@@ -89,25 +89,25 @@ void CopCalculationFunc::jointStateGetForTransForm(Eigen::MatrixXd joint_state_l
 	cf_py_l = transformation_.center_to_sensor_transform_left(1,3);
 	cf_pz_l = transformation_.center_to_sensor_transform_left(2,3);
 
-	cf_fx_l = force_data_l(0,0);
-	cf_fy_l = force_data_l(1,0);
-	cf_fz_l = force_data_l(2,0);
+	cf_fx_l = (transformation_.center_to_sensor_transform_left * force_data_l)(0,0);
+	cf_fy_l = (transformation_.center_to_sensor_transform_left * force_data_l)(1,0);
+	cf_fz_l = (transformation_.center_to_sensor_transform_left * force_data_l)(2,0);
 
-	cf_tx_l = torque_data_l(0,0);
-	cf_ty_l = torque_data_l(1,0);
-	cf_tz_l = torque_data_l(2,0);
+	cf_tx_l = (transformation_.center_to_sensor_transform_left * torque_data_l)(0,0);
+	cf_ty_l = (transformation_.center_to_sensor_transform_left * torque_data_l)(1,0);
+	cf_tz_l = (transformation_.center_to_sensor_transform_left * torque_data_l)(2,0);
 
 	cf_px_r = transformation_.center_to_sensor_transform_right(0,3);
 	cf_py_r = transformation_.center_to_sensor_transform_right(1,3);
 	cf_pz_r = transformation_.center_to_sensor_transform_right(2,3);
 
-	cf_fx_r = force_data_r(0,0);
-	cf_fy_r = force_data_r(1,0);
-	cf_fz_r = force_data_r(2,0);
+	cf_fx_r = (transformation_.center_to_sensor_transform_right * force_data_r)(0,0);
+	cf_fy_r = (transformation_.center_to_sensor_transform_right * force_data_r)(1,0);
+	cf_fz_r = (transformation_.center_to_sensor_transform_right * force_data_r)(2,0);
 
-	cf_tx_r = torque_data_r(0,0);
-	cf_ty_r = torque_data_r(1,0);
-	cf_tz_r = torque_data_r(2,0);
+	cf_tx_r = (transformation_.center_to_sensor_transform_right * torque_data_r)(0,0);
+	cf_ty_r = (transformation_.center_to_sensor_transform_right * torque_data_r)(1,0);
+	cf_tz_r = (transformation_.center_to_sensor_transform_right * torque_data_r)(2,0);
 
 
 }
@@ -126,9 +126,8 @@ void CopCalculationFunc::copCalculationResult()
 	cop_fx_point_y = (- cf_py_l*cf_fx_l - cf_py_r*cf_fx_r + cf_tz_l + cf_tz_r )/(cf_fx_l + cf_fx_r);
 	cop_fx_point_z = (  cf_pz_l*cf_fx_l + cf_pz_r*cf_fx_r + cf_ty_l + cf_ty_r )/(cf_fx_l + cf_fx_r);
 
-	printf("Fz  X  %f ::Y  %f  \n\n", cop_fz_point_x, cop_fz_point_x);
-	printf("Fy  X  %f ::z  %f  \n\n", cop_fy_point_x, cop_fy_point_z);
-	printf("Fx  Y  %f ::z  %f  \n\n", cop_fx_point_y, cop_fx_point_z);
+	printf("cop_fz_x  :: %f \n", cop_fz_point_x);
+
 }
 CopCompensationFunc::CopCompensationFunc()
 {
@@ -170,6 +169,23 @@ CopCompensationFunc::CopCompensationFunc()
 	margin_carving_turn_r_fx_z = 0;
 	margin_carving_turn_l_fx_y = 0;
 	margin_carving_turn_r_fx_y = 0;
+
+	pid_control_value_fz_x = 0;
+	pid_control_value_fz_y = 0;
+	pid_control_value_fy_x = 0;
+	pid_control_value_fy_z = 0;
+	pid_control_value_fx_y = 0;
+	pid_control_value_fx_z = 0;
+
+	control_value_Fz_x = 0;
+	control_value_Fz_y = 0;
+
+	control_value_Fy_x = 0;
+	control_value_Fy_z = 0;
+
+	control_value_Fx_y = 0;
+	control_value_Fx_z = 0;
+
 	pidControllerFz_x = new control_function::PID_function(0.008,0.1,-0.1,0,0,0);
 	pidControllerFz_y = new control_function::PID_function(0.008,0.1,-0.1,0,0,0);
 	pidControllerFx = new control_function::PID_function(0.008,0.1,-0.1,0,0,0);
@@ -202,6 +218,7 @@ void CopCompensationFunc::parse_margin_data()
 }
 void CopCompensationFunc::centerOfPressureReferencePoint(std::string turn_type, double cur_l_point_x, double cur_l_point_y, double cur_l_point_z, double cur_r_point_x, double cur_r_point_y, double cur_r_point_z, double current_control_value)
 {
+	parse_margin_data();
 	if(!turn_type.compare("pflug_bogen"))
 	{
 		if(current_control_value > 0)//right
@@ -247,21 +264,27 @@ void CopCompensationFunc::centerOfPressureReferencePoint(std::string turn_type, 
 		return;
 
 }
-void CopCompensationFunc::centerOfPressureCompensationFz(double current_point_x, double current_point_y, double current_control_value)
+void CopCompensationFunc::centerOfPressureCompensationFz(double current_point_x, double current_point_y)
 {
-	pidControllerFz_x->PID_calculate(reference_point_Fz_x, current_point_x);
-	pidControllerFz_y->PID_calculate(reference_point_Fz_y, current_point_y);
+	pid_control_value_fz_x = pidControllerFz_x->PID_calculate(reference_point_Fz_x, current_point_x);
+	pid_control_value_fz_y = pidControllerFz_y->PID_calculate(reference_point_Fz_y, current_point_y);
 
-
-	return 0;
+	control_value_Fz_x = pid_control_value_fz_x + control_value_Fz_x;
+	control_value_Fz_y = pid_control_value_fz_y + control_value_Fz_y; // 최종적으로 들어갈때 - 로 들어가야함 상대적 운동임
 }
-void CopCompensationFunc::centerOfPressureCompensationFy(double current_point_x, double current_point_z, double current_control_value)
+void CopCompensationFunc::centerOfPressureCompensationFy(double current_point_x, double current_point_z)
 {
+	pid_control_value_fy_x = pidControllerFz_x->PID_calculate(reference_point_Fy_x, current_point_x);
+	pid_control_value_fy_z = pidControllerFz_y->PID_calculate(reference_point_Fy_z, current_point_z);
 
-	return 0;
+	control_value_Fy_x = pid_control_value_fy_x + control_value_Fy_x;
+	control_value_Fy_z = pid_control_value_fy_z + control_value_Fy_z;
 }
-void CopCompensationFunc::centerOfPressureCompensationFx(double current_point_y, double current_point_z, double current_control_value)
+void CopCompensationFunc::centerOfPressureCompensationFx(double current_point_y, double current_point_z)
 {
+	pid_control_value_fx_y = pidControllerFz_x->PID_calculate(reference_point_Fx_y, current_point_y);
+	pid_control_value_fx_z = pidControllerFz_y->PID_calculate(reference_point_Fx_z, current_point_z);
 
-	return 0;
+	control_value_Fx_y = pid_control_value_fx_y + control_value_Fx_y;
+	control_value_Fx_z = pid_control_value_fx_z + control_value_Fx_z;
 }

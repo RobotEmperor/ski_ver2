@@ -84,18 +84,12 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 	end_to_rad_r_->current_pose_change(2,0) = -10*DEGREE2RADIAN;
 	end_to_rad_r_->current_pose_change(2,0) = -15*DEGREE2RADIAN;
 
-	/*	one_joint_ctrl_.resize(1,8);
-	one_joint_ctrl_.fill(0);
-	one_joint_ctrl_(0,1) = 0;
-	result_rad_one_joint_ = 0;*/
-
 	for(int joint_num_=0; joint_num_< 6 ; joint_num_ ++)
 	{
 		leg_end_point_l_(joint_num_, 7) = traj_time_;
 		leg_end_point_r_(joint_num_, 7) = traj_time_;
 	}
-	//one_joint_ctrl_(0,7) = traj_time_;
-	//
+
 	balance_ctrl_.initialize(control_cycle_msec);
 	previous_balance_param_.cob_x_offset_m = 0;
 	previous_balance_param_.cob_y_offset_m = 0;
@@ -217,6 +211,22 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	result_pose_l_modified_ = robotis_framework::getPose3DfromTransformMatrix(result_mat_l_modified_);
 	result_pose_r_modified_ = robotis_framework::getPose3DfromTransformMatrix(result_mat_r_modified_);
 
+	/*	else
+	{
+		for(int id = 11; id<23 ; id++)
+		{
+			current_leg_pose_msg_.data.push_back(dxls[joint_id_to_name_[id]]->dxl_state_->present_position_);
+		}
+		current_leg_pose_pub.publish(current_leg_pose_msg_);
+		current_leg_pose_msg_.data.clear();
+	}*/
+	// cop compensation
+	cop_cal->jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
+	cop_cal->copCalculationResult();
+
+	cop_compensation->centerOfPressureReferencePoint(temp_turn_type,   cop_cal->cf_px_l, cop_cal->cf_py_l, cop_cal->cf_pz_l,
+			                                             cop_cal->cf_px_r, cop_cal->cf_py_r, cop_cal->cf_pz_r, temp_change_value_center);
+
 	//IK
 	l_kinematics_->InverseKinematics(result_pose_l_modified_.x, result_pose_l_modified_.y - 0.105, result_pose_l_modified_.z,
 			result_pose_l_modified_.yaw, result_pose_l_modified_.pitch, result_pose_l_modified_.roll); // pX pY pZ alpha betta kamma
@@ -227,8 +237,9 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 
 	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
 	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
+
 	//<---  cartesian space control  --->
-/*	result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);
+	/*	result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);
 	result_[joint_id_to_name_[13]]->goal_position_ =  l_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[15]]->goal_position_ =  l_kinematics_->joint_radian(3,0);
 
@@ -247,48 +258,13 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
 	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);*/
 
-	//	cop_cal->jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
-	//	cop_cal->copCalculationResult();
-	/*
-	// cop
-	cop_cal->jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
-	cop_cal->copCalculationResult();
+	cop_fz_msg_.data.push_back(cop_cal->cop_fz_point_x); // current cop value
+	cop_fz_msg_.data.push_back(cop_cal->cop_fz_point_y);
+	cop_fz_msg_.data.push_back(cop_compensation->reference_point_Fz_x); // current cop value
+	cop_fz_msg_.data.push_back(cop_compensation->reference_point_Fz_y);
+	cop_fz_pub.publish(cop_fz_msg_);
+	cop_fz_msg_.data.clear();
 
-	//<---  test control --->
-
-	 	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
-		result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
-
-
-	//<---  cartesian space control  --->
-	result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);
-	result_[joint_id_to_name_[13]]->goal_position_ =  l_kinematics_->joint_radian(2,0);
-	result_[joint_id_to_name_[15]]->goal_position_ =  l_kinematics_->joint_radian(3,0);
-
-	result_[joint_id_to_name_[17]]->goal_position_ = -l_kinematics_->joint_radian(4,0);
-	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
-	result_[joint_id_to_name_[21]]->goal_position_ =  l_kinematics_->joint_radian(6,0);
-
-	result_[joint_id_to_name_[12]]->goal_position_ =  r_kinematics_->joint_radian(1,0);
-	result_[joint_id_to_name_[14]]->goal_position_ =  r_kinematics_->joint_radian(2,0);
-	result_[joint_id_to_name_[16]]->goal_position_ =  r_kinematics_->joint_radian(3,0);
-
-	result_[joint_id_to_name_[18]]->goal_position_ =  r_kinematics_->joint_radian(4,0);
-	result_[joint_id_to_name_[20]]->goal_position_ =  r_kinematics_->joint_radian(5,0);
-	result_[joint_id_to_name_[22]]->goal_position_ =  r_kinematics_->joint_radian(6,0);
-
-		result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
-		result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
-
-	// real test //
-	/*for(int id = 11; id<23 ; id++)
-	{
-		current_leg_pose_msg_.data.push_back(dxls[joint_id_to_name_[id]]->dxl_state_->present_position_);
-	}
-	current_leg_pose_pub.publish(current_leg_pose_msg_);
-	current_leg_pose_msg_.data.clear();*/
-
-	// gazebo
 	for(int id = 1; id<7 ; id++)
 	{
 		current_leg_pose_msg_.data.push_back(l_kinematics_->joint_radian(id,0));
@@ -299,27 +275,29 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	}
 	current_leg_pose_pub.publish(current_leg_pose_msg_);
 	current_leg_pose_msg_.data.clear();
-	// l_ endpoint xyz
-	/*	state_end_point_pose_msg_.x=  result_pose_l_modified_.x;
-	state_end_point_pose_msg_.y=  result_pose_l_modified_.y;
-	state_end_point_pose_msg_.z=  result_pose_l_modified_.z;
-	state_end_point_pose_pub.publish(state_end_point_pose_msg_);
-	// l_ endpoint radian alpha betta kamma
-	state_end_point_orientation_msg_.x=  result_pose_l_modified_.roll;
-	state_end_point_orientation_msg_.y=  result_pose_l_modified_.pitch;
-	state_end_point_orientation_msg_.z=  result_pose_l_modified_.yaw;
-	state_end_point_orientation_pub.publish(state_end_point_orientation_msg_);*/
 
-	/*	// r_ endpoint xyz
-	state_end_point_pose_msg_.x=  result_pose_r_modified_.x;
-	state_end_point_pose_msg_.y=  result_pose_r_modified_.y;
-	state_end_point_pose_msg_.z=  result_pose_r_modified_.z;
-	state_end_point_pose_pub.publish(state_end_point_pose_msg_);
+
+	// l_ endpoint xyz
+	l_leg_point_xyz_msg_.x=  result_pose_l_modified_.x;
+	l_leg_point_xyz_msg_.y=  result_pose_l_modified_.y;
+	l_leg_point_xyz_msg_.z=  result_pose_l_modified_.z;
+	l_leg_point_xyz_pub.publish(l_leg_point_xyz_msg_);
+	// l_ endpoint radian alpha betta kamma
+	l_leg_point_rpy_msg_.x=  result_pose_l_modified_.roll;
+	l_leg_point_rpy_msg_.y=  result_pose_l_modified_.pitch;
+	l_leg_point_rpy_msg_.z=  result_pose_l_modified_.yaw;
+	l_leg_point_rpy_pub.publish(l_leg_point_rpy_msg_);
+
+	// r_ endpoint xyz
+	r_leg_point_xyz_msg_.x=  result_pose_r_modified_.x;
+	r_leg_point_xyz_msg_.y=  result_pose_r_modified_.y;
+	r_leg_point_xyz_msg_.z=  result_pose_r_modified_.z;
+	r_leg_point_xyz_pub.publish(r_leg_point_xyz_msg_);
 	// r_ endpoint radian alpha betta kamma
-	state_end_point_orientation_msg_.x=  result_pose_r_modified_.roll;
-	state_end_point_orientation_msg_.y=  result_pose_r_modified_.pitch;
-	state_end_point_orientation_msg_.z=  result_pose_r_modified_.yaw;
-	state_end_point_pose_pub.publish(state_end_point_orientation_msg_);*/
+	r_leg_point_rpy_msg_.x=  result_pose_r_modified_.roll;
+	r_leg_point_rpy_msg_.y=  result_pose_r_modified_.pitch;
+	r_leg_point_rpy_msg_.z=  result_pose_r_modified_.yaw;
+	r_leg_point_rpy_pub.publish(r_leg_point_rpy_msg_);
 }
 void MotionModule::stop()
 {

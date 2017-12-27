@@ -64,8 +64,12 @@ public:
 
 	// paper messages
 	ros::Publisher current_leg_pose_pub;
-	ros::Publisher state_end_point_pose_pub;
-	ros::Publisher state_end_point_orientation_pub;
+	ros::Publisher l_leg_point_xyz_pub;
+	ros::Publisher l_leg_point_rpy_pub;
+	ros::Publisher r_leg_point_xyz_pub;
+	ros::Publisher r_leg_point_rpy_pub;
+	ros::Publisher cop_fz_pub;
+
 
 	// sensor data & balance on off
 	ros::Subscriber get_imu_data_sub_;
@@ -86,9 +90,12 @@ private:
 	int new_count_;
 
 
+	// leg state
 	std_msgs::Float64MultiArray current_leg_pose_msg_;
-	geometry_msgs::Vector3 state_end_point_pose_msg_;
-	geometry_msgs::Vector3 state_end_point_orientation_msg_;
+	geometry_msgs::Vector3 l_leg_point_xyz_msg_;
+	geometry_msgs::Vector3 l_leg_point_rpy_msg_;
+	geometry_msgs::Vector3 r_leg_point_xyz_msg_;
+	geometry_msgs::Vector3 r_leg_point_rpy_msg_;
 
 	boost::thread queue_thread_;
 
@@ -133,6 +140,7 @@ private:
   diana::CopCalculationFunc *cop_cal;
   double currentFX_l,currentFY_l,currentFZ_l,currentTX_l,currentTY_l,currentTZ_l;
   double currentFX_r,currentFY_r,currentFZ_r,currentTX_r,currentTY_r,currentTZ_r;
+  std_msgs::Float64MultiArray cop_fz_msg_;
 
   //cop compensation
   diana::CopCompensationFunc *cop_compensation;
