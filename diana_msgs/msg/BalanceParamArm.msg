@@ -9,3 +9,6 @@ float64 arm_pitch_gyro_p_gain
 float64 arm_pitch_gyro_d_gain
 float64 arm_yaw_gyro_p_gain
 float64 arm_yaw_gyro_d_gain
+
+float64 arm_copFz_p_gain
+float64 arm_copFz_d_gain

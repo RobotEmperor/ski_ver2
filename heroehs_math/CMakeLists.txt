@@ -9,7 +9,6 @@ find_package(catkin REQUIRED COMPONENTS
   robotis_math
   robotis_controller_msgs
   robotis_framework_common
-
 )
 
 
@@ -35,8 +34,6 @@ include_directories(
    src/kinematics.cpp
    src/end_point_to_rad_cal.cpp
  )
-
-
  add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
  target_link_libraries(heroehs_math
    ${catkin_LIBRARIES}

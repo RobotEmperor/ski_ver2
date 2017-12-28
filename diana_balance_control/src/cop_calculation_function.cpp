@@ -221,10 +221,12 @@ void CopCompensationFunc::centerOfPressureReferencePoint(std::string turn_type, 
 	parse_margin_data();
 	if(!turn_type.compare("pflug_bogen"))
 	{
+		//reference_point_Fz_x = cur_l_point_x - cur_l_point_x*(-current_control_value+1);
+		//reference_point_Fz_y = cur_l_point_y - cur_l_point_y*current_control_value*margin_pflug_bogen_l_fz_y;
 		if(current_control_value > 0)//right
 		{
-			reference_point_Fz_x = cur_l_point_x - cur_l_point_x*margin_pflug_bogen_l_fz_x;
-			reference_point_Fz_y = cur_l_point_y - cur_l_point_y*margin_pflug_bogen_l_fz_y;
+			reference_point_Fz_x = cur_l_point_x;
+			reference_point_Fz_y = (cur_l_point_y - cur_l_point_y*(fabs(-current_control_value+1)))*margin_pflug_bogen_l_fz_y;
 
 			reference_point_Fy_x = cur_l_point_x - cur_l_point_x*margin_pflug_bogen_l_fy_x;
 			reference_point_Fy_z = cur_l_point_z - cur_l_point_z*margin_pflug_bogen_l_fy_z;
@@ -234,8 +236,8 @@ void CopCompensationFunc::centerOfPressureReferencePoint(std::string turn_type, 
 		}
 		else if(current_control_value < 0)//left
 		{
-			reference_point_Fz_x = cur_r_point_x - cur_r_point_x*margin_pflug_bogen_r_fz_x;
-			reference_point_Fz_y = cur_r_point_y - cur_r_point_y*margin_pflug_bogen_r_fz_y;
+			reference_point_Fz_x = cur_r_point_x;
+			reference_point_Fz_y = (cur_r_point_y - cur_r_point_y*(fabs(-current_control_value-1)))*margin_pflug_bogen_r_fz_y;
 
 			reference_point_Fy_x = cur_r_point_x - cur_r_point_x*margin_pflug_bogen_r_fy_x;
 			reference_point_Fy_z = cur_r_point_z - cur_r_point_z*margin_pflug_bogen_r_fy_z;
@@ -269,8 +271,10 @@ void CopCompensationFunc::centerOfPressureCompensationFz(double current_point_x,
 	pid_control_value_fz_x = pidControllerFz_x->PID_calculate(reference_point_Fz_x, current_point_x);
 	pid_control_value_fz_y = pidControllerFz_y->PID_calculate(reference_point_Fz_y, current_point_y);
 
-	control_value_Fz_x = pid_control_value_fz_x + control_value_Fz_x;
-	control_value_Fz_y = pid_control_value_fz_y + control_value_Fz_y; // 최종적으로 들어갈때 - 로 들어가야함 상대적 운동임
+	control_value_Fz_x = pid_control_value_fz_x;
+	control_value_Fz_y = pid_control_value_fz_y;
+	//control_value_Fz_x = pid_control_value_fz_x + control_value_Fz_x;
+	//control_value_Fz_y = pid_control_value_fz_y + control_value_Fz_y; // 최종적으로 들어갈때 - 로 들어가야함 상대적 운동임
 }
 void CopCompensationFunc::centerOfPressureCompensationFy(double current_point_x, double current_point_z)
 {

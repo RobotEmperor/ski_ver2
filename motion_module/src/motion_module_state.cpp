@@ -23,10 +23,6 @@ MotionModule::MotionModule()
 
 	new_count_ = 0;
 	// Dynamixel initialize ////
-
-
-
-
 	result_["l_hip_pitch"] = new robotis_framework::DynamixelState();  // joint 11
 	result_["l_hip_roll"]  = new robotis_framework::DynamixelState();  // joint 13
 
