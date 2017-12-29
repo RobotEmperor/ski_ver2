@@ -190,8 +190,8 @@ CopCompensationFunc::CopCompensationFunc()
   min_value_z = 0;
 	max_value_z = 0;
 
-	pidControllerFz_x = new control_function::PID_function(0.008,max_value_x,min_value_x,0,0,0);
-	pidControllerFz_y = new control_function::PID_function(0.008,max_value_y,min_value_y,0,0,0);
+	pidControllerFz_x = new control_function::PID_function(0.008,0.05,-0.05,0,0,0);
+	pidControllerFz_y = new control_function::PID_function(0.008,0.05,-0.05,0,0,0);
 	pidControllerFx = new control_function::PID_function(0.008,0.1,-0.1,0,0,0);
 	pidControllerFy = new control_function::PID_function(0.008,0.1,-0.1,0,0,0);
 }

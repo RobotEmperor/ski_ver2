@@ -27,9 +27,6 @@ UpperBodyModule::UpperBodyModule()
 	result_["head_yaw"]   = new robotis_framework::DynamixelState(); // joint 23
 	result_["head_pitch"]   = new robotis_framework::DynamixelState(); // joint 24
 	result_["head_roll"]   = new robotis_framework::DynamixelState(); // joint 25
-	//	result_["waist_yaw"]  = new robotis_framework::DynamixelState(); // joint 9
-	//	result_["waist_roll"] = new robotis_framework::DynamixelState(); // joint 10
-	//	result_["head_yaw"]   = new robotis_framework::DynamixelState(); // joint 23
 	///////////////////////////
 	//center change waist
 	center_change_ = new diana_motion_waist::CenterChange;
@@ -200,8 +197,6 @@ void UpperBodyModule::copFzMsgCallBack(const std_msgs::Float64MultiArray::ConstP
 	current_cop_fz_y   = msg->data[1];
   reference_cop_fz_x = msg->data[2];
 	reference_cop_fz_y = msg->data[3];
-
-	printf("%f :: %f  :: %f :: %f :: \n",current_cop_fz_x, current_cop_fz_y, reference_cop_fz_x, reference_cop_fz_y);
 }
 // leg state ///////////////////////////////////
 /*void UpperBodyModule::currentLegPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)

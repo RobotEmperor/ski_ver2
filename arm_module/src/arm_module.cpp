@@ -35,13 +35,11 @@ void ArmModule::initialize(const int control_cycle_msec, robotis_framework::Robo
 	//	end_to_rad_l_arm_->current_pose_change(1,0) = 0.105;
 	end_to_rad_l_arm_->cal_end_point_tra_pz->current_pose = -0.47;
 	end_to_rad_l_arm_->current_pose_change(2,0) = -0.47;
-	result_end_l_arm_.resize(6,1);
-	result_end_l_arm_.fill(0);
+
 	//right //
 	r_arm_end_point_.resize(6,8);
 	r_arm_end_point_.fill(0);
-	result_end_r_arm_.resize(6,1);
-	result_end_r_arm_.fill(0);
+
 	//l_arm_end_point_.(1,0) = ; // y 초기값
 	//l_arm_end_point_.(1,1) = ; //
 	r_arm_end_point_(2,0) = -0.47;
@@ -142,9 +140,9 @@ void ArmModule::process(std::map<std::string, robotis_framework::Dynamixel *> dx
 	result_[joint_id_to_name_[3]]->goal_position_ = -l_arm_kinematics_->joint_radian(2,0) + gyro_roll_function->PID_calculate(0,tf_current_gyro_x); // - gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);
 	result_[joint_id_to_name_[5]]->goal_position_ =  l_arm_kinematics_->joint_radian(3,0);
 
-/*	result_[joint_id_to_name_[2]]->goal_position_ = r_arm_kinematics_->joint_radian(1,0);
-	result_[joint_id_to_name_[4]]->goal_position_ = r_arm_kinematics_->joint_radian(2,0);
-	result_[joint_id_to_name_[6]]->goal_position_ = r_arm_kinematics_->joint_radian(3,0);*/
+	result_[joint_id_to_name_[2]]->goal_position_ = -r_arm_kinematics_->joint_radian(1,0);
+	result_[joint_id_to_name_[4]]->goal_position_ = -r_arm_kinematics_->joint_radian(2,0);
+	result_[joint_id_to_name_[6]]->goal_position_ = -r_arm_kinematics_->joint_radian(3,0);
 }
 void ArmModule::stop()
 {

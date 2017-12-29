@@ -27,7 +27,6 @@ private:
 	double min_;
 	double pre_error_;
 	double integral_;
-
 };
 }
 

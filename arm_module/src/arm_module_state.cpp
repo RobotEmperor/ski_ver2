@@ -22,21 +22,12 @@ ArmModule::ArmModule()
 
 	// Dynamixel initialize ////
 
-	/*
 	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
 	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5
-
 	result_["r_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 2
 	result_["r_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 4
 	result_["r_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 6
-	 */
-
-
-
-	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
-	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
-	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5
 
 	///////////////////////////
 	// arm //
@@ -56,6 +47,26 @@ ArmModule::ArmModule()
 	r_arm_desired_point_x_ = 0;
 	r_arm_desired_point_y_ = 0;
 	r_arm_desired_point_z_ = 0;
+
+	result_end_l_arm_.resize(6,1);
+	result_end_l_arm_.fill(0);
+
+	result_end_r_arm_.resize(6,1);
+	result_end_r_arm_.fill(0);
+
+	result_end_l_arm_.coeffRef(0,0) = 0;
+	result_end_l_arm_.coeffRef(1,0) = 0;
+	result_end_l_arm_.coeffRef(2,0) = -0.47;
+	result_end_l_arm_.coeffRef(3,0) = 0;
+	result_end_l_arm_.coeffRef(4,0) = 0;
+	result_end_l_arm_.coeffRef(5,0) = 0;
+
+	result_end_r_arm_.coeffRef(0,0) = 0;
+	result_end_r_arm_.coeffRef(1,0) = 0;
+	result_end_r_arm_.coeffRef(2,0) = -0.47;
+	result_end_r_arm_.coeffRef(3,0) = 0;
+	result_end_r_arm_.coeffRef(4,0) = 0;
+	result_end_r_arm_.coeffRef(5,0) = 0;
 
 	traj_time_test = 4;
 	new_count_ = 1 ;
