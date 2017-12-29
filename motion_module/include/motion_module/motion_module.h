@@ -74,13 +74,13 @@ public:
 	// sensor data & balance on off
 	ros::Subscriber get_imu_data_sub_;
 	ros::Subscriber get_ft_data_sub_;
-  ros::Subscriber set_balance_param_sub_;
+	ros::Subscriber set_balance_param_sub_;
 
 	/* ROS Topic Callback Functions */
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
 	void ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg);
-  void setBalanceParameterCallback(const diana_msgs::BalanceParam::ConstPtr& msg);
-  void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg);
+	void setBalanceParameterCallback(const diana_msgs::BalanceParam::ConstPtr& msg);
+	void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg);
 
 private:
 	void queueThread();
@@ -116,40 +116,45 @@ private:
 	heroehs_math::CalRad *end_to_rad_l_;
 	heroehs_math::CalRad *end_to_rad_r_;
 
-	 // balance gyro
+	// balance gyro
 	Eigen::MatrixXd result_end_l_;
 	Eigen::MatrixXd result_end_r_;
 	Eigen::Matrix4d result_mat_cob_, result_mat_cob_modified_;
 	Eigen::Matrix4d result_mat_l_, result_mat_l_modified_;
-  Eigen::Matrix4d result_mat_r_, result_mat_r_modified_;
-  robotis_framework::Pose3D result_pose_l_modified_;
-  robotis_framework::Pose3D result_pose_r_modified_;
+	Eigen::Matrix4d result_mat_r_, result_mat_r_modified_;
+	robotis_framework::Pose3D result_pose_l_modified_;
+	robotis_framework::Pose3D result_pose_r_modified_;
 
-  diana::BalanceControlUsingPDController balance_ctrl_;
-  void updateBalanceParameter();
-  void gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x);
-  double currentGyroX,currentGyroY,currentGyroZ;
-  double tf_current_gyro_x, tf_current_gyro_y, tf_current_gyro_z;
-  diana_msgs::BalanceParam previous_balance_param_, desired_balance_param_;
-  robotis_framework::FifthOrderPolynomialTrajectory balance_param_update_coeff_;
-  double balance_updating_duration_sec_;
-  double balance_updating_sys_time_sec_;
-  bool balance_update_;
+	diana::BalanceControlUsingPDController balance_ctrl_;
+	void updateBalanceParameter();
+	void gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x);
+	double currentGyroX,currentGyroY,currentGyroZ;
+	double tf_current_gyro_x, tf_current_gyro_y, tf_current_gyro_z;
+	diana_msgs::BalanceParam previous_balance_param_, desired_balance_param_;
+	robotis_framework::FifthOrderPolynomialTrajectory balance_param_update_coeff_;
+	double balance_updating_duration_sec_;
+	double balance_updating_sys_time_sec_;
+	bool balance_update_;
 
-  // cop
-  diana::CopCalculationFunc *cop_cal;
-  double currentFX_l,currentFY_l,currentFZ_l,currentTX_l,currentTY_l,currentTZ_l;
-  double currentFX_r,currentFY_r,currentFZ_r,currentTX_r,currentTY_r,currentTZ_r;
-  std_msgs::Float64MultiArray cop_fz_msg_;
+	// cop
+	diana::CopCalculationFunc *cop_cal;
+	double currentFX_l,currentFY_l,currentFZ_l,currentTX_l,currentTY_l,currentTZ_l;
+	double currentFX_r,currentFY_r,currentFZ_r,currentTX_r,currentTY_r,currentTZ_r;
+	std_msgs::Float64MultiArray cop_fz_msg_;
 
-  //cop compensation
-  diana::CopCompensationFunc *cop_compensation;
+	//cop compensation
+	diana::CopCompensationFunc *cop_compensation;
+	heroehs_math::FifthOrderTrajectory *gain_copFz_p_adjustment;
+	heroehs_math::FifthOrderTrajectory *gain_copFz_d_adjustment;
+	double updating_duration_cop;
+	double copFz_p_gain;
+	double copFz_d_gain;
 
-  //center change lib
-  diana_motion::CenterChange *center_change_;
-  double temp_change_value_edge, temp_change_value_center;
-  std::string temp_turn_type;
-  std::string temp_change_type;
+	//center change lib
+	diana_motion::CenterChange *center_change_;
+	double temp_change_value_edge, temp_change_value_center;
+	std::string temp_turn_type;
+	std::string temp_change_type;
 };
 
 }

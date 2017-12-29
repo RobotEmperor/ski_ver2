@@ -57,6 +57,14 @@ void UpperBodyModule::updateBalanceGyroParameter()
 	gyro_yaw_function->kp_ = gain_yaw_p_adjustment -> fifth_order_traj_gen_one_value(value);
 	value(0,1) = gyro_yaw_d_gain;
 	gyro_yaw_function->kd_ = gain_yaw_d_adjustment -> fifth_order_traj_gen_one_value(value);
+
+	value(0,1) = copFz_p_gain;
+	cop_compensation_waist->pidControllerFz_x->kp_ = gain_copFz_p_adjustment -> fifth_order_traj_gen_one_value(value);
+	cop_compensation_waist->pidControllerFz_y->kp_ = cop_compensation_waist->pidControllerFz_x->kp_;
+
+	value(0,1) = copFz_d_gain;
+	cop_compensation_waist->pidControllerFz_x->kd_ = gain_copFz_d_adjustment -> fifth_order_traj_gen_one_value(value);
+	cop_compensation_waist->pidControllerFz_y->kd_ = cop_compensation_waist->pidControllerFz_x->kd_;
 }
 bool UpperBodyModule::isRunning()
 {
@@ -115,16 +123,20 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
 
 	// cop
-	cop_cal_waist->jointStateGetForTransForm(l_leg_real_joint, r_leg_real_joint);
-	cop_cal_waist->copCalculationResult();
+	cop_compensation_waist->reference_point_Fz_x = reference_cop_fz_x;
+	cop_compensation_waist->reference_point_Fz_y = reference_cop_fz_y;
+	cop_compensation_waist->centerOfPressureCompensationFz(current_cop_fz_x, current_cop_fz_y);
+
 
 	// real test
 	result_[joint_id_to_name_[9]] -> goal_position_  = waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z); // waist roll
-	result_[joint_id_to_name_[10]]-> goal_position_  = waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x); // waist roll
+	result_[joint_id_to_name_[10]]-> goal_position_  = - (waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y); // waist roll
+
+	printf("%f   \n",- (waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y));
 
 	result_[joint_id_to_name_[23]]-> goal_position_  = head_kinematics_ -> zyx_euler_angle_z;
 	//gazebo
-/*
+	/*
   result_[joint_id_to_name_[24]]-> goal_position_ = head_kinematics_ -> zyx_euler_angle_y;
 	result_[joint_id_to_name_[25]]-> goal_position_ = head_kinematics_ -> zyx_euler_angle_x;*/
 
@@ -133,37 +145,36 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	temp_waist_yaw_rad   =  dxls["waist_yaw"] -> dxl_state_->present_position_;
 	temp_waist_roll_rad  = -dxls["waist_roll"]-> dxl_state_->present_position_; // direction must define!
 
-	// display cop to rviz
-	cop_point_Fz_msg_.header.stamp = ros::Time();
-	cop_point_Fy_msg_.header.stamp = ros::Time();
-	cop_point_Fx_msg_.header.stamp = ros::Time();
-
-	std::string frame = "/pelvis";
-	cop_point_Fz_msg_.header.frame_id = frame.c_str();
-	cop_point_Fy_msg_.header.frame_id = frame.c_str();
-	cop_point_Fx_msg_.header.frame_id = frame.c_str();
-
-	cop_point_Fz_msg_.point.x = cop_cal_waist -> cop_fz_point_x;
-	cop_point_Fz_msg_.point.y = cop_cal_waist -> cop_fz_point_y;
-	cop_point_Fz_msg_.point.z = 0;
-	cop_point_Fz_pub.publish(cop_point_Fz_msg_);
-
-	cop_point_Fy_msg_.point.x = cop_cal_waist -> cop_fy_point_x;
-	cop_point_Fy_msg_.point.y = 0;
-	cop_point_Fy_msg_.point.z = cop_cal_waist -> cop_fy_point_z;
-	cop_point_Fy_pub.publish(cop_point_Fy_msg_);
-
-	cop_point_Fx_msg_.point.x = 0;
-	cop_point_Fx_msg_.point.y = cop_cal_waist -> cop_fx_point_y;
-	cop_point_Fx_msg_.point.z = cop_cal_waist -> cop_fx_point_z;
-	cop_point_Fx_pub.publish(cop_point_Fx_msg_);
-
-
 	//transmit to arm module with waist position
 	current_waist_pose_msg.data.push_back(temp_waist_yaw_rad);
 	current_waist_pose_msg.data.push_back(temp_waist_roll_rad);
 	current_waist_pose_pub.publish(current_waist_pose_msg);
 	current_waist_pose_msg.data.clear();
+
+	/*	// display cop to rviz
+		cop_point_Fz_msg_.header.stamp = ros::Time();
+		cop_point_Fy_msg_.header.stamp = ros::Time();
+		cop_point_Fx_msg_.header.stamp = ros::Time();
+
+		std::string frame = "/pelvis";
+		cop_point_Fz_msg_.header.frame_id = frame.c_str();
+		cop_point_Fy_msg_.header.frame_id = frame.c_str();
+		cop_point_Fx_msg_.header.frame_id = frame.c_str();
+
+		cop_point_Fz_msg_.point.x = cop_cal_waist -> cop_fz_point_x;
+		cop_point_Fz_msg_.point.y = cop_cal_waist -> cop_fz_point_y;
+		cop_point_Fz_msg_.point.z = 0;
+		cop_point_Fz_pub.publish(cop_point_Fz_msg_);
+
+		cop_point_Fy_msg_.point.x = cop_cal_waist -> cop_fy_point_x;
+		cop_point_Fy_msg_.point.y = 0;
+		cop_point_Fy_msg_.point.z = cop_cal_waist -> cop_fy_point_z;
+		cop_point_Fy_pub.publish(cop_point_Fy_msg_);
+
+		cop_point_Fx_msg_.point.x = 0;
+		cop_point_Fx_msg_.point.y = cop_cal_waist -> cop_fx_point_y;
+		cop_point_Fx_msg_.point.z = cop_cal_waist -> cop_fx_point_z;
+		cop_point_Fx_pub.publish(cop_point_Fx_msg_);*/
 }
 void UpperBodyModule::stop()
 {

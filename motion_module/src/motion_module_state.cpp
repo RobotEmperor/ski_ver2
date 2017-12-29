@@ -109,8 +109,17 @@ MotionModule::MotionModule()
 	currentTX_r=0.0;
 	currentTY_r=0.0;
 	currentTZ_r=0.0;
-
+	// cop compensation
 	cop_compensation = new diana::CopCompensationFunc;
+	cop_compensation->max_value_x = 0.05;
+	cop_compensation->min_value_x = -0.05;
+	cop_compensation->max_value_y = 0.05;
+	cop_compensation->min_value_y = -0.05;
+	gain_copFz_p_adjustment = new heroehs_math::FifthOrderTrajectory;
+	gain_copFz_d_adjustment = new heroehs_math::FifthOrderTrajectory;
+	updating_duration_cop = 0;
+	copFz_p_gain = 0;
+	copFz_d_gain = 0;
 }
 MotionModule::~MotionModule()
 {
@@ -211,21 +220,14 @@ void MotionModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& ms
 	currentTY_l = (double) msg->torque_y_raw_l;
 	currentTZ_l = -(double) msg->torque_z_raw_l;
 
-	//		currentFX_r = (double) msg->force_x_raw_r;
-	//		currentFY_r = (double) msg->force_y_raw_r;
-	//		currentFZ_r = (double) msg->force_z_raw_r;
+	currentFX_r = (double) msg->force_x_raw_r;
+	currentFY_r = (double) msg->force_y_raw_r;
+	currentFZ_r = -(double) msg->force_z_raw_r;
 
-	currentFX_r = 1;
-	currentFY_r = 1;
-	currentFZ_r = 98.1;
 
-	//		currentTX_r = (double) msg->torque_x_raw_r;
-	//		currentTY_r = (double) msg->torque_y_raw_r;
-	//		currentTZ_r = (double) msg->torque_z_raw_r;
-
-	currentTX_r = 0;
-	currentTY_r = 0;
-	currentTZ_r = 0;
+	currentTX_r = (double) msg->torque_x_raw_r;
+	currentTY_r = (double) msg->torque_y_raw_r;
+	currentTZ_r = -(double) msg->torque_z_raw_r;
 
 	cop_cal->ftSensorDataLeftGet(currentFX_l, currentFY_l, currentFZ_l, currentTX_l, currentTY_l, currentTZ_l);
 	cop_cal->ftSensorDataRightGet(currentFX_r, currentFY_r, currentFZ_r, currentTX_r, currentTY_r, currentTZ_r);
@@ -252,6 +254,11 @@ void MotionModule::setBalanceParameterCallback(const diana_msgs::BalanceParam::C
 	desired_balance_param_.foot_roll_gyro_d_gain  = msg->foot_roll_gyro_d_gain ;
 	desired_balance_param_.foot_pitch_gyro_p_gain = msg->foot_pitch_gyro_p_gain;
 	desired_balance_param_.foot_pitch_gyro_d_gain = msg->foot_pitch_gyro_d_gain;
+
+	updating_duration_cop = msg->updating_duration;
+	copFz_p_gain = msg->foot_copFz_p_gain;
+	copFz_d_gain = msg->foot_copFz_d_gain;
+
 
 	balance_param_update_coeff_.changeTrajectory(0,0,0,0, balance_updating_duration_sec_, 1, 0, 0);
 

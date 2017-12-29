@@ -67,13 +67,17 @@ public:
 	double control_value_Fy_x, control_value_Fy_z;
 	double control_value_Fx_y, control_value_Fx_z;
 
+	double min_value_x, max_value_x;
+	double min_value_y, max_value_y;
+	double min_value_z, max_value_z;
 
-private:
-	// cop compensation variables
 	control_function::PID_function *pidControllerFz_x;
 	control_function::PID_function *pidControllerFz_y;
 	control_function::PID_function *pidControllerFx;
 	control_function::PID_function *pidControllerFy;
+
+private:
+	// cop compensation variables
 
 	double margin_pflug_bogen_l_fz_x,  margin_pflug_bogen_r_fz_x,  margin_pflug_bogen_l_fy_x,  margin_pflug_bogen_r_fy_x,  margin_pflug_bogen_l_fx_z,  margin_pflug_bogen_r_fx_z;
 	double margin_pflug_bogen_l_fz_y,  margin_pflug_bogen_r_fz_y,  margin_pflug_bogen_l_fy_z,  margin_pflug_bogen_r_fy_z,  margin_pflug_bogen_l_fx_y,  margin_pflug_bogen_r_fx_y;

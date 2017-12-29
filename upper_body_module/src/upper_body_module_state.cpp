@@ -27,9 +27,9 @@ UpperBodyModule::UpperBodyModule()
 	result_["head_yaw"]   = new robotis_framework::DynamixelState(); // joint 23
 	result_["head_pitch"]   = new robotis_framework::DynamixelState(); // joint 24
 	result_["head_roll"]   = new robotis_framework::DynamixelState(); // joint 25
-//	result_["waist_yaw"]  = new robotis_framework::DynamixelState(); // joint 9
-//	result_["waist_roll"] = new robotis_framework::DynamixelState(); // joint 10
-//	result_["head_yaw"]   = new robotis_framework::DynamixelState(); // joint 23
+	//	result_["waist_yaw"]  = new robotis_framework::DynamixelState(); // joint 9
+	//	result_["waist_roll"] = new robotis_framework::DynamixelState(); // joint 10
+	//	result_["head_yaw"]   = new robotis_framework::DynamixelState(); // joint 23
 	///////////////////////////
 	//center change waist
 	center_change_ = new diana_motion_waist::CenterChange;
@@ -49,43 +49,40 @@ UpperBodyModule::UpperBodyModule()
 	temp_waist_yaw_rad   = 0;
 	temp_waist_roll_rad  = 0;
 
-	// cop control variables
-	cop_cal_waist = new  diana::CopCalculationFunc;
-	currentFX_l = 0;
-	currentFY_l = 0;
-	currentFZ_l = 0;
-	currentTX_l = 0;
-	currentTY_l = 0;
-	currentTZ_l = 0;
-	currentFX_r = 0;
-	currentFY_r = 0;
-	currentFZ_r = 0;
-	currentTX_r = 0;
-	currentTY_r = 0;
-	currentTZ_r = 0;
 	// gyro control variables
-  currentGyroX = 0;
+	currentGyroX = 0;
 	currentGyroY = 0;
 	currentGyroZ = 0;
-  tf_current_gyro_x = 0;
+	tf_current_gyro_x = 0;
 	tf_current_gyro_y = 0;
 	tf_current_gyro_z = 0;
 	gyro_roll_function = new control_function::PID_function(0.008,5*DEGREE2RADIAN,-5*DEGREE2RADIAN,0,0,0);
 	gyro_yaw_function  = new control_function::PID_function(0.008,5*DEGREE2RADIAN,-5*DEGREE2RADIAN,0,0,0);
 	gain_roll_p_adjustment = new heroehs_math::FifthOrderTrajectory;
 	gain_roll_d_adjustment = new heroehs_math::FifthOrderTrajectory;
-	gain_yaw_p_adjustment = new heroehs_math::FifthOrderTrajectory;
-	gain_yaw_d_adjustment = new heroehs_math::FifthOrderTrajectory;
+	gain_yaw_p_adjustment  = new heroehs_math::FifthOrderTrajectory;
+	gain_yaw_d_adjustment  = new heroehs_math::FifthOrderTrajectory;
 	updating_duration = 0;
 	gyro_roll_p_gain  = 0;
 	gyro_roll_d_gain  = 0;
 	gyro_yaw_p_gain   = 0;
 	gyro_yaw_d_gain   = 0;
-	//leg state
-	l_leg_real_joint.resize(7,1);
-	l_leg_real_joint.fill(0);
-	r_leg_real_joint.resize(7,1);
-	r_leg_real_joint.fill(0);
+
+	//cop compensation variables
+	cop_compensation_waist  = new diana::CopCompensationFunc;
+	gain_copFz_p_adjustment = new heroehs_math::FifthOrderTrajectory;
+	gain_copFz_d_adjustment = new heroehs_math::FifthOrderTrajectory;
+	current_cop_fz_x = 0;
+	current_cop_fz_y = 0;
+  reference_cop_fz_x = 0;
+	reference_cop_fz_y = 0;
+
+	copFz_p_gain = 0;
+	copFz_d_gain = 0;
+	cop_compensation_waist->max_value_x = 5*DEGREE2RADIAN;
+	cop_compensation_waist->min_value_x = -5*DEGREE2RADIAN;
+	cop_compensation_waist->max_value_y = 5*DEGREE2RADIAN;
+	cop_compensation_waist->min_value_y = -5*DEGREE2RADIAN;
 }
 UpperBodyModule::~UpperBodyModule()
 {
@@ -99,18 +96,20 @@ void UpperBodyModule::queueThread()
 	ros_node.setCallbackQueue(&callback_queue);
 	// publish topics
 	current_waist_pose_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/current_waist_pose",100);
-	cop_point_Fz_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fz",100);
-	cop_point_Fy_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fy",100);
-	cop_point_Fx_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fx",100);
+//	cop_point_Fz_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fz",100);
+//	cop_point_Fy_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fy",100);
+//	cop_point_Fx_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fx",100);
 
 	// subscribe topics
-	current_leg_pose_sub = ros_node.subscribe("/current_leg_pose", 5, &UpperBodyModule::currentLegPoseMsgCallback, this);
+//	current_leg_pose_sub = ros_node.subscribe("/current_leg_pose", 5, &UpperBodyModule::currentLegPoseMsgCallback, this);
 	get_imu_data_sub_ = ros_node.subscribe("/imu/data", 100, &UpperBodyModule::imuDataMsgCallback, this);
-	get_ft_data_sub_ = ros_node.subscribe("/diana/force_torque_data", 100, &UpperBodyModule::ftDataMsgCallback, this);
+//	get_ft_data_sub_ = ros_node.subscribe("/diana/force_torque_data", 100, &UpperBodyModule::ftDataMsgCallback, this);
 
 	center_change_msg_sub = ros_node.subscribe("/diana/center_change", 5, &UpperBodyModule::desiredCenterChangeMsgCallback, this);
-
 	balance_param_waist_sub = ros_node.subscribe("/diana/balance_parameter_waist", 5, &UpperBodyModule::balanceParameterWaistMsgCallback, this);
+
+	//current cop and reference cop from leg module
+	cop_fz_sub = ros_node.subscribe("/cop_fz", 5, &UpperBodyModule::copFzMsgCallBack, this);
 
 	// test desired pose
 	head_test = ros_node.subscribe("/desired_pose_head", 5, &UpperBodyModule::desiredPoseHeadMsgCallbackTEST, this);
@@ -158,7 +157,7 @@ void UpperBodyModule::gyroRotationTransformation(double gyro_z, double gyro_y, d
 	tf_current_gyro_y = tf_gyro_value(1,0);
 	tf_current_gyro_z = tf_gyro_value(2,0);
 }
-void UpperBodyModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg)// force torque sensor data get
+/*void UpperBodyModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg)// force torque sensor data get
 {
 	currentFX_l =  (double) msg->force_x_raw_l;
 	currentFY_l =  (double) msg->force_y_raw_l;
@@ -167,23 +166,20 @@ void UpperBodyModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr&
 	currentTX_l =  (double) msg->torque_x_raw_l;
 	currentTY_l =  (double) msg->torque_y_raw_l;
 	currentTZ_l = -(double) msg->torque_z_raw_l;
-	//		currentFX_r = (double) msg->force_x_raw_r;
-	//		currentFY_r = (double) msg->force_y_raw_r;
-	//		currentFZ_r = (double) msg->force_z_raw_r;
 
-	currentFX_r = 1;
-	currentFY_r = 1;
-	currentFZ_r = 98.1;
-	//		currentTX_r = (double) msg->torque_x_raw_r;
-	//		currentTY_r = (double) msg->torque_y_raw_r;
-	//		currentTZ_r = (double) msg->torque_z_raw_r;
-	currentTX_r = 0;
-	currentTY_r = 0;
-	currentTZ_r = 0;
+	currentFX_r = (double) msg->force_x_raw_r;
+	currentFY_r = (double) msg->force_y_raw_r;
+	currentFZ_r = -(double) msg->force_z_raw_r;
+
+
+	currentTX_r = (double) msg->torque_x_raw_r;
+	currentTY_r = (double) msg->torque_y_raw_r;
+	currentTZ_r = -(double) msg->torque_z_raw_r;
 
 	cop_cal_waist->ftSensorDataLeftGet(currentFX_l, currentFY_l, currentFZ_l, currentTX_l, currentTY_l, currentTZ_l);
 	cop_cal_waist->ftSensorDataRightGet(currentFX_r, currentFY_r, currentFZ_r, currentTX_r, currentTY_r, currentTZ_r);
 }
+*/
 //////////////////////////////////////////////////////////////////////
 //balance message for gyro///////////////////////////////////
 void UpperBodyModule::balanceParameterWaistMsgCallback(const diana_msgs::BalanceParamWaist::ConstPtr& msg)
@@ -193,17 +189,29 @@ void UpperBodyModule::balanceParameterWaistMsgCallback(const diana_msgs::Balance
 	gyro_roll_d_gain  = msg->waist_roll_gyro_d_gain;
 	gyro_yaw_p_gain   = msg->waist_yaw_gyro_p_gain;
 	gyro_yaw_d_gain   = msg->waist_yaw_gyro_d_gain;
+	copFz_p_gain = msg->waist_copFz_p_gain;
+	copFz_d_gain = msg->waist_copFz_d_gain;
 }
 //////////////////////////////////////////////////////////////////////
+//current cop and reference cop from leg module
+void UpperBodyModule::copFzMsgCallBack(const std_msgs::Float64MultiArray::ConstPtr& msg)
+{
+	current_cop_fz_x   = msg->data[0];
+	current_cop_fz_y   = msg->data[1];
+  reference_cop_fz_x = msg->data[2];
+	reference_cop_fz_y = msg->data[3];
+
+	printf("%f :: %f  :: %f :: %f :: \n",current_cop_fz_x, current_cop_fz_y, reference_cop_fz_x, reference_cop_fz_y);
+}
 // leg state ///////////////////////////////////
-void UpperBodyModule::currentLegPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
+/*void UpperBodyModule::currentLegPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
 {
 	for(int joint_num = 1; joint_num<7; joint_num++)
 	{
 		l_leg_real_joint(joint_num, 0) = msg->data[joint_num - 1];
 		r_leg_real_joint(joint_num, 0) = msg->data[joint_num + 5];
 	}
-}
+}*/
 //////////////////////////////////////////////////////////////////////
 // center change msg ///////////////////////////////////
 void UpperBodyModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg) // GUI 에서 motion_num topic을 sub 받아 실행 모션 번호 디텍트
@@ -211,7 +219,7 @@ void UpperBodyModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterCha
 	if (temp_change_value_center != msg->center_change || temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
 	{
 		center_change_->parseMotionData(msg->turn_type, msg->change_type);
-	  center_change_->calculateStepEndPointValue(msg->center_change,100,msg->change_type); // 0.01 단위로 조정 가능.
+		center_change_->calculateStepEndPointValue(msg->center_change,100,msg->change_type); // 0.01 단위로 조정 가능.
 
 		for(int m = 0 ; m<2 ; m++)
 		{

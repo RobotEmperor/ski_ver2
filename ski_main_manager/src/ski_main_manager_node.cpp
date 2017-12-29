@@ -69,10 +69,7 @@ int main(int argc, char **argv)
   controller->addMotionModule((robotis_framework::MotionModule*) upper_body_module::UpperBodyModule::getInstance());
   controller->addMotionModule((robotis_framework::MotionModule*) arm_module::ArmModule::getInstance());
 
-
   controller->startTimer();
-
-
 
   while (ros::ok())
   {

@@ -143,12 +143,21 @@ void MotionModule::updateBalanceParameter()
 		balance_ctrl_.foot_pitch_gyro_ctrl_.p_gain_ = (desired_balance_param_.foot_pitch_gyro_p_gain - previous_balance_param_.foot_pitch_gyro_p_gain)*coeff + previous_balance_param_.foot_pitch_gyro_p_gain;
 		balance_ctrl_.foot_pitch_gyro_ctrl_.d_gain_ = (desired_balance_param_.foot_pitch_gyro_d_gain - previous_balance_param_.foot_pitch_gyro_d_gain)*coeff + previous_balance_param_.foot_pitch_gyro_d_gain;
 	}
+
+	Eigen::MatrixXd value;
+	value.resize(1,8);
+	value.fill(0);
+	value(0,7) = updating_duration_cop;
+	value(0,1) = copFz_p_gain;
+	cop_compensation->pidControllerFz_x->kp_ = gain_copFz_p_adjustment -> fifth_order_traj_gen_one_value(value);
+	cop_compensation->pidControllerFz_y->kp_ = cop_compensation->pidControllerFz_x->kp_;
+	value(0,1) = copFz_d_gain;
+	cop_compensation->pidControllerFz_x->kd_ = gain_copFz_d_adjustment -> fifth_order_traj_gen_one_value(value);
+	cop_compensation->pidControllerFz_y->kd_ = cop_compensation->pidControllerFz_x->kd_;
 }
 void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
 		std::map<std::string, double> sensors)
 {
-
-
 	if (enable_ == false)
 	{
 		return;
@@ -223,9 +232,15 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	// cop compensation
 	cop_cal->jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
 	cop_cal->copCalculationResult();
-
 	cop_compensation->centerOfPressureReferencePoint(temp_turn_type,   cop_cal->cf_px_l, cop_cal->cf_py_l, cop_cal->cf_pz_l,
 			                                             cop_cal->cf_px_r, cop_cal->cf_py_r, cop_cal->cf_pz_r, temp_change_value_center);
+	cop_compensation->centerOfPressureCompensationFz(cop_cal->cop_fz_point_x, cop_cal->cop_fz_point_y);
+
+	result_pose_l_modified_.x = result_pose_l_modified_.x + cop_compensation->control_value_Fz_x;
+	result_pose_l_modified_.y = result_pose_l_modified_.y + cop_compensation->control_value_Fz_y;
+
+	result_pose_r_modified_.x = result_pose_r_modified_.x + cop_compensation->control_value_Fz_x;
+	result_pose_r_modified_.y = result_pose_r_modified_.y + cop_compensation->control_value_Fz_y;
 
 	//IK
 	l_kinematics_->InverseKinematics(result_pose_l_modified_.x, result_pose_l_modified_.y - 0.105, result_pose_l_modified_.z,
