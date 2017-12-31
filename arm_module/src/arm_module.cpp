@@ -136,12 +136,12 @@ void ArmModule::process(std::map<std::string, robotis_framework::Dynamixel *> dx
 	gyro_roll_function->PID_calculate(0,tf_current_gyro_x);
 	gyro_pitch_function->PID_calculate(0,tf_current_gyro_y);
 
-	result_[joint_id_to_name_[1]]->goal_position_ =  l_arm_kinematics_->joint_radian(1,0) + gyro_pitch_function->PID_calculate(0,tf_current_gyro_y);// + gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);
-	result_[joint_id_to_name_[3]]->goal_position_ = -l_arm_kinematics_->joint_radian(2,0) + gyro_roll_function->PID_calculate(0,tf_current_gyro_x); // - gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);
+	result_[joint_id_to_name_[1]]->goal_position_ =  -l_arm_kinematics_->joint_radian(1,0) + gyro_pitch_function->PID_calculate(0,tf_current_gyro_y);// + gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);
+	result_[joint_id_to_name_[3]]->goal_position_ =  l_arm_kinematics_->joint_radian(2,0) + gyro_roll_function->PID_calculate(0,tf_current_gyro_x); // - gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);
 	result_[joint_id_to_name_[5]]->goal_position_ =  l_arm_kinematics_->joint_radian(3,0);
 
-	result_[joint_id_to_name_[2]]->goal_position_ = -r_arm_kinematics_->joint_radian(1,0);
-	result_[joint_id_to_name_[4]]->goal_position_ = -r_arm_kinematics_->joint_radian(2,0);
+	result_[joint_id_to_name_[2]]->goal_position_ =  r_arm_kinematics_->joint_radian(1,0);
+	result_[joint_id_to_name_[4]]->goal_position_ =  r_arm_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[6]]->goal_position_ = -r_arm_kinematics_->joint_radian(3,0);
 }
 void ArmModule::stop()

@@ -266,12 +266,12 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 
 	//<---  cartesian space control  --->
 
-	result_[joint_id_to_name_[1]]  -> goal_position_  =  l_arm_kinematics_->joint_radian(1,0);
-	result_[joint_id_to_name_[3]]  -> goal_position_  = -l_arm_kinematics_->joint_radian(2,0);
+	result_[joint_id_to_name_[1]]  -> goal_position_  = -l_arm_kinematics_->joint_radian(1,0);
+	result_[joint_id_to_name_[3]]  -> goal_position_  =  l_arm_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[5]]  -> goal_position_  =  l_arm_kinematics_->joint_radian(3,0);
 
-	result_[joint_id_to_name_[2]]  -> goal_position_  = -r_arm_kinematics_->joint_radian(1,0);
-	result_[joint_id_to_name_[4]]  -> goal_position_  = -r_arm_kinematics_->joint_radian(2,0);
+	result_[joint_id_to_name_[2]]  -> goal_position_  =  r_arm_kinematics_->joint_radian(1,0);
+	result_[joint_id_to_name_[4]]  -> goal_position_  =  r_arm_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[6]]  -> goal_position_  = -r_arm_kinematics_->joint_radian(3,0);
 
 	result_[joint_id_to_name_[9]]->goal_position_    =  waist_kinematics_->xyz_euler_angle_z;// waist yaw
