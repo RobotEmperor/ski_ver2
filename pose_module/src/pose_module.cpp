@@ -310,7 +310,7 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 
 	current_arm_state_pub.publish(current_arm_state_msg);
 	current_arm_state_msg.data.clear();
-	// display cop to rviz
+/*	// display cop to rviz
 	cop_point_Fz_msg_.header.stamp = ros::Time();
 	cop_point_Fy_msg_.header.stamp = ros::Time();
 	cop_point_Fx_msg_.header.stamp = ros::Time();
@@ -333,7 +333,7 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	cop_point_Fx_msg_.point.x = 0;
 	cop_point_Fx_msg_.point.y = cop_cal -> cop_fx_point_y;
 	cop_point_Fx_msg_.point.z = cop_cal -> cop_fx_point_z;
-	cop_point_Fx_pub.publish(cop_point_Fx_msg_);
+	cop_point_Fx_pub.publish(cop_point_Fx_msg_);*/
 
 	//<---  read   --->
 		/*		for(int id=10 ; id<23 ; id++)

@@ -76,10 +76,6 @@ UpperBodyModule::UpperBodyModule()
 
 	copFz_p_gain = 0;
 	copFz_d_gain = 0;
-	cop_compensation_waist->max_value_x = 5*DEGREE2RADIAN;
-	cop_compensation_waist->min_value_x = -5*DEGREE2RADIAN;
-	cop_compensation_waist->max_value_y = 5*DEGREE2RADIAN;
-	cop_compensation_waist->min_value_y = -5*DEGREE2RADIAN;
 }
 UpperBodyModule::~UpperBodyModule()
 {
@@ -93,9 +89,7 @@ void UpperBodyModule::queueThread()
 	ros_node.setCallbackQueue(&callback_queue);
 	// publish topics
 	current_waist_pose_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/current_waist_pose",100);
-//	cop_point_Fz_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fz",100);
-//	cop_point_Fy_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fy",100);
-//	cop_point_Fx_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fx",100);
+
 
 	// subscribe topics
 //	current_leg_pose_sub = ros_node.subscribe("/current_leg_pose", 5, &UpperBodyModule::currentLegPoseMsgCallback, this);
@@ -154,29 +148,6 @@ void UpperBodyModule::gyroRotationTransformation(double gyro_z, double gyro_y, d
 	tf_current_gyro_y = tf_gyro_value(1,0);
 	tf_current_gyro_z = tf_gyro_value(2,0);
 }
-/*void UpperBodyModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg)// force torque sensor data get
-{
-	currentFX_l =  (double) msg->force_x_raw_l;
-	currentFY_l =  (double) msg->force_y_raw_l;
-	currentFZ_l = -(double) msg->force_z_raw_l;
-
-	currentTX_l =  (double) msg->torque_x_raw_l;
-	currentTY_l =  (double) msg->torque_y_raw_l;
-	currentTZ_l = -(double) msg->torque_z_raw_l;
-
-	currentFX_r = (double) msg->force_x_raw_r;
-	currentFY_r = (double) msg->force_y_raw_r;
-	currentFZ_r = -(double) msg->force_z_raw_r;
-
-
-	currentTX_r = (double) msg->torque_x_raw_r;
-	currentTY_r = (double) msg->torque_y_raw_r;
-	currentTZ_r = -(double) msg->torque_z_raw_r;
-
-	cop_cal_waist->ftSensorDataLeftGet(currentFX_l, currentFY_l, currentFZ_l, currentTX_l, currentTY_l, currentTZ_l);
-	cop_cal_waist->ftSensorDataRightGet(currentFX_r, currentFY_r, currentFZ_r, currentTX_r, currentTY_r, currentTZ_r);
-}
-*/
 //////////////////////////////////////////////////////////////////////
 //balance message for gyro///////////////////////////////////
 void UpperBodyModule::balanceParameterWaistMsgCallback(const diana_msgs::BalanceParamWaist::ConstPtr& msg)

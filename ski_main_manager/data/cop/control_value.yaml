@@ -1,18 +1,30 @@
 # control value 
-pflug_bogen_l_fz: [0.7, 0.7] # x, y margin 
-pflug_bogen_r_fz: [0.7, 0.7] # x, y margin 
+pflug_bogen_l_fz_x: 0.7 # x margin
+pflug_bogen_l_fz_y: 0.7 # y margin
+pflug_bogen_r_fz_x: 0.7 
+pflug_bogen_r_fz_y: 0.7
 
-carving_turn_l_fz: [0.05, 0.05] # x, y margin 
-carving_turn_r_fz: [0.05, 0.05] # x, y margin 
+carving_turn_l_fz_x: 0.05
+carving_turn_l_fz_y: 0.05 
+carving_turn_r_fz_x: 0.05 
+carving_turn_r_fz_y: 0.05
 
-pflug_bogen_l_fy: [0.05, 0.05] # x, z margin 
-pflug_bogen_r_fy: [0.05, 0.05] # x, z margin 
+pflug_bogen_l_fy_x: 0.05 
+pflug_bogen_l_fy_y: 0.05
+pflug_bogen_r_fy_x: 0.05
+pflug_bogen_r_fy_y: 0.05
 
-carving_turn_l_fy: [0.05, 0.05] # x, z margin 
-carving_turn_r_fy: [0.05, 0.05] # x, z margin 
+carving_turn_l_fy_x: 0.05 
+carving_turn_l_fy_y: 0.05
+carving_turn_r_fy_x: 0.05 
+carving_turn_r_fy_y: 0.05
 
-pflug_bogen_l_fx: [0.05, 0.05] # y, z margin 
-pflug_bogen_r_fx: [0.05, 0.05] # y, z margin 
+pflug_bogen_l_fx_x: 0.05
+pflug_bogen_l_fx_y: 0.05
+pflug_bogen_r_fx_x: 0.05 
+pflug_bogen_r_fx_y: 0.05
 
-carving_turn_l_fx: [0.05, 0.05] # y, z margin 
-carving_turn_r_fx: [0.05, 0.05] # y, z margin 
+carving_turn_l_fx_x: 0.05 
+carving_turn_l_fx_y: 0.05
+carving_turn_r_fx_X: 0.05 
+carving_turn_r_fx_y: 0.05

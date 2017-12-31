@@ -23,6 +23,7 @@ MotionModule::MotionModule()
 
 	new_count_ = 0;
 	// Dynamixel initialize ////
+
 	result_["l_hip_pitch"] = new robotis_framework::DynamixelState();  // joint 11
 	result_["l_hip_roll"]  = new robotis_framework::DynamixelState();  // joint 13
 
@@ -37,6 +38,8 @@ MotionModule::MotionModule()
 	result_["r_knee_pitch"] = new robotis_framework::DynamixelState();  // joint 18
 	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
 	result_["r_ankle_roll"]  = new robotis_framework::DynamixelState();  // joint 22
+
+
 	// test
 	/*
 		result_["l_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 19
@@ -110,11 +113,7 @@ MotionModule::MotionModule()
 	currentTY_r=0.0;
 	currentTZ_r=0.0;
 	// cop compensation
-	cop_compensation = new diana::CopCompensationFunc;
-	cop_compensation->max_value_x = 0.05;
-	cop_compensation->min_value_x = -0.05;
-	cop_compensation->max_value_y = 0.05;
-	cop_compensation->min_value_y = -0.05;
+	cop_compensation = new diana::CopCompensationFunc();
 	gain_copFz_p_adjustment = new heroehs_math::FifthOrderTrajectory;
 	gain_copFz_d_adjustment = new heroehs_math::FifthOrderTrajectory;
 	updating_duration_cop = 0;
@@ -213,21 +212,21 @@ void MotionModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& ms
 {
 	currentFX_l = (double) msg->force_x_raw_l;
 	currentFY_l = (double) msg->force_y_raw_l;
-	currentFZ_l = -(double) msg->force_z_raw_l;
+	currentFZ_l = (double) msg->force_z_raw_l;
 
 
 	currentTX_l = (double) msg->torque_x_raw_l;
 	currentTY_l = (double) msg->torque_y_raw_l;
-	currentTZ_l = -(double) msg->torque_z_raw_l;
+	currentTZ_l = (double) msg->torque_z_raw_l;
 
 	currentFX_r = (double) msg->force_x_raw_r;
 	currentFY_r = (double) msg->force_y_raw_r;
-	currentFZ_r = -(double) msg->force_z_raw_r;
+	currentFZ_r = (double) msg->force_z_raw_r;
 
 
 	currentTX_r = (double) msg->torque_x_raw_r;
 	currentTY_r = (double) msg->torque_y_raw_r;
-	currentTZ_r = -(double) msg->torque_z_raw_r;
+	currentTZ_r = (double) msg->torque_z_raw_r;
 
 	cop_cal->ftSensorDataLeftGet(currentFX_l, currentFY_l, currentFZ_l, currentTX_l, currentTY_l, currentTZ_l);
 	cop_cal->ftSensorDataRightGet(currentFX_r, currentFY_r, currentFZ_r, currentTX_r, currentTY_r, currentTZ_r);
@@ -264,5 +263,7 @@ void MotionModule::setBalanceParameterCallback(const diana_msgs::BalanceParam::C
 
 	balance_update_ = true;
 	balance_updating_sys_time_sec_ = 0;
+
+	cop_compensation->parse_margin_data(); // cop margin data ;
 }
 

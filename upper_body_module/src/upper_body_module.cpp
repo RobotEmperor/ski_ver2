@@ -40,6 +40,11 @@ void UpperBodyModule::initialize(const int control_cycle_msec, robotis_framework
 		head_end_point_ (joint_num_, 7) = traj_time_test;
 	}
 	waist_end_point_(4, 7) = 0;
+
+	cop_compensation_waist->pidControllerFz_x->max_ = 5*DEGREE2RADIAN;
+	cop_compensation_waist->pidControllerFz_x->min_ = -5*DEGREE2RADIAN;
+	cop_compensation_waist->pidControllerFz_y->max_ = 5*DEGREE2RADIAN;
+	cop_compensation_waist->pidControllerFz_y->min_ = -5*DEGREE2RADIAN;
 	ROS_INFO("< -------  Initialize Module : Upper Body Module  [HEAD  && WAIST] !!  ------->");
 }
 void UpperBodyModule::updateBalanceGyroParameter()
@@ -120,22 +125,16 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	gyro_roll_function->PID_calculate(0,tf_current_gyro_x); // control value roll rad //
 	gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z); // control value yaw  rad //
 
-
-
 	// cop
 	cop_compensation_waist->reference_point_Fz_x = reference_cop_fz_x;
 	cop_compensation_waist->reference_point_Fz_y = reference_cop_fz_y;
 	cop_compensation_waist->centerOfPressureCompensationFz(current_cop_fz_x, current_cop_fz_y);
 
-
 	// real test
-/*	result_[joint_id_to_name_[9]] -> goal_position_  = waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z); // waist roll
+/*result_[joint_id_to_name_[9]] -> goal_position_  = waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z); // waist roll
 	result_[joint_id_to_name_[10]]-> goal_position_  = - (waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y); // waist roll
-
-
 	result_[joint_id_to_name_[23]]-> goal_position_  = head_kinematics_ -> zyx_euler_angle_z;*/
 	//gazebo
-
 	result_[joint_id_to_name_[9]] -> goal_position_  = waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z); // waist roll
 	result_[joint_id_to_name_[10]]-> goal_position_  = - (waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y); // waist roll
 	result_[joint_id_to_name_[23]]-> goal_position_  = -head_kinematics_ -> zyx_euler_angle_z;

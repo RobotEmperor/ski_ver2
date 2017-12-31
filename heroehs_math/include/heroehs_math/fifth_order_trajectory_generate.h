@@ -57,6 +57,8 @@ public:
 	double final_velocity;
 	double final_acc;
 
+	double temp_value;
+
 
 
 };

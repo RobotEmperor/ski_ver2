@@ -72,6 +72,9 @@ Eigen::MatrixXd CalRad::cal_end_point_to_rad(Eigen::MatrixXd eP_) // end point 6
 
 		ROS_INFO("Initialize && Change End Point Value");
 	}
+
+
+
 	result_joint(0,0) = cal_end_point_tra_px -> fifth_order_traj_gen(current_pose_change(0,0), eP_(0,1), current_pose_change(0,1), eP_(0,3), eP_(0,4), eP_(0,5), eP_(0,6), eP_(0,7));// initial pose, final pose, initial vel, final vel, initial acc, final acc, initial time, final time
 	result_joint(1,0) = cal_end_point_tra_py -> fifth_order_traj_gen(current_pose_change(1,0), eP_(1,1), current_pose_change(1,1), eP_(1,3), eP_(1,4), eP_(1,5), eP_(1,6), eP_(1,7));
 	result_joint(2,0) = cal_end_point_tra_pz -> fifth_order_traj_gen(current_pose_change(2,0), eP_(2,1), current_pose_change(2,1), eP_(2,3), eP_(2,4), eP_(2,5), eP_(2,6), eP_(2,7));
@@ -88,6 +91,7 @@ Eigen::MatrixXd CalRad::cal_end_point_to_rad(Eigen::MatrixXd eP_) // end point 6
 	}
 	else
 		is_moving_check = false;
+
 
 	return result_joint;
 }

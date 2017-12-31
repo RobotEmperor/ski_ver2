@@ -8,6 +8,8 @@
 #ifndef SKI_VER2_DIANA_BALANCE_CONTROL_INCLUDE_DIANA_BALANCE_CONTROL_CONTROL_FUNCTION_H_
 #define SKI_VER2_DIANA_BALANCE_CONTROL_INCLUDE_DIANA_BALANCE_CONTROL_CONTROL_FUNCTION_H_
 
+#include <stdio.h>
+
 namespace control_function
 {
 
@@ -20,11 +22,11 @@ public:
 	double kp_;
 	double kd_;
 	double ki_;
+	double max_;
+	double min_;
 
 private:
 	double dt_;
-	double max_;
-	double min_;
 	double pre_error_;
 	double integral_;
 };

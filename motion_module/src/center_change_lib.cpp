@@ -76,6 +76,7 @@ CenterChange::CenterChange()
 		break;
 		}
 	}
+
 	for(int i=0; i<6; i++)
 	{
 		step_end_point_value[0][i] = middle_end_point_value_center[0][i];
@@ -84,7 +85,6 @@ CenterChange::CenterChange()
 }
 CenterChange::~CenterChange()
 {}
-
 void CenterChange::parseMotionData(std::string turn_type, std::string change_type)
 {
 	std::string path_ = ros::package::getPath("ski_main_manager") + "/data/turn/"+ turn_type + ".yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
@@ -93,14 +93,13 @@ void CenterChange::parseMotionData(std::string turn_type, std::string change_typ
 	{
 		// load yaml
 		doc = YAML::LoadFile(path_.c_str()); // 파일 경로를 입력하여 파일을 로드 한다.
-
 	}catch(const std::exception& e) // 에러 점검
 	{
 		ROS_ERROR("Fail to load LEG parse data yaml file!");
 		return;
 	}
 	// motion data load initialize//
-	YAML::Node pose_node = doc["motion_"+ change_type];// YAML 에 string "motion"을 읽어온다.
+	YAML::Node pose_node = doc["motion_"+change_type];// YAML 에 string "motion"을 읽어온다.
 	//	 motion data load //
 	if(!change_type.compare("center_change")) // 문자열이 같을때 0
 	{

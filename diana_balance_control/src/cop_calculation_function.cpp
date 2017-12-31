@@ -128,6 +128,7 @@ void CopCalculationFunc::copCalculationResult()
 }
 CopCompensationFunc::CopCompensationFunc()
 {
+	parse_margin_data();
 	reference_point_Fz_x = 0;
 	reference_point_Fz_y = 0;
 
@@ -183,13 +184,6 @@ CopCompensationFunc::CopCompensationFunc()
 	control_value_Fx_y = 0;
 	control_value_Fx_z = 0;
 
-	min_value_x = 0;
-	max_value_x = 0;
-	min_value_y = 0;
-	max_value_y = 0;
-  min_value_z = 0;
-	max_value_z = 0;
-
 	pidControllerFz_x = new control_function::PID_function(0.008,0.05,-0.05,0,0,0);
 	pidControllerFz_y = new control_function::PID_function(0.008,0.05,-0.05,0,0,0);
 	pidControllerFx = new control_function::PID_function(0.008,0.1,-0.1,0,0,0);
@@ -206,23 +200,20 @@ void CopCompensationFunc::parse_margin_data()
 	{
 		// load yaml
 		doc = YAML::LoadFile(path_.c_str()); // 파일 경로를 입력하여 파일을 로드 한다.
-
 	}catch(const std::exception& e) // 에러 점검
 	{
 		ROS_ERROR("Fail to load yaml file!");
 		return;
 	}
-
 	//margin load //
-	margin_pflug_bogen_l_fz_x = doc["pflug_bogen_l_fz"][0].as<double>();
-	margin_pflug_bogen_l_fz_y = doc["pflug_bogen_l_fz"][1].as<double>();
+  margin_pflug_bogen_l_fz_x = doc["pflug_bogen_l_fz_x"].as<double>();
+	margin_pflug_bogen_l_fz_y = doc["pflug_bogen_l_fz_y"].as<double>();
 
-	margin_pflug_bogen_r_fz_x = doc["pflug_bogen_r_fz"][0].as<double>();
-	margin_pflug_bogen_r_fz_y = doc["pflug_bogen_r_fz"][1].as<double>();
+	margin_pflug_bogen_r_fz_x = doc["pflug_bogen_r_fz_x"].as<double>();
+	margin_pflug_bogen_r_fz_y = doc["pflug_bogen_r_fz_y"].as<double>();
 }
 void CopCompensationFunc::centerOfPressureReferencePoint(std::string turn_type, double cur_l_point_x, double cur_l_point_y, double cur_l_point_z, double cur_r_point_x, double cur_r_point_y, double cur_r_point_z, double current_control_value)
 {
-	parse_margin_data();
 	if(!turn_type.compare("pflug_bogen"))
 	{
 		if(current_control_value > 0)//right

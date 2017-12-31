@@ -10,7 +10,6 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
-#include <Eigen/Dense>
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 #include <string>
@@ -41,9 +40,6 @@ namespace diana_motion
 
 	};
 }
-
-
-
 
 
 #endif /* SKI_VER2_MOTION_MODULE_INCLUDE_MOTION_MODULE_CENTER_CHANGE_LIB_H_ */

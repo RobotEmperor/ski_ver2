@@ -26,22 +26,24 @@ FifthOrderTrajectory::FifthOrderTrajectory()
 	d_t = 0;
 	trajectory_final_value = 0;
 
-	initial_time = 0.0;
-	initial_pose = 0.0;
-	initial_velocity = 0.0;
-	initial_acc = 0.0;
+	initial_time = 0;
+	initial_pose = 0;
+	initial_velocity = 0;
+	initial_acc = 0;
 
 
-	current_time = 0.0;
-	current_pose = 0.0;
-	current_velocity = 0.0;
-	current_acc = 0.0;
+	current_time = 0;
+	current_pose = 0;
+	current_velocity = 0;
+	current_acc = 0;
 
 
-	final_time = 0.0;
-	final_pose = 0.0;
-	final_velocity = 0.0;
-	final_acc = 0.0;
+	final_time = 0;
+	final_pose = 0;
+	final_velocity = 0;
+	final_acc = 0;
+
+	temp_value = 0;
 
 }
 
@@ -101,8 +103,8 @@ double FifthOrderTrajectory::fifth_order_traj_gen(double initial_value_, double 
 		current_acc = 2*a[2] + 6*a[3]*current_time + 12*a[4]*pow(current_time,2) + 20*a[5]*pow(current_time,4);
 
 		is_moving_traj = true;
-
 		return trajectory_final_value;
+
 	}
 
 }

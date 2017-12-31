@@ -40,9 +40,9 @@ int main(int argc, char **argv)
 
   base_module::BaseModule::getInstance()->gazebo_check = controller->gazebo_mode_;
   pose_module::PoseModule::getInstance()->gazebo_check = controller->gazebo_mode_;
-  motion_module::MotionModule::getInstance()->gazebo_check = controller->gazebo_mode_;
   upper_body_module::UpperBodyModule::getInstance()->gazebo_check = controller->gazebo_mode_;
   arm_module::ArmModule::getInstance()->gazebo_check = controller->gazebo_mode_;
+  motion_module::MotionModule::getInstance()->gazebo_check = controller->gazebo_mode_;
 
   if (robot_file == "")
   {
@@ -65,9 +65,9 @@ int main(int argc, char **argv)
   controller->addMotionModule((robotis_framework::MotionModule*) offset_module::OffsetModule::getInstance());
   controller->addMotionModule((robotis_framework::MotionModule*) base_module::BaseModule::getInstance());
   controller->addMotionModule((robotis_framework::MotionModule*) pose_module::PoseModule::getInstance());
-  controller->addMotionModule((robotis_framework::MotionModule*) motion_module::MotionModule::getInstance());
   controller->addMotionModule((robotis_framework::MotionModule*) upper_body_module::UpperBodyModule::getInstance());
   controller->addMotionModule((robotis_framework::MotionModule*) arm_module::ArmModule::getInstance());
+  controller->addMotionModule((robotis_framework::MotionModule*) motion_module::MotionModule::getInstance());
 
   controller->startTimer();
 

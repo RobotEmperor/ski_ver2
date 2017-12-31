@@ -44,8 +44,6 @@ public:
 private:
 	Eigen::MatrixXd result_joint;
 
-
-
 };
 }
 

@@ -58,7 +58,6 @@ public:
 	void centerOfPressureCompensationFy(double current_point_x, double current_point_z);
 	void centerOfPressureCompensationFx(double current_point_y, double current_point_z);
 
-
 	double reference_point_Fz_x , reference_point_Fz_y;
 	double reference_point_Fy_x , reference_point_Fy_z;
 	double reference_point_Fx_y , reference_point_Fx_z;
@@ -67,10 +66,6 @@ public:
 	double control_value_Fy_x, control_value_Fy_z;
 	double control_value_Fx_y, control_value_Fx_z;
 
-	double min_value_x, max_value_x;
-	double min_value_y, max_value_y;
-	double min_value_z, max_value_z;
-
 	control_function::PID_function *pidControllerFz_x;
 	control_function::PID_function *pidControllerFz_y;
 	control_function::PID_function *pidControllerFx;
@@ -78,7 +73,6 @@ public:
 
 private:
 	// cop compensation variables
-
 	double margin_pflug_bogen_l_fz_x,  margin_pflug_bogen_r_fz_x,  margin_pflug_bogen_l_fy_x,  margin_pflug_bogen_r_fy_x,  margin_pflug_bogen_l_fx_z,  margin_pflug_bogen_r_fx_z;
 	double margin_pflug_bogen_l_fz_y,  margin_pflug_bogen_r_fz_y,  margin_pflug_bogen_l_fy_z,  margin_pflug_bogen_r_fy_z,  margin_pflug_bogen_l_fx_y,  margin_pflug_bogen_r_fx_y;
 	double margin_carving_turn_l_fz_x, margin_carving_turn_r_fz_x, margin_carving_turn_l_fy_x, margin_carving_turn_r_fy_x, margin_carving_turn_l_fx_z, margin_carving_turn_r_fx_z;

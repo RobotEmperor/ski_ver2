@@ -25,6 +25,7 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 		joint_name_to_id_[joint_name] = dxl_info->id_;
 		joint_id_to_name_[dxl_info->id_] = joint_name;
 	}
+
 	//초기화 //
 	leg_end_point_l_.resize(6,8);
 	leg_end_point_l_.fill(0);
@@ -102,6 +103,11 @@ void MotionModule::initialize(const int control_cycle_msec, robotis_framework::R
 	tf_current_gyro_y = 0;
 	tf_current_gyro_z = 0;
 
+	cop_compensation->pidControllerFz_x->max_ = 0.05;
+	cop_compensation->pidControllerFz_x->min_ = -0.05;
+	cop_compensation->pidControllerFz_y->max_ = 0.05;
+	cop_compensation->pidControllerFz_y->min_ = -0.05;
+
 	ROS_INFO("< -------  Initialize Module : Motion Module !!  ------->");
 }
 bool MotionModule::isRunning()
@@ -158,11 +164,11 @@ void MotionModule::updateBalanceParameter()
 void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
 		std::map<std::string, double> sensors)
 {
+
 	if (enable_ == false)
 	{
 		return;
 	}
-
 	updateBalanceParameter();
 
 	//// read current position ////
@@ -181,6 +187,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 			}
 		} //
 	}
+
 	if(is_moving_l_ == false && is_moving_r_ == false) // desired pose
 	{
 		ROS_INFO("Motion Stay");
@@ -202,6 +209,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 		is_moving_l_ = end_to_rad_l_-> is_moving_check;
 		is_moving_r_ = end_to_rad_r_-> is_moving_check;
 	}
+
 	///////////////////////////////////////////////////// control //////////////////////////////////////////////////////////
 	//////balance
 	result_mat_l_ = robotis_framework::getTransformationXYZRPY(result_end_l_.coeff(0,0), result_end_l_.coeff(1,0), result_end_l_.coeff(2,0),
@@ -220,20 +228,12 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	result_pose_l_modified_ = robotis_framework::getPose3DfromTransformMatrix(result_mat_l_modified_);
 	result_pose_r_modified_ = robotis_framework::getPose3DfromTransformMatrix(result_mat_r_modified_);
 
-	/*	else
-	{
-		for(int id = 11; id<23 ; id++)
-		{
-			current_leg_pose_msg_.data.push_back(dxls[joint_id_to_name_[id]]->dxl_state_->present_position_);
-		}
-		current_leg_pose_pub.publish(current_leg_pose_msg_);
-		current_leg_pose_msg_.data.clear();
-	}*/
 	// cop compensation
 	cop_cal->jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
 	cop_cal->copCalculationResult();
 	cop_compensation->centerOfPressureReferencePoint(temp_turn_type,   cop_cal->cf_px_l, cop_cal->cf_py_l, cop_cal->cf_pz_l,
 			                                             cop_cal->cf_px_r, cop_cal->cf_py_r, cop_cal->cf_pz_r, temp_change_value_center);
+
 	cop_compensation->centerOfPressureCompensationFz(cop_cal->cop_fz_point_x, cop_cal->cop_fz_point_y);
 
 	result_pose_l_modified_.x = result_pose_l_modified_.x + cop_compensation->control_value_Fz_x;
@@ -248,10 +248,11 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	r_kinematics_->InverseKinematics(result_pose_r_modified_.x, result_pose_r_modified_.y + 0.105, result_pose_r_modified_.z,
 			result_pose_r_modified_.yaw, result_pose_r_modified_.pitch, result_pose_r_modified_.roll); // pX pY pZ alpha betta kamma
 
+
 	//<---  test control --->
 
-/*	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
-	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);*/
+	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
+	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
 
 	//<---  cartesian space control  --->
 	result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);
