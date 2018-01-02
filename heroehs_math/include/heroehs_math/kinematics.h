@@ -28,6 +28,14 @@ public:
 	void FowardKnematicsCenterToSensorRight(double joint[7]);
 	void FowardKnematicsCenterToSensorLeft(double joint[7]);
 	void InverseKinematics(double pX_, double pY_, double pZ_, double z_alpha_, double y_betta_, double x_kamma_);
+
+	void TransformationOriginToWaist(double x, double y, double z, double roll, double pitch, double yaw);
+	void TransformationWaistToHead(double x, double y, double z, double roll, double pitch, double yaw);
+	void TransformateHeadPointOnOrigin(double x, double y, double z);
+
+	Eigen::MatrixXd tf_origin_to_waist;
+	Eigen::MatrixXd tf_waist_to_head;
+
 	Eigen::MatrixXd CenterToGroundTransformation(Eigen::MatrixXd point);
 
 
@@ -38,6 +46,7 @@ public:
 	Eigen::MatrixXd center_to_foot_transform_right_leg;
 
 	double real_theta_public[7];
+	double head_point_on_origin_x, head_point_on_origin_y, head_point_on_origin_z;
 private:
 
 	//forward_kinematics leg

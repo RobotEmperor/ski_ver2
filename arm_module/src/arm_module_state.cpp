@@ -146,8 +146,7 @@ void ArmModule::gyroRotationTransformation(double gyro_z, double gyro_y, double 
 	tf_gyro_value(0,0) =  gyro_x;
 	tf_gyro_value(1,0) =  gyro_y;
 	tf_gyro_value(2,0) =  gyro_z;
-
-	tf_gyro_value = (robotis_framework::getRotationZ(M_PI/2)*robotis_framework::getRotationZ(-M_PI))*tf_gyro_value;
+	tf_gyro_value = (robotis_framework::getRotationZ(M_PI/2)*robotis_framework::getRotationY(-M_PI))*tf_gyro_value;
 	tf_current_gyro_x = tf_gyro_value(0,0);
 	tf_current_gyro_y = tf_gyro_value(1,0);
 	tf_current_gyro_z = tf_gyro_value(2,0);

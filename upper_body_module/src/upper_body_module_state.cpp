@@ -39,12 +39,29 @@ UpperBodyModule::UpperBodyModule()
 	end_to_rad_waist_ = new heroehs_math::CalRad;
 
 	head_kinematics_  = new heroehs_math::KinematicsEulerAngle;
+	head_point_kinematics_ = new heroehs_math::Kinematics;
 	end_to_rad_head_  = new heroehs_math::CalRad;
 
 	traj_time_test = 4;
 	new_count_ = 1 ;
 	temp_waist_yaw_rad   = 0;
 	temp_waist_roll_rad  = 0;
+
+	end_to_rad_waist_ -> cal_end_point_tra_alpha -> current_time = traj_time_test;
+	end_to_rad_waist_ -> cal_end_point_tra_betta -> current_time = 0;
+	end_to_rad_waist_ -> cal_end_point_tra_kamma -> current_time = traj_time_test;
+
+	end_to_rad_head_ -> cal_end_point_tra_alpha -> current_time = traj_time_test;
+	end_to_rad_head_ -> cal_end_point_tra_betta -> current_time = traj_time_test;
+	end_to_rad_head_ -> cal_end_point_tra_kamma -> current_time = traj_time_test;
+
+	end_to_rad_waist_ -> cal_end_point_tra_alpha -> final_time = traj_time_test;
+	end_to_rad_waist_ -> cal_end_point_tra_betta -> final_time = 0;
+	end_to_rad_waist_ -> cal_end_point_tra_kamma -> final_time = traj_time_test;
+
+	end_to_rad_head_ -> cal_end_point_tra_alpha -> final_time = traj_time_test;
+	end_to_rad_head_ -> cal_end_point_tra_betta -> final_time = traj_time_test;
+	end_to_rad_head_ -> cal_end_point_tra_kamma -> final_time = traj_time_test;
 
 	// gyro control variables
 	currentGyroX = 0;
@@ -71,7 +88,7 @@ UpperBodyModule::UpperBodyModule()
 	gain_copFz_d_adjustment = new heroehs_math::FifthOrderTrajectory;
 	current_cop_fz_x = 0;
 	current_cop_fz_y = 0;
-  reference_cop_fz_x = 0;
+	reference_cop_fz_x = 0;
 	reference_cop_fz_y = 0;
 
 	copFz_p_gain = 0;
@@ -92,9 +109,9 @@ void UpperBodyModule::queueThread()
 
 
 	// subscribe topics
-//	current_leg_pose_sub = ros_node.subscribe("/current_leg_pose", 5, &UpperBodyModule::currentLegPoseMsgCallback, this);
+	//	current_leg_pose_sub = ros_node.subscribe("/current_leg_pose", 5, &UpperBodyModule::currentLegPoseMsgCallback, this);
 	get_imu_data_sub_ = ros_node.subscribe("/imu/data", 100, &UpperBodyModule::imuDataMsgCallback, this);
-//	get_ft_data_sub_ = ros_node.subscribe("/diana/force_torque_data", 100, &UpperBodyModule::ftDataMsgCallback, this);
+	//	get_ft_data_sub_ = ros_node.subscribe("/diana/force_torque_data", 100, &UpperBodyModule::ftDataMsgCallback, this);
 
 	center_change_msg_sub = ros_node.subscribe("/diana/center_change", 5, &UpperBodyModule::desiredCenterChangeMsgCallback, this);
 	balance_param_waist_sub = ros_node.subscribe("/diana/balance_parameter_waist", 5, &UpperBodyModule::balanceParameterWaistMsgCallback, this);
@@ -116,14 +133,14 @@ void UpperBodyModule::desiredPoseWaistMsgCallbackTEST(const std_msgs::Float64Mul
 {
 	waist_end_point_(3, 1) = msg->data[0]; // yaw  트레젝토리 6 * 8 은 xyz yaw(z) pitch(y) roll(x) 이며 8은 처음 위치 나중 위치 / 속도 속도 / 가속도 가속도 / 시간 시간 / 임
 	waist_end_point_(5, 1) = msg->data[1]; // roll
-	//is_moving_waist_ = true;
+	is_moving_waist_ = true;
 }
 void UpperBodyModule::desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg)
 {
 	head_end_point_(3, 1) = msg->data[0]; // yaw  트레젝토리 6 * 8 은 xyz yaw(z) pitch(y) roll(x) 이며 8은 처음 위치 나중 위치 / 속도 속도 / 가속도 가속도 / 시간 시간 / 임
 	head_end_point_(4, 1) = msg->data[1];
 	head_end_point_(5, 1) = msg->data[2]; // roll
-	//is_moving_head_ = true;
+	is_moving_head_ = true;
 }
 /////////////////////////////////////////////////////
 // sensor data get///////////////////////////////////
@@ -143,7 +160,7 @@ void UpperBodyModule::gyroRotationTransformation(double gyro_z, double gyro_y, d
 	tf_gyro_value(1,0) =  gyro_y;
 	tf_gyro_value(2,0) =  gyro_z;
 
-	tf_gyro_value = (robotis_framework::getRotationZ(M_PI/2)*robotis_framework::getRotationZ(-M_PI))*tf_gyro_value;
+	tf_gyro_value = (robotis_framework::getRotationZ(M_PI/2)*robotis_framework::getRotationY(-M_PI))*tf_gyro_value;
 	tf_current_gyro_x = tf_gyro_value(0,0);
 	tf_current_gyro_y = tf_gyro_value(1,0);
 	tf_current_gyro_z = tf_gyro_value(2,0);
@@ -166,7 +183,7 @@ void UpperBodyModule::copFzMsgCallBack(const std_msgs::Float64MultiArray::ConstP
 {
 	current_cop_fz_x   = msg->data[0];
 	current_cop_fz_y   = msg->data[1];
-  reference_cop_fz_x = msg->data[2];
+	reference_cop_fz_x = msg->data[2];
 	reference_cop_fz_y = msg->data[3];
 }
 // leg state ///////////////////////////////////

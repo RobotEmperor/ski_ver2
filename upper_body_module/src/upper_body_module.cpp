@@ -71,6 +71,15 @@ void UpperBodyModule::updateBalanceGyroParameter()
 	cop_compensation_waist->pidControllerFz_x->kd_ = gain_copFz_d_adjustment -> fifth_order_traj_gen_one_value(value);
 	cop_compensation_waist->pidControllerFz_y->kd_ = cop_compensation_waist->pidControllerFz_x->kd_;
 }
+double UpperBodyModule::limitCheckHead(double calculated_value, double max, double min)
+{
+	if(calculated_value > (max*DEGREE2RADIAN))
+		return (max*DEGREE2RADIAN);
+	else if (calculated_value < (min*DEGREE2RADIAN))
+		return (min*DEGREE2RADIAN);
+	else
+		return calculated_value;
+}
 bool UpperBodyModule::isRunning()
 {
 	return running_;
@@ -108,7 +117,11 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	}
 	else
 	{
-		ROS_INFO("Upper Module Trajectory Start");
+		ROS_INFO("Upper Module run !!!!");
+		// limit must be calculated 23 24 25
+		head_end_point_(3,1) = limitCheckHead(head_end_point_(3,1),90,-90);
+		head_end_point_(4,1) = limitCheckHead(head_end_point_(4,1),20,-20);
+		head_end_point_(5,1) = limitCheckHead(head_end_point_(5,1),20,-20);
 
 		result_rad_waist_ = end_to_rad_waist_ -> cal_end_point_to_rad(waist_end_point_);
 		result_rad_head_  = end_to_rad_head_  -> cal_end_point_to_rad(head_end_point_);
@@ -130,21 +143,32 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	cop_compensation_waist->reference_point_Fz_y = reference_cop_fz_y;
 	cop_compensation_waist->centerOfPressureCompensationFz(current_cop_fz_x, current_cop_fz_y);
 
-	// real test
-/*result_[joint_id_to_name_[9]] -> goal_position_  = waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z); // waist roll
-	result_[joint_id_to_name_[10]]-> goal_position_  = - (waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y); // waist roll
-	result_[joint_id_to_name_[23]]-> goal_position_  = head_kinematics_ -> zyx_euler_angle_z;*/
+	// head point get
+	head_point_kinematics_->TransformationOriginToWaist(0,0,0.2,
+			waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z),
+			0,
+			waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y);
+	head_point_kinematics_->TransformationWaistToHead(0,0,0.352,
+			head_kinematics_ -> zyx_euler_angle_x,
+			head_kinematics_ -> zyx_euler_angle_y,
+			head_kinematics_ -> zyx_euler_angle_z);
+
+	head_point_kinematics_->TransformateHeadPointOnOrigin(0,0,0);
+	//printf("X :: %f Y:: %f Z:: %f \n", head_point_kinematics_->head_point_on_origin_x, head_point_kinematics_->head_point_on_origin_y,head_point_kinematics_->head_point_on_origin_z);
+
 	//gazebo
 	result_[joint_id_to_name_[9]] -> goal_position_  = waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z); // waist roll
-	result_[joint_id_to_name_[10]]-> goal_position_  = - (waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y); // waist roll
+	result_[joint_id_to_name_[10]]-> goal_position_  = -(waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y); // waist roll
 	result_[joint_id_to_name_[23]]-> goal_position_  = -head_kinematics_ -> zyx_euler_angle_z;
-  result_[joint_id_to_name_[24]]-> goal_position_  = -head_kinematics_ -> zyx_euler_angle_y;
+	result_[joint_id_to_name_[24]]-> goal_position_  = -head_kinematics_ -> zyx_euler_angle_y;
 	result_[joint_id_to_name_[25]]-> goal_position_  = -head_kinematics_ -> zyx_euler_angle_x;
 
 
+
+
 	//arm module current position transmitted
-	temp_waist_yaw_rad   =  dxls["waist_yaw"] -> dxl_state_->present_position_;
-	temp_waist_roll_rad  = -dxls["waist_roll"]-> dxl_state_->present_position_; // direction must define!
+	temp_waist_yaw_rad   =  waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z);
+	temp_waist_roll_rad  =  waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y; // direction must define!
 
 	//transmit to arm module with waist position
 	current_waist_pose_msg.data.push_back(temp_waist_yaw_rad);

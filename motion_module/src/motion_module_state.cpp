@@ -90,6 +90,7 @@ MotionModule::MotionModule()
 	balance_updating_duration_sec_ = 2.0;
 	balance_updating_sys_time_sec_ = 2.0;
 	balance_update_= false;
+
 	tf_current_gyro_x = 0;
 	tf_current_gyro_y = 0;
 	tf_current_gyro_z = 0;
@@ -191,7 +192,7 @@ void MotionModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) // 
 	currentGyroX = (double) msg->angular_velocity.x;
 	currentGyroY = (double) msg->angular_velocity.y;
 	currentGyroZ = (double) msg->angular_velocity.z;
-	gyroRotationTransformation(currentGyroX, currentGyroY, currentGyroZ);
+	gyroRotationTransformation(currentGyroZ, currentGyroY, currentGyroX);
 	balance_ctrl_.setCurrentGyroSensorOutput(tf_current_gyro_x, tf_current_gyro_y);
 }
 void MotionModule::gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x)
@@ -203,7 +204,7 @@ void MotionModule::gyroRotationTransformation(double gyro_z, double gyro_y, doub
 	tf_gyro_value(1,0) =  gyro_y;
 	tf_gyro_value(2,0) =  gyro_z;
 
-	tf_gyro_value = (robotis_framework::getRotationZ(M_PI/2)*robotis_framework::getRotationZ(-M_PI))*tf_gyro_value;
+	tf_gyro_value = (robotis_framework::getRotationZ(M_PI/2)*robotis_framework::getRotationY(-M_PI))*tf_gyro_value;
 	tf_current_gyro_x = tf_gyro_value(0,0);
 	tf_current_gyro_y = tf_gyro_value(1,0);
 	tf_current_gyro_z = tf_gyro_value(2,0);
@@ -230,6 +231,11 @@ void MotionModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& ms
 
 	cop_cal->ftSensorDataLeftGet(currentFX_l, currentFY_l, currentFZ_l, currentTX_l, currentTY_l, currentTZ_l);
 	cop_cal->ftSensorDataRightGet(currentFX_r, currentFY_r, currentFZ_r, currentTX_r, currentTY_r, currentTZ_r);
+
+	cop_cal->jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
+	cop_cal->copCalculationResult();
+	cop_compensation->centerOfPressureReferencePoint(temp_turn_type,   cop_cal->cf_px_l, cop_cal->cf_py_l, cop_cal->cf_pz_l,
+			                                             cop_cal->cf_px_r, cop_cal->cf_py_r, cop_cal->cf_pz_r, temp_change_value_center);
 }
 void MotionModule::setBalanceParameterCallback(const diana_msgs::BalanceParam::ConstPtr& msg)
 {

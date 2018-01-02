@@ -116,6 +116,17 @@ Kinematics::Kinematics()
 			0 , 1, 0, 0,
 			0 , 0, 1, total_length_,
 			0 , 0, 0, 1;
+
+	// Head to origin point transformation
+	tf_origin_to_waist.resize(4,4);
+	tf_origin_to_waist.fill(0);
+	tf_origin_to_waist(3,3) = 1;
+	tf_waist_to_head.resize(4,4);
+	tf_waist_to_head.fill(0);
+	tf_waist_to_head(3,3) = 1;
+	head_point_on_origin_x = 0;
+	head_point_on_origin_y = 0;
+	head_point_on_origin_z = 0;
 }
 Kinematics::~Kinematics()
 {
@@ -544,6 +555,47 @@ void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_
 
 	joint_radian << 0 , real_theta[1], real_theta[2] , real_theta[3] , real_theta[4] , real_theta[5] , real_theta[6];
 }
+void Kinematics::TransformationOriginToWaist(double x, double y, double z, double roll, double pitch, double yaw)
+{
+	Eigen::MatrixXd transformation;
+	transformation.resize(4,4);
+	transformation.fill(0);
+	transformation(3,3) = 1;
+	transformation.block(0,0,3,3) = robotis_framework::getRotationX(roll)*robotis_framework::getRotationY(pitch)*robotis_framework::getRotationZ(yaw);
+	transformation(0,3) = x;
+	transformation(1,3) = y;
+	transformation(2,3) = z;
+	tf_origin_to_waist = transformation;
+}
+void Kinematics::TransformationWaistToHead(double x, double y, double z, double roll, double pitch, double yaw)
+{
+	Eigen::MatrixXd transformation;
+	transformation.resize(4,4);
+	transformation.fill(0);
+	transformation(3,3) = 1;
+	transformation.block(0,0,3,3) = robotis_framework::getRotationZ(yaw)*robotis_framework::getRotationY(pitch)*robotis_framework::getRotationX(roll);
+	transformation(0,3) = x;
+	transformation(1,3) = y;
+	transformation(2,3) = z;
+	tf_waist_to_head = transformation;
+}
+void Kinematics::TransformateHeadPointOnOrigin(double x, double y, double z)
+{
+	Eigen::MatrixXd temp_tf;
+	temp_tf.resize(4,1);
+	temp_tf.fill(0);
+	Eigen::MatrixXd point_head;
+	point_head.resize(4,1);
+	point_head.fill(0);
+	point_head<< x,
+			         y,
+							 z,
+							 1;
+	temp_tf = tf_origin_to_waist*tf_waist_to_head*point_head;
+	head_point_on_origin_x = temp_tf(0,0);
+	head_point_on_origin_y = temp_tf(1,0);
+	head_point_on_origin_z = temp_tf(2,0);
+}
 //////////////////////////////////////////////////////////Arm Kinematics/////////////////////////////////////////////////////////////////////////
 KinematicsArm::KinematicsArm()
 {
@@ -799,10 +851,6 @@ void KinematicsEulerAngle::ZYXEulerAngles(double z, double y, double x)
 	zyx_euler_angle_matrix_<< cos(y)*cos(z), cos(z)*sin(x)*sin(y) - cos(x)*sin(z), sin(x)*sin(z) + cos(x)*cos(z)*sin(y),
 			cos(y)*sin(z), cos(x)*cos(z) + sin(x)*sin(y)*sin(z), cos(x)*sin(y)*sin(z) - cos(z)*sin(x) ,
 			-sin(y)      , cos(y)*sin(x)                       , cos(x)*cos(y);
-	//printf("zyx angles \n");
-	//printf("%f     %f     %f\n",zyx_euler_angle_matrix_(0,0),zyx_euler_angle_matrix_(0,1),zyx_euler_angle_matrix_(0,2));
-	//printf("%f     %f     %f\n",zyx_euler_angle_matrix_(1,0),zyx_euler_angle_matrix_(1,1),zyx_euler_angle_matrix_(1,2));
-	//printf("%f     %f     %f\n",zyx_euler_angle_matrix_(2,0),zyx_euler_angle_matrix_(2,1),zyx_euler_angle_matrix_(2,2));
 }
 
 void KinematicsEulerAngle::XYZEulerAngles(double x, double y, double z)
@@ -810,12 +858,6 @@ void KinematicsEulerAngle::XYZEulerAngles(double x, double y, double z)
 	xyz_euler_angle_matrix_ << cos(y)*cos(z)                       , -cos(y)*sin(z)                      , sin(y)        ,
 			cos(x)*sin(z) + cos(z)*sin(x)*sin(y), cos(x)*cos(z) - sin(x)*sin(y)*sin(z), -cos(y)*sin(x),
 			sin(x)*sin(z) - cos(x)*cos(z)*sin(y), cos(z)*sin(x) + cos(x)*sin(y)*sin(z),  cos(x)*cos(y);
-
-	//printf("xyz angles \n");
-	//printf("%f     %f     %f\n",xyz_euler_angle_matrix_(0,0),xyz_euler_angle_matrix_(0,1),xyz_euler_angle_matrix_(0,2));
-	//printf("%f     %f     %f\n",xyz_euler_angle_matrix_(1,0),xyz_euler_angle_matrix_(1,1),xyz_euler_angle_matrix_(1,2));
-	//printf("%f     %f     %f\n",xyz_euler_angle_matrix_(2,0),xyz_euler_angle_matrix_(2,1),xyz_euler_angle_matrix_(2,2));
-
 }
 void KinematicsEulerAngle::ZYXEulerAnglesSolution(double z, double y, double x)
 {
@@ -824,10 +866,6 @@ void KinematicsEulerAngle::ZYXEulerAnglesSolution(double z, double y, double x)
 	zyx_euler_angle_z = atan2(zyx_euler_angle_matrix_(1,0),zyx_euler_angle_matrix_(0,0));
 	zyx_euler_angle_y = atan2(-zyx_euler_angle_matrix_(2,0),sqrt(pow(zyx_euler_angle_matrix_(2,1),2) + pow(zyx_euler_angle_matrix_(2,2),2)));
 	zyx_euler_angle_x = atan2(zyx_euler_angle_matrix_(2,1),zyx_euler_angle_matrix_(2,2));
-
-	//printf("zyx angles forward angles \n");
-	//ZYXEulerAngles(zyx_euler_angle_z, zyx_euler_angle_y, zyx_euler_angle_x);
-
 }
 void KinematicsEulerAngle::XYZEulerAnglesSolution(double x, double y, double z)
 {
@@ -836,7 +874,4 @@ void KinematicsEulerAngle::XYZEulerAnglesSolution(double x, double y, double z)
 	xyz_euler_angle_x = atan2(-xyz_euler_angle_matrix_(1,2),xyz_euler_angle_matrix_(2,2));
 	xyz_euler_angle_y = atan2(xyz_euler_angle_matrix_(0,2),sqrt(pow(xyz_euler_angle_matrix_(0,0),2) + pow(xyz_euler_angle_matrix_(0,1),2)));
 	xyz_euler_angle_z = atan2(-xyz_euler_angle_matrix_(0,1),xyz_euler_angle_matrix_(0,0));
-
-	//printf("xyz angles forward angles \n");
-	//XYZEulerAngles(xyz_euler_angle_x, xyz_euler_angle_y, xyz_euler_angle_z);
 }

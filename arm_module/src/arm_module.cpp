@@ -118,7 +118,7 @@ void ArmModule::process(std::map<std::string, robotis_framework::Dynamixel *> dx
 	}
 	else
 	{
-		ROS_INFO("Arm Module Trajectory Start");
+		ROS_INFO("Arm Module run !!!!");
 		//l_arm_kinematics_ -> ArmToOriginTransformation(waist_yaw_rad_ , waist_roll_rad_, l_arm_desired_point_x_, l_arm_desired_point_y_, l_arm_desired_point_z_);
 		//r_arm_kinematics_ -> ArmToOriginTransformation(waist_yaw_rad_ , waist_roll_rad_, r_arm_desired_point_x_, r_arm_desired_point_y_, r_arm_desired_point_z_);
 

@@ -96,9 +96,9 @@ public:
 	// current cop and reference cop from leg module
 	void copFzMsgCallBack(const std_msgs::Float64MultiArray::ConstPtr& msg);
 
-	geometry_msgs::PointStamped cop_point_Fz_msg_;
-	geometry_msgs::PointStamped cop_point_Fy_msg_;
-	geometry_msgs::PointStamped cop_point_Fx_msg_;
+//	geometry_msgs::PointStamped cop_point_Fz_msg_;
+//	geometry_msgs::PointStamped cop_point_Fy_msg_;
+//	geometry_msgs::PointStamped cop_point_Fx_msg_;
 
 private:
 	void queueThread();
@@ -114,7 +114,7 @@ private:
 	bool is_moving_head_;
 	bool is_moving_waist_;
 
-
+	double limitCheckHead(double calculated_value, double max, double min);
 	//waist kinematics
 	heroehs_math::KinematicsEulerAngle *waist_kinematics_;
 	heroehs_math::CalRad *end_to_rad_waist_;     //
@@ -123,6 +123,7 @@ private:
 
 	//head kinematics
 	heroehs_math::KinematicsEulerAngle *head_kinematics_;
+	heroehs_math::Kinematics *head_point_kinematics_;
 	heroehs_math::CalRad *end_to_rad_head_;      //
 	Eigen::MatrixXd head_end_point_;             // (6*8)
 	Eigen::MatrixXd result_rad_head_;            // (6*1)
@@ -130,13 +131,6 @@ private:
 	//arm module data transmit
 	std_msgs::Float64MultiArray current_waist_pose_msg;
 	double temp_waist_yaw_rad, temp_waist_roll_rad;
-
-	// cop calculation
-	//diana::CopCalculationFunc *cop_cal_waist;
-	//double currentFX_l,currentFY_l,currentFZ_l,currentTX_l,currentTY_l,currentTZ_l;
-	//double currentFX_r,currentFY_r,currentFZ_r,currentTX_r,currentTY_r,currentTZ_r;
-	//Eigen::MatrixXd l_leg_real_joint;
-	//Eigen::MatrixXd r_leg_real_joint;
 
 	// cop compensation
 	diana::CopCompensationFunc *cop_compensation_waist;

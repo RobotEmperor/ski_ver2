@@ -194,7 +194,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	}
 	else
 	{
-		ROS_INFO("Motion Trajectory Start");
+		ROS_INFO("Motion run !!!!");
 		// trajectory is working cartesian space control
 		result_end_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
 		result_end_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
@@ -229,11 +229,6 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	result_pose_r_modified_ = robotis_framework::getPose3DfromTransformMatrix(result_mat_r_modified_);
 
 	// cop compensation
-	cop_cal->jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
-	cop_cal->copCalculationResult();
-	cop_compensation->centerOfPressureReferencePoint(temp_turn_type,   cop_cal->cf_px_l, cop_cal->cf_py_l, cop_cal->cf_pz_l,
-			                                             cop_cal->cf_px_r, cop_cal->cf_py_r, cop_cal->cf_pz_r, temp_change_value_center);
-
 	cop_compensation->centerOfPressureCompensationFz(cop_cal->cop_fz_point_x, cop_cal->cop_fz_point_y);
 
 	result_pose_l_modified_.x = result_pose_l_modified_.x + cop_compensation->control_value_Fz_x;
