@@ -246,8 +246,8 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 
 	//<---  test control --->
 
-	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
-	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
+//	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
+//	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
 
 	//<---  cartesian space control  --->
 	result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);

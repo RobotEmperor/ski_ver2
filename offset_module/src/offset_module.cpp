@@ -30,6 +30,7 @@ OffsetModule::OffsetModule()
 	// Dynamixel initialize ////
 
 
+
 	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["r_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 2
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
@@ -59,8 +60,8 @@ OffsetModule::OffsetModule()
 	result_["head_yaw"]         = new robotis_framework::DynamixelState();  // joint 23
 	result_["head_pitch"]       = new robotis_framework::DynamixelState();  // joint 24
 	result_["head_roll"]        = new robotis_framework::DynamixelState();  // joint 25
-
 /*
+
 	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
 	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5
@@ -73,6 +74,7 @@ OffsetModule::OffsetModule()
 	result_["l_ankle_pitch"]    = new robotis_framework::DynamixelState();  // joint 19
 	result_["r_ankle_pitch"]     = new robotis_framework::DynamixelState(); // joint 20
 */
+
 
 
 

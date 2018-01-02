@@ -22,6 +22,7 @@ PoseModule::PoseModule()
 	// Dynamixel initialize ////
 
 
+
 	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["r_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 2
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
@@ -52,9 +53,10 @@ PoseModule::PoseModule()
 	result_["head_pitch"]       = new robotis_framework::DynamixelState();  // joint 24
 	result_["head_roll"]        = new robotis_framework::DynamixelState();  // joint 25
 
+
 	// TEST
-/*
-	result_["waist_yaw"]        = new robotis_framework::DynamixelState();  // joint 9
+
+	/*result_["waist_yaw"]        = new robotis_framework::DynamixelState();  // joint 9
 	result_["waist_roll"]       = new robotis_framework::DynamixelState();  // joint 10
 
 	result_["head_yaw"]         = new robotis_framework::DynamixelState();  // joint 23
@@ -64,8 +66,8 @@ PoseModule::PoseModule()
 
 	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
-	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5
-*/
+	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5*/
+
 
 
 
@@ -95,8 +97,6 @@ PoseModule::PoseModule()
 	end_to_rad_r_arm_  = new heroehs_math::CalRad;
 	is_moving_r_arm    = false;
 
-	waist_yaw_rad_  = 0;
-	waist_roll_rad_ = 0;
 	l_arm_desired_point_x_ = 0;
 	l_arm_desired_point_y_ = 0;
 	l_arm_desired_point_z_ = 0;
@@ -141,6 +141,14 @@ void PoseModule::queueThread()
 	cop_point_Fz_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fz",100);
 	cop_point_Fy_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fy",100);
 	cop_point_Fx_pub = ros_node.advertise<geometry_msgs::PointStamped>("/cop_point_Fx",100);
+
+	cop_fz_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/cop_fz",100);
+
+	l_leg_point_xyz_pub = ros_node.advertise<geometry_msgs::Vector3>("/l_leg_point_xyz",100);
+	l_leg_point_rpy_pub = ros_node.advertise<geometry_msgs::Vector3>("/l_leg_point_rpy",100);
+
+	r_leg_point_xyz_pub = ros_node.advertise<geometry_msgs::Vector3>("/r_leg_point_xyz",100);
+	r_leg_point_rpy_pub = ros_node.advertise<geometry_msgs::Vector3>("/r_leg_point_rpy",100);
 
 	/* subscribe topics */
 	// for gui
@@ -220,29 +228,27 @@ bool PoseModule::readPgainSrvFunction(pose_module::command::Request  &req, pose_
 }
 void PoseModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg)// force torque sensor data get
 {
-	currentFX_l =  (double) msg->force_x_raw_l;
-	currentFY_l =  (double) msg->force_y_raw_l;
-	currentFZ_l = -(double) msg->force_z_raw_l;
+	currentFX_l = (double) msg->force_x_raw_l;
+	currentFY_l = (double) msg->force_y_raw_l;
+	currentFZ_l = (double) msg->force_z_raw_l;
 
-	currentTX_l =  (double) msg->torque_x_raw_l;
-	currentTY_l =  (double) msg->torque_y_raw_l;
-	currentTZ_l = -(double) msg->torque_z_raw_l;
-	//		currentFX_r = (double) msg->force_x_raw_r;
-	//		currentFY_r = (double) msg->force_y_raw_r;
-	//		currentFZ_r = (double) msg->force_z_raw_r;
+	currentTX_l = (double) msg->torque_x_raw_l;
+	currentTY_l = (double) msg->torque_y_raw_l;
+	currentTZ_l = (double) msg->torque_z_raw_l;
+	currentFX_r = (double) msg->force_x_raw_r;
+	currentFY_r = (double) msg->force_y_raw_r;
+	currentFZ_r = (double) msg->force_z_raw_r;
 
-	currentFX_r = 1;
-	currentFY_r = 1;
-	currentFZ_r = 98.1;
-	//		currentTX_r = (double) msg->torque_x_raw_r;
-	//		currentTY_r = (double) msg->torque_y_raw_r;
-	//		currentTZ_r = (double) msg->torque_z_raw_r;
-	currentTX_r = 0;
-	currentTY_r = 0;
-	currentTZ_r = 0;
+	currentTX_r = (double) msg->torque_x_raw_r;
+	currentTY_r = (double) msg->torque_y_raw_r;
+	currentTZ_r = (double) msg->torque_z_raw_r;
+
 
 	cop_cal->ftSensorDataLeftGet(currentFX_l, currentFY_l, currentFZ_l, currentTX_l, currentTY_l, currentTZ_l);
 	cop_cal->ftSensorDataRightGet(currentFX_r, currentFY_r, currentFZ_r, currentTX_r, currentTY_r, currentTZ_r);
+
+	cop_cal->jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
+	cop_cal->copCalculationResult();
 }
 
 

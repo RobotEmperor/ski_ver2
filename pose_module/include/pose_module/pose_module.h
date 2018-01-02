@@ -24,6 +24,7 @@
 #include <stdio.h>
 
 #include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/Vector3.h>
 #include "robotis_framework_common/motion_module.h"
 #include "robotis_controller_msgs/StatusMsg.h"
 #include "robotis_math/robotis_math.h"
@@ -75,6 +76,11 @@ public:
 	ros::Publisher cop_point_Fz_pub;
 	ros::Publisher cop_point_Fy_pub;
 	ros::Publisher cop_point_Fx_pub;
+	ros::Publisher cop_fz_pub;
+	ros::Publisher l_leg_point_xyz_pub;
+	ros::Publisher l_leg_point_rpy_pub;
+	ros::Publisher r_leg_point_xyz_pub;
+	ros::Publisher r_leg_point_rpy_pub;
 
 	geometry_msgs::PointStamped cop_point_Fz_msg_;
 	geometry_msgs::PointStamped cop_point_Fy_msg_;
@@ -140,8 +146,6 @@ private:
 	Eigen::MatrixXd r_arm_end_point_;
 	Eigen::MatrixXd result_end_r_arm_;
 
-	double waist_yaw_rad_;
-	double waist_roll_rad_;
 	double l_arm_desired_point_x_, l_arm_desired_point_y_, l_arm_desired_point_z_;
 	double r_arm_desired_point_x_, r_arm_desired_point_y_, r_arm_desired_point_z_;
 	// Gui arm state publisher
@@ -161,6 +165,11 @@ private:
 	diana::CopCalculationFunc *cop_cal;
   double currentFX_l,currentFY_l,currentFZ_l,currentTX_l,currentTY_l,currentTZ_l;
   double currentFX_r,currentFY_r,currentFZ_r,currentTX_r,currentTY_r,currentTZ_r;
+  std_msgs::Float64MultiArray cop_fz_msg_;
+	geometry_msgs::Vector3 l_leg_point_xyz_msg_;
+	geometry_msgs::Vector3 l_leg_point_rpy_msg_;
+	geometry_msgs::Vector3 r_leg_point_xyz_msg_;
+	geometry_msgs::Vector3 r_leg_point_rpy_msg_;
 };
 
 }

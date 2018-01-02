@@ -25,8 +25,10 @@ UpperBodyModule::UpperBodyModule()
 	result_["waist_roll"] = new robotis_framework::DynamixelState(); // joint 10
 
 	result_["head_yaw"]   = new robotis_framework::DynamixelState(); // joint 23
+
 	result_["head_pitch"]   = new robotis_framework::DynamixelState(); // joint 24
 	result_["head_roll"]   = new robotis_framework::DynamixelState(); // joint 25
+
 	///////////////////////////
 	//center change waist
 	center_change_ = new diana_motion_waist::CenterChange;

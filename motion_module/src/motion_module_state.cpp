@@ -24,6 +24,7 @@ MotionModule::MotionModule()
 	new_count_ = 0;
 	// Dynamixel initialize ////
 
+
 	result_["l_hip_pitch"] = new robotis_framework::DynamixelState();  // joint 11
 	result_["l_hip_roll"]  = new robotis_framework::DynamixelState();  // joint 13
 
@@ -39,12 +40,10 @@ MotionModule::MotionModule()
 	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
 	result_["r_ankle_roll"]  = new robotis_framework::DynamixelState();  // joint 22
 
-
 	// test
-	/*
-		result_["l_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 19
-		result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
-	 */
+	//	result_["l_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 19
+	//	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
+
 	///////////////////////////
 	l_kinematics_ = new heroehs_math::Kinematics;
 	r_kinematics_ = new heroehs_math::Kinematics;
