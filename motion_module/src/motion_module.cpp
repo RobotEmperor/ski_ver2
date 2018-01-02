@@ -246,11 +246,11 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 
 	//<---  test control --->
 
-//	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
-//	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
+	result_[joint_id_to_name_[20]]->goal_position_ = r_kinematics_->joint_radian(5,0);
+	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
 
 	//<---  cartesian space control  --->
-	result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);
+/*	result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);
 	result_[joint_id_to_name_[13]]->goal_position_ =  l_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[15]]->goal_position_ =  l_kinematics_->joint_radian(3,0);
 
@@ -264,7 +264,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 
 	result_[joint_id_to_name_[18]]->goal_position_ =  r_kinematics_->joint_radian(4,0);
 	result_[joint_id_to_name_[20]]->goal_position_ =  r_kinematics_->joint_radian(5,0);
-	result_[joint_id_to_name_[22]]->goal_position_ =  r_kinematics_->joint_radian(6,0);
+	result_[joint_id_to_name_[22]]->goal_position_ =  r_kinematics_->joint_radian(6,0);*/
 
 	cop_fz_msg_.data.push_back(cop_cal->cop_fz_point_x); // current cop value
 	cop_fz_msg_.data.push_back(cop_cal->cop_fz_point_y);

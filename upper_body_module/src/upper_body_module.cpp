@@ -157,11 +157,11 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	//printf("X :: %f Y:: %f Z:: %f \n", head_point_kinematics_->head_point_on_origin_x, head_point_kinematics_->head_point_on_origin_y,head_point_kinematics_->head_point_on_origin_z);
 
 	//gazebo
-	result_[joint_id_to_name_[9]] -> goal_position_  = waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z); // waist roll
-	result_[joint_id_to_name_[10]]-> goal_position_  = -(waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y); // waist roll
+	result_[joint_id_to_name_[9]] -> goal_position_  = -(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z)); // waist roll
+	result_[joint_id_to_name_[10]]-> goal_position_  =  waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y; // waist roll
 	result_[joint_id_to_name_[23]]-> goal_position_  = -head_kinematics_ -> zyx_euler_angle_z;
-	result_[joint_id_to_name_[24]]-> goal_position_  = -head_kinematics_ -> zyx_euler_angle_y;
-	result_[joint_id_to_name_[25]]-> goal_position_  = -head_kinematics_ -> zyx_euler_angle_x;
+/*	result_[joint_id_to_name_[24]]-> goal_position_  = -head_kinematics_ -> zyx_euler_angle_y;
+	result_[joint_id_to_name_[25]]-> goal_position_  = -head_kinematics_ -> zyx_euler_angle_x;*/
 
 
 
