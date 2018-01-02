@@ -6,7 +6,7 @@
  */
 
 #include "robotis_controller/robotis_controller.h"
-#include "offset_module/offset_module.
+#include "offset_module/offset_module.h"
 #include "base_module/base_module.h"
 #include "pose_module/pose_module.h"
 #include "motion_module/motion_module.h"
