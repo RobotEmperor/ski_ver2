@@ -101,6 +101,12 @@ UpperBodyModule::UpperBodyModule()
 	flag2_x = 0;
 	flag2_y = 0;
 	flag2_z = 0;
+	flag3_x = 0;
+	flag3_y = 0;
+	flag3_z = 0;
+	flag4_x = 0;
+	flag4_y = 0;
+	flag4_z = 0;
 }
 UpperBodyModule::~UpperBodyModule()
 {
@@ -116,6 +122,8 @@ void UpperBodyModule::queueThread()
 	current_waist_pose_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/current_waist_pose",100);
 	current_flag_position1_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position1",100);
 	current_flag_position2_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position2",100);
+	current_flag_position3_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position3",100);
+	current_flag_position4_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position4",100);
 
 	// subscribe topics
 	//	current_leg_pose_sub = ros_node.subscribe("/current_leg_pose", 5, &UpperBodyModule::currentLegPoseMsgCallback, this);

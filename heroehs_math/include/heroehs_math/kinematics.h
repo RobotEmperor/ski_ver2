@@ -29,6 +29,7 @@ public:
 	void FowardKnematicsCenterToSensorLeft(double joint[7]);
 	void InverseKinematics(double pX_, double pY_, double pZ_, double z_alpha_, double y_betta_, double x_kamma_);
 
+	Eigen::MatrixXd RotationZedToHead(double zed_x, double zed_y, double zed_z);
 	void TransformationOriginToWaist(double x, double y, double z, double roll, double pitch, double yaw);
 	void TransformationWaistToHead(double x, double y, double z, double roll, double pitch, double yaw);
 	void TransformateHeadPointOnOrigin(double x, double y, double z);

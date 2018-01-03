@@ -162,6 +162,15 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	flag2_x = head_point_kinematics_->head_point_on_origin_x;
 	flag2_y = head_point_kinematics_->head_point_on_origin_y;
 	flag2_z = head_point_kinematics_->head_point_on_origin_z;
+	currentFlagPositionFunction(10, -3, 0.5);
+	flag3_x = head_point_kinematics_->head_point_on_origin_x;
+	flag3_y = head_point_kinematics_->head_point_on_origin_y;
+	flag3_z = head_point_kinematics_->head_point_on_origin_z;
+	currentFlagPositionFunction(4, 3, 0.5);
+	flag4_x = head_point_kinematics_->head_point_on_origin_x;
+	flag4_y = head_point_kinematics_->head_point_on_origin_y;
+	flag4_z = head_point_kinematics_->head_point_on_origin_z;
+
 
 
 	//gazebo
@@ -181,6 +190,7 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	current_waist_pose_pub.publish(current_waist_pose_msg);
 	current_waist_pose_msg.data.clear();
 
+	//flag publisher
 	current_flag_position1_msg.x = flag1_x;
 	current_flag_position1_msg.y = flag1_y;
 	current_flag_position1_msg.z = flag1_z;
@@ -191,6 +201,15 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	current_flag_position2_msg.z = flag2_z;
 	current_flag_position2_pub.publish(current_flag_position2_msg);
 
+	current_flag_position3_msg.x = flag3_x;
+	current_flag_position3_msg.y = flag3_y;
+	current_flag_position3_msg.z = flag3_z;
+	current_flag_position3_pub.publish(current_flag_position3_msg);
+
+	current_flag_position4_msg.x = flag4_x;
+	current_flag_position4_msg.y = flag4_y;
+	current_flag_position4_msg.z = flag4_z;
+	current_flag_position4_pub.publish(current_flag_position4_msg);
 	/*	// display cop to rviz
 		cop_point_Fz_msg_.header.stamp = ros::Time();
 		cop_point_Fy_msg_.header.stamp = ros::Time();

@@ -555,6 +555,17 @@ void Kinematics::InverseKinematics(double pX_, double pY_, double pZ_, double z_
 
 	joint_radian << 0 , real_theta[1], real_theta[2] , real_theta[3] , real_theta[4] , real_theta[5] , real_theta[6];
 }
+Eigen::MatrixXd Kinematics::RotationZedToHead(double zed_x, double zed_y, double zed_z)
+{
+	Eigen::MatrixXd zed_point;
+	zed_point.resize(3,1);
+	zed_point.fill(0);
+	zed_point<< zed_x,
+			zed_y,
+			zed_z;
+	zed_point = robotis_framework::getRotationZ(-M_PI/2)*robotis_framework::getRotationX(-M_PI/2)*zed_point;
+	return zed_point;
+}
 void Kinematics::TransformationOriginToWaist(double x, double y, double z, double roll, double pitch, double yaw)
 {
 	Eigen::MatrixXd transformation;
@@ -584,13 +595,19 @@ void Kinematics::TransformateHeadPointOnOrigin(double x, double y, double z)
 	Eigen::MatrixXd temp_tf;
 	temp_tf.resize(4,1);
 	temp_tf.fill(0);
+
+	Eigen::MatrixXd point_zed;
+	point_zed.resize(3,1);
+	point_zed.fill(0);
+	point_zed = RotationZedToHead(x, y, z);
+
 	Eigen::MatrixXd point_head;
 	point_head.resize(4,1);
 	point_head.fill(0);
-	point_head<< x,
-			         y,
-							 z,
-							 1;
+	point_head<< point_zed(0,0),
+			         point_zed(1,0),
+			         point_zed(2,0),
+			         1;
 	temp_tf = tf_origin_to_waist*tf_waist_to_head*point_head;
 	head_point_on_origin_x = temp_tf(0,0);
 	head_point_on_origin_y = temp_tf(1,0);
@@ -780,8 +797,8 @@ void KinematicsArm::FowardKinematicsArm(double joint[4], std::string left_right)
 	H_arm[0](3,2) = 0;
 	H_arm[0](3,3) = 1;
 
-		P_ = H_arm[0]*H_arm[1]*H_arm[2]*H_arm[3];
-		/*
+	P_ = H_arm[0]*H_arm[1]*H_arm[2]*H_arm[3];
+	/*
   printf("forward_kinematics arm\n");
 	printf("%f  %f  %f %f \n",P_(0,0),P_(0,1),P_(0,2),P_(0,3));
 	printf("%f  %f  %f %f \n",P_(1,0),P_(1,1),P_(1,2),P_(1,3));
