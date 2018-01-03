@@ -84,7 +84,24 @@ void ArmModule::updateBalanceGyroParameter()
 	value(0,1) = gyro_yaw_d_gain;
 	gyro_yaw_function->kd_ = gain_yaw_d_adjustment -> fifth_order_traj_gen_one_value(value);
 }
-
+double ArmModule::limitCheckArmAngle(double calculated_value, double max, double min)
+{
+	if(calculated_value > (max*DEGREE2RADIAN))
+		return (max*DEGREE2RADIAN);
+	else if (calculated_value < (min*DEGREE2RADIAN))
+		return (min*DEGREE2RADIAN);
+	else
+		return calculated_value;
+}
+double ArmModule::limitCheckArmPosition(double calculated_value, double max, double min)
+{
+	if(calculated_value > max)
+		return max;
+	else if (calculated_value < min)
+		return min;
+	else
+		return calculated_value;
+}
 void ArmModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
 		std::map<std::string, double> sensors)
 {
@@ -122,6 +139,8 @@ void ArmModule::process(std::map<std::string, robotis_framework::Dynamixel *> dx
 	else
 	{
 		ROS_INFO("Arm Module run !!!!");
+		l_arm_end_point_(1,1)=limitCheckArmPosition(l_arm_end_point_(1,1),  0.35,  0.07);
+		r_arm_end_point_(1,1)=limitCheckArmPosition(r_arm_end_point_(1,1), -0.07, -0.35);
 
 		result_end_l_arm_ = end_to_rad_l_arm_ -> cal_end_point_to_rad(l_arm_end_point_);
 		result_end_r_arm_ = end_to_rad_r_arm_ -> cal_end_point_to_rad(r_arm_end_point_);
@@ -133,18 +152,18 @@ void ArmModule::process(std::map<std::string, robotis_framework::Dynamixel *> dx
 	l_arm_kinematics_ -> InverseKinematicsArm(result_end_l_arm_(0,0), result_end_l_arm_(1,0), result_end_l_arm_(2,0));
 	r_arm_kinematics_ -> InverseKinematicsArm(result_end_r_arm_(0,0), result_end_r_arm_(1,0), result_end_r_arm_(2,0));
 
-	gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);
-	gyro_roll_function->PID_calculate(0,tf_current_gyro_x);
+	gyro_yaw_function  ->PID_calculate(0,tf_current_gyro_z);
+	gyro_roll_function ->PID_calculate(0,tf_current_gyro_x);
 	gyro_pitch_function->PID_calculate(0,tf_current_gyro_y);
 
-	result_[joint_id_to_name_[1]]->goal_position_ =  -(l_arm_kinematics_->joint_radian(1,0) + gyro_pitch_function->PID_calculate(0,tf_current_gyro_y));// + gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);
-	result_[joint_id_to_name_[3]]->goal_position_ =  -(l_arm_kinematics_->joint_radian(2,0) + gyro_roll_function->PID_calculate(0,tf_current_gyro_x)); // - gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);
-	result_[joint_id_to_name_[5]]->goal_position_ =  l_arm_kinematics_->joint_radian(3,0);
+	result_[joint_id_to_name_[1]]->goal_position_ =  -l_arm_kinematics_->joint_radian(1,0) + gyro_pitch_function->PID_calculate(0,tf_current_gyro_y) - gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);// + gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);
+	result_[joint_id_to_name_[3]]->goal_position_ =  limitCheckArmAngle(-l_arm_kinematics_->joint_radian(2,0) - gyro_roll_function->PID_calculate(0,tf_current_gyro_x) - fabs(gyro_yaw_function->PID_calculate(0,tf_current_gyro_z)), -5, -140); // - gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);
+	result_[joint_id_to_name_[5]]->goal_position_ =  l_arm_kinematics_->joint_radian(3,0) - gyro_pitch_function->PID_calculate(0,tf_current_gyro_y) + gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);
 
 
-	result_[joint_id_to_name_[2]]->goal_position_ =  r_arm_kinematics_->joint_radian(1,0) + gyro_pitch_function->PID_calculate(0,tf_current_gyro_y);
-	result_[joint_id_to_name_[4]]->goal_position_ = -(r_arm_kinematics_->joint_radian(2,0) - gyro_roll_function->PID_calculate(0,tf_current_gyro_x));
-	result_[joint_id_to_name_[6]]->goal_position_ = -r_arm_kinematics_->joint_radian(3,0);
+	result_[joint_id_to_name_[2]]->goal_position_ =  r_arm_kinematics_->joint_radian(1,0) - gyro_pitch_function->PID_calculate(0,tf_current_gyro_y) - gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);
+	result_[joint_id_to_name_[4]]->goal_position_ =  limitCheckArmAngle(-r_arm_kinematics_->joint_radian(2,0) - gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + fabs(gyro_yaw_function->PID_calculate(0,tf_current_gyro_z)), 140, 5);
+	result_[joint_id_to_name_[6]]->goal_position_ = -r_arm_kinematics_->joint_radian(3,0) + gyro_pitch_function->PID_calculate(0,tf_current_gyro_y) + gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);
 }
 void ArmModule::stop()
 {

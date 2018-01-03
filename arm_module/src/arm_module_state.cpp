@@ -81,9 +81,9 @@ ArmModule::ArmModule()
 	tf_current_gyro_x = 0;
 	tf_current_gyro_y = 0;
 	tf_current_gyro_z = 0;
-	gyro_roll_function      = new control_function::PID_function(0.008,5*DEGREE2RADIAN,-5*DEGREE2RADIAN,0,0,0);
-	gyro_pitch_function     = new control_function::PID_function(0.008,5*DEGREE2RADIAN,-5*DEGREE2RADIAN,0,0,0);
-	gyro_yaw_function       = new control_function::PID_function(0.008,5*DEGREE2RADIAN,-5*DEGREE2RADIAN,0,0,0);
+	gyro_roll_function      = new control_function::PID_function(0.008,15*DEGREE2RADIAN,-15*DEGREE2RADIAN,0,0,0);
+	gyro_pitch_function     = new control_function::PID_function(0.008,15*DEGREE2RADIAN,-15*DEGREE2RADIAN,0,0,0);
+	gyro_yaw_function       = new control_function::PID_function(0.008,15*DEGREE2RADIAN,-15*DEGREE2RADIAN,0,0,0);
 	gain_roll_p_adjustment  = new heroehs_math::FifthOrderTrajectory;
 	gain_roll_d_adjustment  = new heroehs_math::FifthOrderTrajectory;
 	gain_pitch_p_adjustment = new heroehs_math::FifthOrderTrajectory;
@@ -150,7 +150,7 @@ void ArmModule::gyroRotationTransformation(double gyro_z, double gyro_y, double 
 	tf_gyro_value(0,0) =  gyro_x;
 	tf_gyro_value(1,0) =  gyro_y;
 	tf_gyro_value(2,0) =  gyro_z;
-	tf_gyro_value = (robotis_framework::getRotationZ(M_PI/2)*robotis_framework::getRotationY(-M_PI))*tf_gyro_value;
+	tf_gyro_value = (robotis_framework::getRotationZ(-M_PI/2)*robotis_framework::getRotationY(-M_PI))*tf_gyro_value;
 	tf_current_gyro_x = tf_gyro_value(0,0);
 	tf_current_gyro_y = tf_gyro_value(1,0);
 	tf_current_gyro_z = tf_gyro_value(2,0);

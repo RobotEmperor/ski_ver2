@@ -25,11 +25,8 @@ UpperBodyModule::UpperBodyModule()
 	result_["waist_roll"] = new robotis_framework::DynamixelState(); // joint 10
 
 	result_["head_yaw"]   = new robotis_framework::DynamixelState(); // joint 23
-
-/*
 	result_["head_pitch"]   = new robotis_framework::DynamixelState(); // joint 24
 	result_["head_roll"]   = new robotis_framework::DynamixelState(); // joint 25
-*/
 
 	///////////////////////////
 	//center change waist
@@ -164,7 +161,7 @@ void UpperBodyModule::gyroRotationTransformation(double gyro_z, double gyro_y, d
 	tf_gyro_value(1,0) =  gyro_y;
 	tf_gyro_value(2,0) =  gyro_z;
 
-	tf_gyro_value = (robotis_framework::getRotationZ(M_PI/2)*robotis_framework::getRotationY(-M_PI))*tf_gyro_value;
+	tf_gyro_value = (robotis_framework::getRotationZ(-M_PI/2)*robotis_framework::getRotationY(-M_PI))*tf_gyro_value;
 	tf_current_gyro_x = tf_gyro_value(0,0);
 	tf_current_gyro_y = tf_gyro_value(1,0);
 	tf_current_gyro_z = tf_gyro_value(2,0);

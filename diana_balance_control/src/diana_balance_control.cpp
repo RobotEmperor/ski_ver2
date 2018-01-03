@@ -143,13 +143,13 @@ void BalanceControlUsingPDController::sumBalanceResults()
   pose_right_foot_adjustment_.coeffRef(1) = 0;
   pose_right_foot_adjustment_.coeffRef(2) = 0;
   pose_right_foot_adjustment_.coeffRef(3) = foot_roll_adjustment_by_gyro_roll_;
-  pose_right_foot_adjustment_.coeffRef(4) = -foot_pitch_adjustment_by_gyro_pitch_;
+  pose_right_foot_adjustment_.coeffRef(4) = foot_pitch_adjustment_by_gyro_pitch_;
 
   pose_left_foot_adjustment_.coeffRef(0) = 0;
   pose_left_foot_adjustment_.coeffRef(1) = 0;
   pose_left_foot_adjustment_.coeffRef(2) = 0;
   pose_left_foot_adjustment_.coeffRef(3) = foot_roll_adjustment_by_gyro_roll_;
-  pose_left_foot_adjustment_.coeffRef(4) = -foot_pitch_adjustment_by_gyro_pitch_;
+  pose_left_foot_adjustment_.coeffRef(4) = foot_pitch_adjustment_by_gyro_pitch_;
 }
 
 void BalanceControlUsingPDController::checkBalanceLimit()

@@ -66,9 +66,6 @@ public:
 
 	double traj_time_test;
 
-
-
-
 	// sensor data & balance on off
 	ros::Subscriber desired_pose_arm_sub_;
 	ros::Subscriber current_waist_pose_sub_;
@@ -77,14 +74,12 @@ public:
 	ros::Subscriber balance_param_arm_sub;
 
 
-
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
 	void balanceParameterArmMsgCallback(const diana_msgs::BalanceParamArm::ConstPtr& msg);
 
 	void desiredPoseArmMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
 	void currentWaistPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
 
-	//void ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg);
 
 private:
 	void queueThread();
@@ -119,8 +114,10 @@ private:
 	double waist_roll_rad_;
 	double l_arm_desired_point_x_, l_arm_desired_point_y_, l_arm_desired_point_z_;
 	double r_arm_desired_point_x_, r_arm_desired_point_y_, r_arm_desired_point_z_;
+	double limitCheckArmPosition(double calculated_value, double max, double min);
 
   // gyro compensation
+	double limitCheckArmAngle(double calculated_value, double max, double min);
 	void gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x);
 	void updateBalanceGyroParameter();
 	double currentGyroX,currentGyroY,currentGyroZ;

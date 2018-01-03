@@ -25,7 +25,7 @@ MotionModule::MotionModule()
 	// Dynamixel initialize ////
 
 
-/*
+
 	result_["l_hip_pitch"] = new robotis_framework::DynamixelState();  // joint 11
 	result_["l_hip_roll"]  = new robotis_framework::DynamixelState();  // joint 13
 
@@ -40,11 +40,11 @@ MotionModule::MotionModule()
 	result_["r_knee_pitch"] = new robotis_framework::DynamixelState();  // joint 18
 	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
 	result_["r_ankle_roll"]  = new robotis_framework::DynamixelState();  // joint 22
-*/
+
 
 	// test
-		result_["l_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 19
-		result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
+	//	result_["l_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 19
+	//	result_["r_ankle_pitch"] = new robotis_framework::DynamixelState();  // joint 20
 
 	///////////////////////////
 	l_kinematics_ = new heroehs_math::Kinematics;
@@ -205,7 +205,7 @@ void MotionModule::gyroRotationTransformation(double gyro_z, double gyro_y, doub
 	tf_gyro_value(1,0) =  gyro_y;
 	tf_gyro_value(2,0) =  gyro_z;
 
-	tf_gyro_value = (robotis_framework::getRotationZ(M_PI/2)*robotis_framework::getRotationY(-M_PI))*tf_gyro_value;
+	tf_gyro_value = (robotis_framework::getRotationZ(-M_PI/2)*robotis_framework::getRotationY(-M_PI))*tf_gyro_value;
 	tf_current_gyro_x = tf_gyro_value(0,0);
 	tf_current_gyro_y = tf_gyro_value(1,0);
 	tf_current_gyro_z = tf_gyro_value(2,0);
