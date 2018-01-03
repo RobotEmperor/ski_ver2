@@ -65,15 +65,12 @@ public:
 	double traj_time_test;
 	// publisher
 	ros::Publisher  current_waist_pose_pub;
-/*	ros::Publisher cop_point_Fz_pub;
-	ros::Publisher cop_point_Fy_pub;
-	ros::Publisher cop_point_Fx_pub;*/
+	ros::Publisher  current_flag_position1_pub;
+	ros::Publisher  current_flag_position2_pub;
 
 	// Subscriber
 	ros::Subscriber head_test;
 	ros::Subscriber waist_test;
-	//ros::Subscriber current_leg_pose_sub;
-	//ros::Subscriber get_ft_data_sub_;
 	ros::Subscriber get_imu_data_sub_;
 	ros::Subscriber center_change_msg_sub;
 	ros::Subscriber balance_param_waist_sub;
@@ -84,21 +81,19 @@ public:
 
 	//void currentLegPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
 	void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg);
-
 	void desiredPoseWaistMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
 	void desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
 	//sensor
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
-	//void ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg);
 	//pid gain value for gyro
 	void balanceParameterWaistMsgCallback(const diana_msgs::BalanceParamWaist::ConstPtr& msg);
 
 	// current cop and reference cop from leg module
 	void copFzMsgCallBack(const std_msgs::Float64MultiArray::ConstPtr& msg);
 
-//	geometry_msgs::PointStamped cop_point_Fz_msg_;
-//	geometry_msgs::PointStamped cop_point_Fy_msg_;
-//	geometry_msgs::PointStamped cop_point_Fx_msg_;
+	//flag position function
+	void currentFlagPositionFunction(double x, double y, double z);
+
 
 private:
 	void queueThread();
@@ -165,6 +160,12 @@ private:
 	double temp_change_value_center;
 	std::string temp_turn_type;
 	std::string temp_change_type;
+
+	//flag position
+	double flag1_x, flag1_y, flag1_z;
+	double flag2_x, flag2_y, flag2_z;
+	geometry_msgs::Vector3 current_flag_position1_msg;
+	geometry_msgs::Vector3 current_flag_position2_msg;
 
 
 };

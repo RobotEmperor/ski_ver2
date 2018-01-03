@@ -21,6 +21,7 @@ BaseModule::BaseModule()
 
 
 
+
 	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["r_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 2
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
@@ -50,15 +51,18 @@ BaseModule::BaseModule()
 	result_["head_pitch"]       = new robotis_framework::DynamixelState();  // joint 24
 	result_["head_roll"]        = new robotis_framework::DynamixelState();  // joint 25
 
+
 	// TEST
-/*
-	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
+
+	/*result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
 	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5
+
 
 	result_["r_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 2
 	result_["r_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 4
 	result_["r_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 6
+
 
 	result_["waist_yaw"]        = new robotis_framework::DynamixelState();  // joint 9
 	result_["waist_roll"]       = new robotis_framework::DynamixelState();  // joint 10
@@ -66,8 +70,8 @@ BaseModule::BaseModule()
 	result_["head_yaw"]         = new robotis_framework::DynamixelState();  // joint 23
 
 	result_["l_ankle_pitch"]    = new robotis_framework::DynamixelState();  // joint 19
-	result_["r_ankle_pitch"]     = new robotis_framework::DynamixelState(); // joint 20
-*/
+	result_["r_ankle_pitch"]     = new robotis_framework::DynamixelState(); // joint 20*/
+
 	new_count_ = 1;
 	///////////////////////////
 
@@ -201,7 +205,7 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		// 허리 (9 , 10), 다리 (11 ~ 22), 머리 (23 ~ 25) 다이나믹셀 초기화
 			for(int id=9 ; id<26 ; id++)
 		{
-			if(id == 9 || id == 11 || id == 17 || id == 19 || id == 23 || id == 24 || id == 25) // 방향 반대인 다이나믹셀
+			if(id == 9 || id == 10 || id == 11 || id == 17 || id == 19 || id == 23 || id == 24 || id == 25) // 방향 반대인 다이나믹셀
 			{
 				result_[joint_id_to_name_[id]]->goal_position_ = - motion_trajectory[id]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(id,0),
 						base_module_state->joint_ini_pose_goal(id,0),0,0,0,0,0,base_module_state->mov_time_state);
@@ -240,7 +244,7 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		}
 
 		//test
-		/*result_[joint_id_to_name_[10]]->goal_position_ =  motion_trajectory[10]->fifth_order_traj_gen(base_module_state->joint_ini_pose_state(10,0),
+		/*result_[joint_id_to_name_[10]]->goal_position_ =  -motion_trajectory[10]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(10,0),
 				base_module_state->joint_ini_pose_goal(10,0),0,0,0,0,0,base_module_state->mov_time_state);
 		result_[joint_id_to_name_[9]]->goal_position_ =  -motion_trajectory[9]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(9,0),
 				base_module_state->joint_ini_pose_goal(9,0),0,0,0,0,0,base_module_state->mov_time_state);
@@ -258,14 +262,8 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		result_[joint_id_to_name_[3]]->goal_position_ = - motion_trajectory[3]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(3,0),
 				base_module_state->joint_ini_pose_goal(3,0),0,0,0,0,0,base_module_state->mov_time_state);
 		result_[joint_id_to_name_[5]]->goal_position_ =  motion_trajectory[5]->fifth_order_traj_gen(base_module_state->joint_ini_pose_state(5,0),
-				base_module_state->joint_ini_pose_goal(5,0),0,0,0,0,0,base_module_state->mov_time_state);
+				base_module_state->joint_ini_pose_goal(5,0),0,0,0,0,0,base_module_state->mov_time_state);*/
 
-		result_[joint_id_to_name_[2]]->goal_position_ =  motion_trajectory[2]->fifth_order_traj_gen(base_module_state->joint_ini_pose_state(2,0),
-				base_module_state->joint_ini_pose_goal(2,0),0,0,0,0,0,base_module_state->mov_time_state);
-		result_[joint_id_to_name_[4]]->goal_position_ = - motion_trajectory[4]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(4,0),
-				base_module_state->joint_ini_pose_goal(4,0),0,0,0,0,0,base_module_state->mov_time_state);
-		result_[joint_id_to_name_[6]]->goal_position_ = - motion_trajectory[6]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(6,0),
-				base_module_state->joint_ini_pose_goal(6,0),0,0,0,0,0,base_module_state->mov_time_state);*/
 
 		base_module_state->is_moving_state = motion_trajectory[10]->is_moving_traj;// trajectory end
 	}

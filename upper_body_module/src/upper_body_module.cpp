@@ -80,6 +80,19 @@ double UpperBodyModule::limitCheckHead(double calculated_value, double max, doub
 	else
 		return calculated_value;
 }
+void UpperBodyModule::currentFlagPositionFunction(double x, double y, double z)
+{
+	head_point_kinematics_->TransformationOriginToWaist(0,0,0.2,
+			waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y,
+			0,
+			waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z));
+	head_point_kinematics_->TransformationWaistToHead(0,0,0.352,
+			head_kinematics_ -> zyx_euler_angle_x,
+			head_kinematics_ -> zyx_euler_angle_y,
+			head_kinematics_ -> zyx_euler_angle_z);
+
+	head_point_kinematics_->TransformateHeadPointOnOrigin(x,y,z);
+}
 bool UpperBodyModule::isRunning()
 {
 	return running_;
@@ -141,20 +154,19 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	cop_compensation_waist->centerOfPressureCompensationFz(current_cop_fz_x, current_cop_fz_y);
 
 	// head point get
-	head_point_kinematics_->TransformationOriginToWaist(0,0,0.2,
-			waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y,
-			0,
-			waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z));
-	head_point_kinematics_->TransformationWaistToHead(0,0,0.352,
-			head_kinematics_ -> zyx_euler_angle_x,
-			head_kinematics_ -> zyx_euler_angle_y,
-			head_kinematics_ -> zyx_euler_angle_z);
+	currentFlagPositionFunction(10, 0, 0.5);// 천유 좌표를 넣어야함
+	flag1_x = head_point_kinematics_->head_point_on_origin_x;
+	flag1_y = head_point_kinematics_->head_point_on_origin_y;
+	flag1_z = head_point_kinematics_->head_point_on_origin_z;
+	currentFlagPositionFunction(10, 3, 0.5);
+	flag2_x = head_point_kinematics_->head_point_on_origin_x;
+	flag2_y = head_point_kinematics_->head_point_on_origin_y;
+	flag2_z = head_point_kinematics_->head_point_on_origin_z;
 
-	head_point_kinematics_->TransformateHeadPointOnOrigin(0,0,0);
 
 	//gazebo
 	result_[joint_id_to_name_[9]] -> goal_position_  = -(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z)); // waist roll
-	result_[joint_id_to_name_[10]]-> goal_position_  =  waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y; // waist roll
+	result_[joint_id_to_name_[10]]-> goal_position_  = -(waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y); // waist roll
 	result_[joint_id_to_name_[23]]-> goal_position_  = -head_kinematics_ -> zyx_euler_angle_z;
 	result_[joint_id_to_name_[24]]-> goal_position_  = -head_kinematics_ -> zyx_euler_angle_y;
 	result_[joint_id_to_name_[25]]-> goal_position_  = -head_kinematics_ -> zyx_euler_angle_x;
@@ -168,6 +180,16 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	current_waist_pose_msg.data.push_back(temp_waist_roll_rad);
 	current_waist_pose_pub.publish(current_waist_pose_msg);
 	current_waist_pose_msg.data.clear();
+
+	current_flag_position1_msg.x = flag1_x;
+	current_flag_position1_msg.y = flag1_y;
+	current_flag_position1_msg.z = flag1_z;
+	current_flag_position1_pub.publish(current_flag_position1_msg);
+
+	current_flag_position2_msg.x = flag2_x;
+	current_flag_position2_msg.y = flag2_y;
+	current_flag_position2_msg.z = flag2_z;
+	current_flag_position2_pub.publish(current_flag_position2_msg);
 
 	/*	// display cop to rviz
 		cop_point_Fz_msg_.header.stamp = ros::Time();

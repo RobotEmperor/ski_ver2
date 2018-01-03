@@ -94,6 +94,13 @@ UpperBodyModule::UpperBodyModule()
 
 	copFz_p_gain = 0;
 	copFz_d_gain = 0;
+
+	flag1_x = 0;
+	flag1_y = 0;
+	flag1_z = 0;
+	flag2_x = 0;
+	flag2_y = 0;
+	flag2_z = 0;
 }
 UpperBodyModule::~UpperBodyModule()
 {
@@ -107,7 +114,8 @@ void UpperBodyModule::queueThread()
 	ros_node.setCallbackQueue(&callback_queue);
 	// publish topics
 	current_waist_pose_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/current_waist_pose",100);
-
+	current_flag_position1_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position1",100);
+	current_flag_position2_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position2",100);
 
 	// subscribe topics
 	//	current_leg_pose_sub = ros_node.subscribe("/current_leg_pose", 5, &UpperBodyModule::currentLegPoseMsgCallback, this);
@@ -187,15 +195,6 @@ void UpperBodyModule::copFzMsgCallBack(const std_msgs::Float64MultiArray::ConstP
 	reference_cop_fz_x = msg->data[2];
 	reference_cop_fz_y = msg->data[3];
 }
-// leg state ///////////////////////////////////
-/*void UpperBodyModule::currentLegPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
-{
-	for(int joint_num = 1; joint_num<7; joint_num++)
-	{
-		l_leg_real_joint(joint_num, 0) = msg->data[joint_num - 1];
-		r_leg_real_joint(joint_num, 0) = msg->data[joint_num + 5];
-	}
-}*/
 //////////////////////////////////////////////////////////////////////
 // center change msg ///////////////////////////////////
 void UpperBodyModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg) // GUI 에서 motion_num topic을 sub 받아 실행 모션 번호 디텍트
