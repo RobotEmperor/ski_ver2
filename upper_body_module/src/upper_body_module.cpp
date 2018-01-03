@@ -92,11 +92,8 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 		return;
 	}
 	updateBalanceGyroParameter();
-	//// read current position ////
 	if(new_count_ == 1)
 	{
-		//is_moving_waist_ = false;
-		//is_moving_head_ = false;
 		new_count_ ++;
 		for (std::map<std::string, robotis_framework::Dynamixel*>::iterator state_iter = dxls.begin();
 				state_iter != dxls.end(); state_iter++)
@@ -145,16 +142,15 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
 	// head point get
 	head_point_kinematics_->TransformationOriginToWaist(0,0,0.2,
-			waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z),
+			waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y,
 			0,
-			waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y);
+			waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z));
 	head_point_kinematics_->TransformationWaistToHead(0,0,0.352,
 			head_kinematics_ -> zyx_euler_angle_x,
 			head_kinematics_ -> zyx_euler_angle_y,
 			head_kinematics_ -> zyx_euler_angle_z);
 
 	head_point_kinematics_->TransformateHeadPointOnOrigin(0,0,0);
-	//printf("X :: %f Y:: %f Z:: %f \n", head_point_kinematics_->head_point_on_origin_x, head_point_kinematics_->head_point_on_origin_y,head_point_kinematics_->head_point_on_origin_z);
 
 	//gazebo
 	result_[joint_id_to_name_[9]] -> goal_position_  = -(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z)); // waist roll
