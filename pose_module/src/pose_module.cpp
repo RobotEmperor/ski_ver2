@@ -64,6 +64,7 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 	head_end_point_.fill(0);
 	result_end_head_.resize(6,1);
 	result_end_head_.fill(0);
+
 	// arm
 	// left //
 	l_arm_end_point_.resize(6,8);

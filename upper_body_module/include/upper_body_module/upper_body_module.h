@@ -142,8 +142,11 @@ private:
 	// gyro
 	void gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x);
 	void updateBalanceGyroParameter();
+	void updateHeadBalanceControl();
 	double currentGyroX,currentGyroY,currentGyroZ;
+	double currentGyroOrientationX,currentGyroOrientationY,currentGyroOrientationZ;
 	double tf_current_gyro_x, tf_current_gyro_y, tf_current_gyro_z;
+	double tf_current_gyro_orientation_x, tf_current_gyro_orientation_y, tf_current_gyro_orientation_z;
 	heroehs_math::FifthOrderTrajectory *gain_roll_p_adjustment;
 	heroehs_math::FifthOrderTrajectory *gain_roll_d_adjustment;
 	heroehs_math::FifthOrderTrajectory *gain_yaw_p_adjustment;
@@ -155,6 +158,7 @@ private:
 	double gyro_roll_d_gain;
 	double gyro_yaw_p_gain;
 	double gyro_yaw_d_gain;
+	Eigen::MatrixXd tf_gyro_value;
 
 
 	//center change lib

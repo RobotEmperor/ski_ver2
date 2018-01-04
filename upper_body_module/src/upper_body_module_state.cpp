@@ -68,9 +68,17 @@ UpperBodyModule::UpperBodyModule()
 	currentGyroX = 0;
 	currentGyroY = 0;
 	currentGyroZ = 0;
+	currentGyroOrientationX = 0;
+	currentGyroOrientationY = 0;
+	currentGyroOrientationZ = 0;
 	tf_current_gyro_x = 0;
 	tf_current_gyro_y = 0;
 	tf_current_gyro_z = 0;
+	tf_current_gyro_orientation_x = 0;
+	tf_current_gyro_orientation_y = 0;
+	tf_current_gyro_orientation_z = 0;
+	tf_gyro_value.resize(3,1);
+	tf_gyro_value.fill(0);
 	gyro_roll_function = new control_function::PID_function(0.008,5*DEGREE2RADIAN,-5*DEGREE2RADIAN,0,0,0);
 	gyro_yaw_function  = new control_function::PID_function(0.008,5*DEGREE2RADIAN,-5*DEGREE2RADIAN,0,0,0);
 	gain_roll_p_adjustment = new heroehs_math::FifthOrderTrajectory;
@@ -166,11 +174,20 @@ void UpperBodyModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) 
 	currentGyroX = (double) msg->angular_velocity.x;
 	currentGyroY = (double) msg->angular_velocity.y;
 	currentGyroZ = (double) msg->angular_velocity.z;
+	currentGyroOrientationX = (double) msg->orientation.x;
+	currentGyroOrientationY = (double) msg->orientation.y;
+	currentGyroOrientationZ = (double) msg->orientation.z;
 	gyroRotationTransformation(currentGyroZ, currentGyroY, currentGyroX);
+	tf_current_gyro_x = tf_gyro_value(0,0);
+	tf_current_gyro_y = tf_gyro_value(1,0);
+	tf_current_gyro_z = tf_gyro_value(2,0);
+	gyroRotationTransformation(currentGyroOrientationZ, currentGyroOrientationY, currentGyroOrientationX);
+	tf_current_gyro_orientation_x = tf_gyro_value(0,0);
+	tf_current_gyro_orientation_y = tf_gyro_value(1,0);
+	tf_current_gyro_orientation_z = tf_gyro_value(2,0);
 }
 void UpperBodyModule::gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x)
 {
-	Eigen::MatrixXd tf_gyro_value;
 	tf_gyro_value.resize(3,1);
 	tf_gyro_value.fill(0);
 	tf_gyro_value(0,0) =  gyro_x;
@@ -178,9 +195,6 @@ void UpperBodyModule::gyroRotationTransformation(double gyro_z, double gyro_y, d
 	tf_gyro_value(2,0) =  gyro_z;
 
 	tf_gyro_value = (robotis_framework::getRotationZ(-M_PI/2)*robotis_framework::getRotationY(-M_PI))*tf_gyro_value;
-	tf_current_gyro_x = tf_gyro_value(0,0);
-	tf_current_gyro_y = tf_gyro_value(1,0);
-	tf_current_gyro_z = tf_gyro_value(2,0);
 }
 //////////////////////////////////////////////////////////////////////
 //balance message for gyro///////////////////////////////////
