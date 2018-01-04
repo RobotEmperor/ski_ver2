@@ -123,6 +123,8 @@ UpperBodyModule::UpperBodyModule()
 	temp_pre_roll = 0;
 	temp_pre_pitch = 0;
 	temp_pre_yaw = 0;
+
+	head_enable = false;
 }
 UpperBodyModule::~UpperBodyModule()
 {
@@ -148,6 +150,7 @@ void UpperBodyModule::queueThread()
 
 	center_change_msg_sub = ros_node.subscribe("/diana/center_change", 5, &UpperBodyModule::desiredCenterChangeMsgCallback, this);
 	balance_param_waist_sub = ros_node.subscribe("/diana/balance_parameter_waist", 5, &UpperBodyModule::balanceParameterWaistMsgCallback, this);
+	head_balance_sub = ros_node.subscribe("/head_balance", 5, &UpperBodyModule::headBalanceMsgCallback, this);
 
 	//current cop and reference cop from leg module
 	cop_fz_sub = ros_node.subscribe("/cop_fz", 5, &UpperBodyModule::copFzMsgCallBack, this);
@@ -215,6 +218,10 @@ void UpperBodyModule::balanceParameterWaistMsgCallback(const diana_msgs::Balance
 	gyro_yaw_d_gain   = msg->waist_yaw_gyro_d_gain;
 	copFz_p_gain = msg->waist_copFz_p_gain;
 	copFz_d_gain = msg->waist_copFz_d_gain;
+}
+void UpperBodyModule::headBalanceMsgCallback(const std_msgs::Bool::ConstPtr& msg)
+{
+	head_enable = msg->data;
 }
 //////////////////////////////////////////////////////////////////////
 //current cop and reference cop from leg module

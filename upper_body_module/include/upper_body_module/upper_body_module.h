@@ -33,6 +33,7 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Bool.h>
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/PointStamped.h>
 #include <sensor_msgs/Imu.h>
@@ -76,6 +77,7 @@ public:
 	ros::Subscriber get_imu_data_sub_;
 	ros::Subscriber center_change_msg_sub;
 	ros::Subscriber balance_param_waist_sub;
+	ros::Subscriber head_balance_sub;
 
 	//current cop and reference cop from leg module
 	ros::Subscriber cop_fz_sub;
@@ -89,6 +91,7 @@ public:
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
 	//pid gain value for gyro
 	void balanceParameterWaistMsgCallback(const diana_msgs::BalanceParamWaist::ConstPtr& msg);
+	void headBalanceMsgCallback(const std_msgs::Bool::ConstPtr& msg);
 
 	// current cop and reference cop from leg module
 	void copFzMsgCallBack(const std_msgs::Float64MultiArray::ConstPtr& msg);
@@ -180,6 +183,10 @@ private:
 	control_function::Filter *filter_head;
 	double temp_head_roll, temp_head_pitch, temp_head_yaw;
 	double temp_pre_roll, temp_pre_pitch, temp_pre_yaw;
+
+	// enable adjustment
+	//heroehs_math::FifthOrderTrajectory *head_balance_enable;
+	bool head_enable;
 
 
 };
