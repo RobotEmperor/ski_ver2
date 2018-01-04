@@ -142,7 +142,6 @@ private:
 	// gyro
 	void gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x);
 	void updateBalanceGyroParameter();
-	void updateHeadBalanceControl();
 	double currentGyroX,currentGyroY,currentGyroZ;
 	double currentGyroOrientationX,currentGyroOrientationY,currentGyroOrientationZ;
 	double tf_current_gyro_x, tf_current_gyro_y, tf_current_gyro_z;
@@ -176,6 +175,11 @@ private:
 	geometry_msgs::Vector3 current_flag_position2_msg;
 	geometry_msgs::Vector3 current_flag_position3_msg;
 	geometry_msgs::Vector3 current_flag_position4_msg;
+
+	//head low pass filter variables
+	control_function::Filter *filter_head;
+	double temp_head_roll, temp_head_pitch, temp_head_yaw;
+	double temp_pre_roll, temp_pre_pitch, temp_pre_yaw;
 
 
 };

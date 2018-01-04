@@ -30,6 +30,14 @@ private:
 	double pre_error_;
 	double integral_;
 };
+
+class Filter
+{
+public:
+	Filter();
+	~Filter();
+	double lowPassFilter(double value, double pre_value, double weight_factor);
+};
 }
 
 #endif /* SKI_VER2_DIANA_BALANCE_CONTROL_INCLUDE_DIANA_BALANCE_CONTROL_CONTROL_FUNCTION_H_ */

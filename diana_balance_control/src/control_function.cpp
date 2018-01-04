@@ -58,3 +58,15 @@ PID_function::~PID_function()
 
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
+Filter::Filter()
+{
+
+}
+Filter::~Filter()
+{
+
+}
+double Filter::lowPassFilter(double value, double pre_value, double weight_factor)
+{
+	return weight_factor*pre_value + (1-weight_factor)*value;
+}

@@ -115,6 +115,14 @@ UpperBodyModule::UpperBodyModule()
 	flag4_x = 0;
 	flag4_y = 0;
 	flag4_z = 0;
+
+	filter_head = new control_function::Filter;
+	temp_head_roll  = 0;
+	temp_head_pitch = 0;
+	temp_head_yaw   = 0;
+	temp_pre_roll = 0;
+	temp_pre_pitch = 0;
+	temp_pre_yaw = 0;
 }
 UpperBodyModule::~UpperBodyModule()
 {
