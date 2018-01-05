@@ -27,6 +27,11 @@ add_message_files(
   CenterChange.msg
   BalanceParamWaist.msg
   BalanceParamArm.msg
+  RegionOfInterestArray.msg
+  FlagData.msg
+  FlagDataArray.msg
+  GateData.msg
+  GateDataArray.msg
 )
 
 generate_messages(

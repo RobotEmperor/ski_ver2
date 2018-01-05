@@ -1,0 +1,5 @@
+std_msgs/ColorRGBA color
+sensor_msgs/RegionOfInterest area
+geometry_msgs/Vector3 position
+float64 distance
+float64 distance_lidar

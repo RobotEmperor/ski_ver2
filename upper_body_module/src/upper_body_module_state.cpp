@@ -144,9 +144,8 @@ void UpperBodyModule::queueThread()
 	current_flag_position4_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position4",100);
 
 	// subscribe topics
-	//	current_leg_pose_sub = ros_node.subscribe("/current_leg_pose", 5, &UpperBodyModule::currentLegPoseMsgCallback, this);
+	flag_position_get_sub = ros_node.subscribe("/gate_watcher/flag_data", 100, &UpperBodyModule::flagPositionGetMsgCallback, this);
 	get_imu_data_sub_ = ros_node.subscribe("/imu/data", 100, &UpperBodyModule::imuDataMsgCallback, this);
-	//	get_ft_data_sub_ = ros_node.subscribe("/diana/force_torque_data", 100, &UpperBodyModule::ftDataMsgCallback, this);
 
 	center_change_msg_sub = ros_node.subscribe("/diana/center_change", 5, &UpperBodyModule::desiredCenterChangeMsgCallback, this);
 	balance_param_waist_sub = ros_node.subscribe("/diana/balance_parameter_waist", 5, &UpperBodyModule::balanceParameterWaistMsgCallback, this);
@@ -158,6 +157,8 @@ void UpperBodyModule::queueThread()
 	// test desired pose
 	head_test = ros_node.subscribe("/desired_pose_head", 5, &UpperBodyModule::desiredPoseHeadMsgCallbackTEST, this);
 	waist_test = ros_node.subscribe("/desired_pose_waist", 5, &UpperBodyModule::desiredPoseWaistMsgCallbackTEST, this);
+
+
 
 	ros::WallDuration duration(control_cycle_msec_ / 1000.0);
 	while(ros_node.ok())
@@ -179,6 +180,36 @@ void UpperBodyModule::desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64Mult
 	is_moving_head_ = true;
 }
 /////////////////////////////////////////////////////
+// flag position data get////////////////////////////
+void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray& msg)
+{
+	// head point get
+	if(msg.length >= 2)
+	{
+		currentFlagPositionFunction(msg.data[0].position.x, msg.data[0].position.y, msg.data[0].position.z);// 천유 좌표를 넣어야함
+		flag1_x = head_point_kinematics_->head_point_on_origin_x*0.01;
+		flag1_y = head_point_kinematics_->head_point_on_origin_y*0.01;
+		flag1_z = head_point_kinematics_->head_point_on_origin_z*0.01;
+		currentFlagPositionFunction(msg.data[1].position.x, msg.data[1].position.y, msg.data[1].position.z);
+		flag2_x = head_point_kinematics_->head_point_on_origin_x*0.01;
+		flag2_y = head_point_kinematics_->head_point_on_origin_y*0.01;
+		flag2_z = head_point_kinematics_->head_point_on_origin_z*0.01;
+		currentFlagPositionFunction(msg.data[2].position.x, msg.data[2].position.y, msg.data[2].position.z);
+		flag3_x = head_point_kinematics_->head_point_on_origin_x*0.01;
+		flag3_y = head_point_kinematics_->head_point_on_origin_y*0.01;
+		flag3_z = head_point_kinematics_->head_point_on_origin_z*0.01;
+		currentFlagPositionFunction(msg.data[3].position.x, msg.data[3].position.y, msg.data[3].position.z);
+		flag4_x = head_point_kinematics_->head_point_on_origin_x*0.01;
+		flag4_y = head_point_kinematics_->head_point_on_origin_y*0.01;
+		flag4_z = head_point_kinematics_->head_point_on_origin_z*0.01;
+	}
+	else
+	{
+		printf("No data!!!!");
+	}
+}
+/////////////////////////////////////////////////////
+
 // sensor data get///////////////////////////////////
 void UpperBodyModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) // gyro data get
 {

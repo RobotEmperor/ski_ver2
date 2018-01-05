@@ -40,6 +40,7 @@
 
 //m - personal
 #include "diana_msgs/BalanceParam.h"
+#include "diana_msgs/FlagDataArray.h"
 #include "diana_msgs/BalanceParamWaist.h"
 #include "diana_msgs/ForceTorque.h"
 #include "robotis_controller_msgs/StatusMsg.h"
@@ -78,7 +79,7 @@ public:
 	ros::Subscriber center_change_msg_sub;
 	ros::Subscriber balance_param_waist_sub;
 	ros::Subscriber head_balance_sub;
-
+	ros::Subscriber flag_position_get_sub;
 	//current cop and reference cop from leg module
 	ros::Subscriber cop_fz_sub;
 
@@ -96,8 +97,12 @@ public:
 	// current cop and reference cop from leg module
 	void copFzMsgCallBack(const std_msgs::Float64MultiArray::ConstPtr& msg);
 
+	//flag position data get
+	void flagPositionGetMsgCallback(const diana_msgs::FlagDataArray& msg);
+
 	//flag position function
 	void currentFlagPositionFunction(double x, double y, double z);
+
 
 
 private:

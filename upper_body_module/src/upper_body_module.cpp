@@ -153,23 +153,6 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	cop_compensation_waist->reference_point_Fz_y = reference_cop_fz_y;
 	cop_compensation_waist->centerOfPressureCompensationFz(current_cop_fz_x, current_cop_fz_y);
 
-	// head point get
-	currentFlagPositionFunction(10, 0, 0.5);// 천유 좌표를 넣어야함
-	flag1_x = head_point_kinematics_->head_point_on_origin_x;
-	flag1_y = head_point_kinematics_->head_point_on_origin_y;
-	flag1_z = head_point_kinematics_->head_point_on_origin_z;
-	currentFlagPositionFunction(10, 3, 0.5);
-	flag2_x = head_point_kinematics_->head_point_on_origin_x;
-	flag2_y = head_point_kinematics_->head_point_on_origin_y;
-	flag2_z = head_point_kinematics_->head_point_on_origin_z;
-	currentFlagPositionFunction(10, -3, 0.5);
-	flag3_x = head_point_kinematics_->head_point_on_origin_x;
-	flag3_y = head_point_kinematics_->head_point_on_origin_y;
-	flag3_z = head_point_kinematics_->head_point_on_origin_z;
-	currentFlagPositionFunction(4, 3, 0.5);
-	flag4_x = head_point_kinematics_->head_point_on_origin_x;
-	flag4_y = head_point_kinematics_->head_point_on_origin_y;
-	flag4_z = head_point_kinematics_->head_point_on_origin_z;
 
 	// flag 에 따른 머리 제어 추가
 	//updateHeadBalanceControl();
