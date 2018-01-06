@@ -66,7 +66,8 @@ Filter::~Filter()
 {
 
 }
-double Filter::lowPassFilter(double value, double pre_value, double weight_factor)
+double Filter::lowPassFilter(double value, double pre_value, double weight_factor, double sampling_time)
 {
-	return weight_factor*pre_value + (1-weight_factor)*value;
+	printf("cutoff_frequency  ::  %f \n", 1/(2*M_PI*weight_factor));
+	return (weight_factor*pre_value + sampling_time*value)/(weight_factor + sampling_time);
 }

@@ -9,6 +9,7 @@
 #define SKI_VER2_DIANA_BALANCE_CONTROL_INCLUDE_DIANA_BALANCE_CONTROL_CONTROL_FUNCTION_H_
 
 #include <stdio.h>
+#include <math.h>
 
 namespace control_function
 {
@@ -36,7 +37,7 @@ class Filter
 public:
 	Filter();
 	~Filter();
-	double lowPassFilter(double value, double pre_value, double weight_factor);
+	double lowPassFilter(double value, double pre_value, double weight_factor, double sampling_time);
 };
 }
 
