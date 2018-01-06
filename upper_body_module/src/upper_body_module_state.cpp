@@ -68,6 +68,7 @@ UpperBodyModule::UpperBodyModule()
 	currentGyroX = 0;
 	currentGyroY = 0;
 	currentGyroZ = 0;
+	currentGyroOrientationW = 0;
 	currentGyroOrientationX = 0;
 	currentGyroOrientationY = 0;
 	currentGyroOrientationZ = 0;
@@ -219,6 +220,7 @@ void UpperBodyModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) 
 	currentGyroX = (double) msg->angular_velocity.x;
 	currentGyroY = (double) msg->angular_velocity.y;
 	currentGyroZ = (double) msg->angular_velocity.z;
+	currentGyroOrientationW = (double) msg->orientation.w;
 	currentGyroOrientationX = (double) msg->orientation.x;
 	currentGyroOrientationY = (double) msg->orientation.y;
 	currentGyroOrientationZ = (double) msg->orientation.z;
@@ -226,20 +228,37 @@ void UpperBodyModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) 
 	tf_current_gyro_x = tf_gyro_value(0,0);
 	tf_current_gyro_y = tf_gyro_value(1,0);
 	tf_current_gyro_z = tf_gyro_value(2,0);
-	gyroRotationTransformation(currentGyroOrientationZ, currentGyroOrientationY, currentGyroOrientationX);
+	quaternionToAngle(currentGyroOrientationW, currentGyroOrientationX, currentGyroOrientationY, currentGyroOrientationZ);
+	gyroRotationTransformation(tf_gyro_value(2,0), tf_gyro_value(1,0), tf_gyro_value(0,0));
 	tf_current_gyro_orientation_x = tf_gyro_value(0,0);
 	tf_current_gyro_orientation_y = tf_gyro_value(1,0);
 	tf_current_gyro_orientation_z = tf_gyro_value(2,0);
 }
 void UpperBodyModule::gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x)
 {
-	tf_gyro_value.resize(3,1);
-	tf_gyro_value.fill(0);
 	tf_gyro_value(0,0) =  gyro_x;
 	tf_gyro_value(1,0) =  gyro_y;
 	tf_gyro_value(2,0) =  gyro_z;
 
 	tf_gyro_value = (robotis_framework::getRotationZ(-M_PI/2)*robotis_framework::getRotationY(-M_PI))*tf_gyro_value;
+}
+void UpperBodyModule::quaternionToAngle(double q_w, double q_x, double q_y, double q_z)
+{
+	double sinr = 2.0 * (q_w * q_x + q_y * q_z);
+	double cosr = 1.0 - 2.0 * (q_x * q_x + q_y * q_y);
+	tf_gyro_value(0,0) = atan2(sinr, cosr);
+
+	// pitch (y-axis rotation)
+	double sinp = 2.0 * (q_w * q_y - q_z * q_x);
+	if (fabs(sinp) >= 1)
+		tf_gyro_value(1,0) = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+	else
+		tf_gyro_value(1,0) = asin(sinp);
+
+	// yaw (z-axis rotation)
+	double siny = 2.0 * (q_w * q_z + q_x * q_y);
+	double cosy = 1.0 - 2.0 * (q_y * q_y + q_z * q_z);
+	tf_gyro_value(2,0) = atan2(siny, cosy);
 }
 //////////////////////////////////////////////////////////////////////
 //balance message for gyro///////////////////////////////////

@@ -149,9 +149,10 @@ private:
 
 	// gyro
 	void gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x);
+	void quaternionToAngle(double q_w, double q_x, double q_y, double q_z);
 	void updateBalanceGyroParameter();
 	double currentGyroX,currentGyroY,currentGyroZ;
-	double currentGyroOrientationX,currentGyroOrientationY,currentGyroOrientationZ;
+	double currentGyroOrientationW, currentGyroOrientationX,currentGyroOrientationY,currentGyroOrientationZ;
 	double tf_current_gyro_x, tf_current_gyro_y, tf_current_gyro_z;
 	double tf_current_gyro_orientation_x, tf_current_gyro_orientation_y, tf_current_gyro_orientation_z;
 	heroehs_math::FifthOrderTrajectory *gain_roll_p_adjustment;
