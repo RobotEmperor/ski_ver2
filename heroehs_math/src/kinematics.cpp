@@ -798,8 +798,8 @@ void KinematicsArm::FowardKinematicsArm(double joint[4], std::string left_right)
 	H_arm[0](3,3) = 1;
 
 	P_ = H_arm[0]*H_arm[1]*H_arm[2]*H_arm[3];
-	/*
-  printf("forward_kinematics arm\n");
+
+/*  printf("forward_kinematics arm\n");
 	printf("%f  %f  %f %f \n",P_(0,0),P_(0,1),P_(0,2),P_(0,3));
 	printf("%f  %f  %f %f \n",P_(1,0),P_(1,1),P_(1,2),P_(1,3));
 	printf("%f  %f  %f %f \n",P_(2,0),P_(2,1),P_(2,2),P_(2,3));

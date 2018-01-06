@@ -190,8 +190,11 @@ private:
 	double temp_pre_roll, temp_pre_pitch, temp_pre_yaw;
 
 	// enable adjustment
-	//heroehs_math::FifthOrderTrajectory *head_balance_enable;
-	bool head_enable;
+	heroehs_math::FifthOrderTrajectory *head_balance_enable;
+	double head_enable;
+	double result_head_enable;
+	double head_enable_time;
+
 
 
 };

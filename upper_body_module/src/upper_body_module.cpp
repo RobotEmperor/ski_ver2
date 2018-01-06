@@ -60,6 +60,7 @@ void UpperBodyModule::updateBalanceGyroParameter()
 	Eigen::MatrixXd value;
 	value.resize(1,8);
 	value.fill(0);
+
 	value(0,7) = updating_duration;
 	value(0,1) = gyro_roll_p_gain;
 	gyro_roll_function->kp_ = gain_roll_p_adjustment -> fifth_order_traj_gen_one_value(value);
@@ -78,6 +79,11 @@ void UpperBodyModule::updateBalanceGyroParameter()
 	value(0,1) = copFz_d_gain;
 	cop_compensation_waist->pidControllerFz_x->kd_ = gain_copFz_d_adjustment -> fifth_order_traj_gen_one_value(value);
 	cop_compensation_waist->pidControllerFz_y->kd_ = cop_compensation_waist->pidControllerFz_x->kd_;
+
+	value(0,7) = head_enable_time;
+	value(0,1) = head_enable;
+	result_head_enable = head_balance_enable->fifth_order_traj_gen_one_value(value);
+
 }
 double UpperBodyModule::limitCheckHead(double calculated_value, double max, double min)
 {
@@ -175,9 +181,10 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	}
 	head_kinematics_ -> ZYXEulerAnglesSolution(result_rad_head_(3,0),result_rad_head_(4,0),result_rad_head_(5,0));
 
-	temp_head_yaw   = limitCheckHead(head_kinematics_ -> zyx_euler_angle_z - head_enable*(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z)),90,-90);
-	temp_head_pitch = limitCheckHead(head_kinematics_ -> zyx_euler_angle_y - head_enable*(tf_current_gyro_orientation_y),20,-20);
-	temp_head_roll  = limitCheckHead(head_kinematics_ -> zyx_euler_angle_x - head_enable*(tf_current_gyro_orientation_x + waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y),20,-20);
+	printf("%f\n", result_head_enable);
+	temp_head_yaw   = limitCheckHead(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z)),90,-90);
+	temp_head_pitch = limitCheckHead(head_kinematics_ -> zyx_euler_angle_y - result_head_enable*(tf_current_gyro_orientation_y),20,-20);
+	temp_head_roll  = limitCheckHead(head_kinematics_ -> zyx_euler_angle_x - result_head_enable*(tf_current_gyro_orientation_x + waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y),20,-20);
 
 	//gazebo
 	result_[joint_id_to_name_[9]] -> goal_position_  = -(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z)); // waist roll
@@ -185,7 +192,7 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	result_[joint_id_to_name_[23]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_yaw, temp_pre_yaw, 0.7);
 	result_[joint_id_to_name_[24]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_pitch, temp_pre_pitch, 0.7);
 	result_[joint_id_to_name_[25]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_roll, temp_pre_roll, 0.7);
-	printf("X   ::   %f    Y  ::   %f     Z   ::   %f \n", filter_head->lowPassFilter(temp_head_yaw, temp_pre_yaw, 0.7), filter_head->lowPassFilter(temp_head_pitch, temp_pre_pitch, 0.7), filter_head->lowPassFilter(temp_head_roll, temp_pre_roll, 0.7));
+	//printf("X   ::   %f    Y  ::   %f     Z   ::   %f \n", filter_head->lowPassFilter(temp_head_yaw, temp_pre_yaw, 0.7), filter_head->lowPassFilter(temp_head_pitch, temp_pre_pitch, 0.7), filter_head->lowPassFilter(temp_head_roll, temp_pre_roll, 0.7));
 
 	temp_pre_roll  = temp_head_roll;
 	temp_pre_pitch = temp_head_pitch;

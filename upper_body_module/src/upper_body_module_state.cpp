@@ -124,7 +124,10 @@ UpperBodyModule::UpperBodyModule()
 	temp_pre_pitch = 0;
 	temp_pre_yaw = 0;
 
-	head_enable = false;
+	head_balance_enable = new heroehs_math::FifthOrderTrajectory ;
+	head_enable = 0;
+	result_head_enable = 0;
+	head_enable_time = 2.0;
 }
 UpperBodyModule::~UpperBodyModule()
 {
@@ -252,7 +255,14 @@ void UpperBodyModule::balanceParameterWaistMsgCallback(const diana_msgs::Balance
 }
 void UpperBodyModule::headBalanceMsgCallback(const std_msgs::Bool::ConstPtr& msg)
 {
-	head_enable = msg->data;
+	if(msg->data == 1)
+	{
+		head_enable = 1.0;
+	}
+	else
+	{
+		head_enable = 0;
+	}
 }
 //////////////////////////////////////////////////////////////////////
 //current cop and reference cop from leg module

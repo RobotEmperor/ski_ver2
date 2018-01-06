@@ -266,9 +266,6 @@ void CopCompensationFunc::centerOfPressureCompensationFz(double current_point_x,
 
 	control_value_Fz_x = -pid_control_value_fz_x;
 	control_value_Fz_y = -pid_control_value_fz_y;
-
-	//control_value_Fz_x = pid_control_value_fz_x + control_value_Fz_x;
-	//control_value_Fz_y = pid_control_value_fz_y + control_value_Fz_y; // 최종적으로 들어갈때 - 로 들어가야함 상대적 운동임
 }
 void CopCompensationFunc::centerOfPressureCompensationFy(double current_point_x, double current_point_z)
 {

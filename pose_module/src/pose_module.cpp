@@ -66,34 +66,40 @@ void PoseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 	result_end_head_.fill(0);
 
 	// arm
-	// left //
 	l_arm_end_point_.resize(6,8);
 	l_arm_end_point_.fill(0);
+	l_arm_end_point_(0,0) = 0.17677; // y 초기값
+	l_arm_end_point_(0,1) = 0.17677 ; //
+	l_arm_end_point_(1,0) = 0.280563; // y 초기값
+	l_arm_end_point_(1,1) = 0.280563 ; //
+	l_arm_end_point_(2,0) = -0.280563;
+	l_arm_end_point_(2,1) = -0.280563;
+	end_to_rad_l_arm_->cal_end_point_tra_px->current_pose = 0.17677;
+	end_to_rad_l_arm_->current_pose_change(0,0) = 0.17677;
+	end_to_rad_l_arm_->cal_end_point_tra_py->current_pose = 0.280563;
+	end_to_rad_l_arm_->current_pose_change(1,0) = 0.280563;
+	end_to_rad_l_arm_->cal_end_point_tra_pz->current_pose = -0.280563;
+	end_to_rad_l_arm_->current_pose_change(2,0) = -0.280563;
 	result_end_l_arm_.resize(6,1);
 	result_end_l_arm_.fill(0);
-	l_arm_end_point_(1,0) = 0.07; // y 초기값
-	l_arm_end_point_(1,1) = 0.07 ; //
-	l_arm_end_point_(2,0) = -0.4;
-	l_arm_end_point_(2,1) = -0.4;
-	end_to_rad_l_arm_->cal_end_point_tra_py->current_pose = 0.07;
-	end_to_rad_l_arm_->current_pose_change(1,0) = 0.07;
-	end_to_rad_l_arm_->cal_end_point_tra_pz->current_pose = -0.4;
-	end_to_rad_l_arm_->current_pose_change(2,0) = -0.4;
-
 
 	//right //
 	r_arm_end_point_.resize(6,8);
 	r_arm_end_point_.fill(0);
 	result_end_r_arm_.resize(6,1);
 	result_end_r_arm_.fill(0);
-	r_arm_end_point_(1,0) = -0.07; // y 초기값
-	r_arm_end_point_(1,1) = -0.07; //
-	r_arm_end_point_(2,0) = -0.4;
-	r_arm_end_point_(2,1) = -0.4;
-	end_to_rad_r_arm_->cal_end_point_tra_py->current_pose = -0.07;
-	end_to_rad_r_arm_->current_pose_change(1,0) = -0.07;
-	end_to_rad_r_arm_->cal_end_point_tra_pz->current_pose = -0.4;
-	end_to_rad_r_arm_->current_pose_change(2,0) = -0.4;
+	r_arm_end_point_(0,0) = 0.17677; // y 초기값
+	r_arm_end_point_(0,1) = 0.17677; //
+	r_arm_end_point_(1,0) = -0.280563; // y 초기값
+	r_arm_end_point_(1,1) = -0.280563; //
+	r_arm_end_point_(2,0) = -0.280563;
+	r_arm_end_point_(2,1) = -0.280563;
+	end_to_rad_r_arm_->cal_end_point_tra_px->current_pose = 0.17677;
+	end_to_rad_r_arm_->current_pose_change(0,0) = 0.17677;
+	end_to_rad_r_arm_->cal_end_point_tra_py->current_pose = -0.280563;
+	end_to_rad_r_arm_->current_pose_change(1,0) = -0.280563;
+	end_to_rad_r_arm_->cal_end_point_tra_pz->current_pose = -0.280563;
+	end_to_rad_r_arm_->current_pose_change(2,0) = -0.280563;
 
 	for(int joint_num_= 0; joint_num_< 6 ; joint_num_ ++)
 	{
@@ -240,22 +246,21 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	l_arm_kinematics_ ->OriginToArmTransformationPoint(waist_kinematics_->xyz_euler_angle_z , waist_kinematics_->xyz_euler_angle_x, l_arm_kinematics_->joint_radian(1,0), l_arm_kinematics_->joint_radian(2,0), l_arm_kinematics_->joint_radian(3,0));
 	r_arm_kinematics_ ->OriginToArmTransformationPoint(waist_kinematics_->xyz_euler_angle_z , waist_kinematics_->xyz_euler_angle_x, r_arm_kinematics_->joint_radian(1,0), r_arm_kinematics_->joint_radian(2,0), r_arm_kinematics_->joint_radian(3,0));
 
-	//<---  catesian space control test --->
-	/*result_[joint_id_to_name_[9]] -> goal_position_   = -waist_kinematics_->xyz_euler_angle_z;// waist yaw
+/*
+		//<---  catesian space control test --->
+	result_[joint_id_to_name_[9]] -> goal_position_   = -waist_kinematics_->xyz_euler_angle_z;// waist yaw
 	result_[joint_id_to_name_[10]] -> goal_position_  = waist_kinematics_->xyz_euler_angle_x; // waist roll
 
-	result_[joint_id_to_name_[19]] -> goal_position_  = -l_kinematics_->joint_radian(5,0);
-	result_[joint_id_to_name_[20]] -> goal_position_  = r_kinematics_->joint_radian(5,0);
+	result_[joint_id_to_name_[17]] -> goal_position_  = -l_kinematics_->joint_radian(4,0);
+	result_[joint_id_to_name_[18]] -> goal_position_  = r_kinematics_->joint_radian(4,0);
 
 	result_[joint_id_to_name_[23]] -> goal_position_  = head_kinematics_->zyx_euler_angle_z;
 
 	result_[joint_id_to_name_[1]]  -> goal_position_  = -l_arm_kinematics_->joint_radian(1,0);
 	result_[joint_id_to_name_[3]]  -> goal_position_  = -l_arm_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[5]]  -> goal_position_  =  l_arm_kinematics_->joint_radian(3,0);
+*/
 
-	result_[joint_id_to_name_[2]]  -> goal_position_  =  r_arm_kinematics_->joint_radian(1,0);
-	result_[joint_id_to_name_[4]]  -> goal_position_  = -r_arm_kinematics_->joint_radian(2,0);
-	result_[joint_id_to_name_[6]]  -> goal_position_  = -r_arm_kinematics_->joint_radian(3,0);*/
 
 	//<---  cartesian space control  --->
 
