@@ -161,7 +161,6 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
 
 	// flag 에 따른 머리 제어 추가
-	//updateHeadBalanceControl();
 	if(is_moving_head_ == false)
 	{
 		ROS_INFO("Upper Head Stay");
@@ -181,7 +180,7 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	}
 	head_kinematics_ -> ZYXEulerAnglesSolution(result_rad_head_(3,0),result_rad_head_(4,0),result_rad_head_(5,0));
 
-	temp_head_yaw   = limitCheckHead(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z)),90,-90);
+	temp_head_yaw   = limitCheckHead(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z)),60,-60);
 	temp_head_pitch = limitCheckHead(head_kinematics_ -> zyx_euler_angle_y - result_head_enable*(tf_current_gyro_orientation_y),20,-20);
 	temp_head_roll  = limitCheckHead(head_kinematics_ -> zyx_euler_angle_x - result_head_enable*(tf_current_gyro_orientation_x + waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y),20,-20);
 

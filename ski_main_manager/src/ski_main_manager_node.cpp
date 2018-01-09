@@ -1,5 +1,5 @@
 /*
- * heroehs_manager1_node.cpp
+ * aki_main_manager.cpp
  *
  *  Created on: Oct 10, 2017
  *      Author: robotemperor
