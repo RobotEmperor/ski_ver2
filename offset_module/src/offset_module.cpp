@@ -40,7 +40,7 @@ OffsetModule::OffsetModule()
 	result_["waist_yaw"]        = new robotis_framework::DynamixelState();  // joint 9
 	result_["waist_roll"]       = new robotis_framework::DynamixelState();  // joint 10
 
-  result_["l_hip_pitch"]      = new robotis_framework::DynamixelState();  // joint 11
+	result_["l_hip_pitch"]      = new robotis_framework::DynamixelState();  // joint 11
 	result_["l_hip_roll"]       = new robotis_framework::DynamixelState();  // joint 13
 	result_["l_hip_yaw"]        = new robotis_framework::DynamixelState();  // joint 15
 	result_["l_knee_pitch"]     = new robotis_framework::DynamixelState();  // joint 17
@@ -59,7 +59,7 @@ OffsetModule::OffsetModule()
 	result_["head_pitch"]       = new robotis_framework::DynamixelState();  // joint 24
 	result_["head_roll"]        = new robotis_framework::DynamixelState();  // joint 25
 
-/*
+	/*
 	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
 	result_["l_elbow_pitch"]    = new robotis_framework::DynamixelState();  // joint 5
@@ -71,7 +71,7 @@ OffsetModule::OffsetModule()
 
 	result_["l_knee_pitch"]     = new robotis_framework::DynamixelState();  // joint 17
 	result_["r_knee_pitch"]     = new robotis_framework::DynamixelState();  // joint 18
-*/
+	 */
 
 
 
@@ -145,22 +145,28 @@ void OffsetModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	if (enable_ == false)
 		return;
 
-	for (std::map<std::string, robotis_framework::Dynamixel*>::iterator state_iter = dxls.begin();
-			state_iter != dxls.end(); state_iter++)
+	if(new_count_ ==1) // init
 	{
-		std::string joint_name = state_iter->first;
-		robotis_framework::Dynamixel* dxl_info = state_iter->second;
-
-		joint_name_to_id_[joint_name] = dxl_info->id_;
-		read_joint_value_[joint_name_to_id_[joint_name]] = dxls[joint_name]->dxl_state_->present_position_;
-
-		if(offset_start_ == false)
+		for (std::map<std::string, robotis_framework::Dynamixel*>::iterator state_iter = dxls.begin();
+				state_iter != dxls.end(); state_iter++)
 		{
-			change_joint_value_[joint_name_to_id_[joint_name]] = dxls[joint_name]->dxl_state_->present_position_;
-			ROS_INFO("%d :: %f", joint_name_to_id_[joint_name], change_joint_value_[joint_name_to_id_[joint_name]]);
-			result_[joint_id_to_name_[dxl_info->id_]]->goal_position_ = change_joint_value_[joint_name_to_id_[joint_name]]; // 지정된 조인트에 목표 위치 입력
-		}
-	} // 등록된 다이나믹셀의 위치값을 읽어옴
+			std::string joint_name = state_iter->first;
+			robotis_framework::Dynamixel* dxl_info = state_iter->second;
+
+			joint_name_to_id_[joint_name] = dxl_info->id_;
+			read_joint_value_[joint_name_to_id_[joint_name]] = dxls[joint_name]->dxl_state_->present_position_;
+
+			if(offset_start_ == false)
+			{
+				change_joint_value_[joint_name_to_id_[joint_name]] = dxls[joint_name]->dxl_state_->present_position_;
+				ROS_INFO("%d :: %f", joint_name_to_id_[joint_name], change_joint_value_[joint_name_to_id_[joint_name]]);
+				result_[joint_id_to_name_[dxl_info->id_]]->goal_position_ = change_joint_value_[joint_name_to_id_[joint_name]]; // 지정된 조인트에 목표 위치 입력
+			}
+		} // 등록된 다이나믹셀의 위치값을 읽어옴
+
+		new_count_ ++;
+	}
+
 
 	result_[joint_id_to_name_[joint_select_]]->goal_position_ = change_joint_value_[joint_select_]; // 지정된 조인트에 목표 위치 입력
 
@@ -176,15 +182,15 @@ void OffsetModule::change_joint_value_sub_function(const std_msgs::Int16MultiArr
 	switch (joint_select_)
 	{
 	case 10 : temp_ratio = 0.088/4.0;
-	          break;
+	break;
 	case 23 : temp_ratio = 0.088/2.5;
-	          break;
+	break;
 	case 24 : temp_ratio = 0.088;
-	          break;
+	break;
 	case 25 : temp_ratio = 0.088;
-		          break;
+	break;
 	default : temp_ratio = 0.088/3.0;
-	          break;
+	break;
 	}
 	if(joint_select_< 8)
 		temp_ratio = 0.088/2.5;
