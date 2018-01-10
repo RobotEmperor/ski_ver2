@@ -136,6 +136,7 @@ void OffsetModule::initialize(const int control_cycle_msec, robotis_framework::R
 		joint_id_to_name_[dxl_info->id_] = joint_name;
 		joint_select_ = dxl_info->id_;
 	}
+	parse_initial_offset_data();
 
 	ROS_INFO("< -------  Initialize Module : Offset Module !!  ------->");
 }
@@ -178,7 +179,6 @@ void OffsetModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	}
 
 	result_[joint_id_to_name_[joint_select_]]->goal_position_ = change_joint_value_[joint_select_]; // 지정된 조인트에 목표 위치 입력
-	ROS_INFO("%d :: %f", joint_select_, change_joint_value_[joint_select_]);
 
 }
 
@@ -235,7 +235,6 @@ bool OffsetModule::read_joint_value_srv_function(offset_module::command::Request
 	res.dxl_state[24] = static_cast<int16_t>(((read_joint_value_[24]*RADIAN2DEGREE))/(0.088)); // GUI 에서 요청한 모든 조인트의 위치값을 저장함.
 	res.dxl_state[25] = static_cast<int16_t>(((read_joint_value_[25]*RADIAN2DEGREE))/(0.088)); // GUI 에서 요청한 모든 조인트의 위치값을 저장함.
 
-	ROS_INFO("READ!!!!!!");
 
 	return true;
 }
@@ -268,6 +267,33 @@ void OffsetModule::save_onoff_sub_function(const std_msgs::Bool::ConstPtr& msg)
 	}
 	else
 		return;
+}
+
+void OffsetModule::parse_initial_offset_data()
+{
+	std::string path = ros::package::getPath("ski_main_manager") + "/config/offset.yaml";
+	YAML::Node doc; // YAML file class 선언!
+	try
+	{
+		// load yaml
+		doc = YAML::LoadFile(path.c_str()); // 파일 경로를 입력하여 파일을 로드 한다.
+
+	}catch(const std::exception& e) // 에러 점검
+	{
+		ROS_ERROR("Fail to load yaml file!");
+		return;
+	}
+
+	for(int i=1; i<7 ; i++)
+	{
+		offset_joint_value_[i] =  doc[joint_id_to_name_[i]].as<double>();
+		printf("%d  ::  %f\n", i, offset_joint_value_[i]);
+	}
+	for(int i=9; i<26 ; i++)
+	{
+		offset_joint_value_[i] =  doc[joint_id_to_name_[i]].as<double>();
+		printf("%d  ::  %f\n", i, offset_joint_value_[i]);
+	}
 }
 
 

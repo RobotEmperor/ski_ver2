@@ -110,6 +110,7 @@ public:
 
 	void offset_joint_value_sub_function(const std_msgs::Float64MultiArray::ConstPtr& msg);
 	void save_onoff_sub_function(const std_msgs::Bool::ConstPtr& msg);
+	void parse_initial_offset_data();
 
 
 	bool read_joint_value_srv_function(offset_module::command::Request  &req, offset_module::command::Response &res);
