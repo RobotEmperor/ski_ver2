@@ -226,11 +226,10 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 			}
 		}
 		// 팔 다이나믹셀 초기화
-		for(int id=1 ; id<9 ; id++)
+		for(int id=1 ; id<7 ; id++)
 		{
-			if(id != 3 && id != 4)
-			{
-				if(id == 1 || id == 7 || id == 8 || id == 6) // 방향 반대인 다이나믹셀
+
+				if(id == 1 || id == 3 || id == 4 || id == 6) // 방향 반대인 다이나믹셀
 				{
 					result_[joint_id_to_name_[id]]->goal_position_ = - motion_trajectory[id]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(id,0),
 							base_module_state->joint_ini_pose_goal(id,0),0,0,0,0,0,base_module_state->mov_time_state);
@@ -246,7 +245,7 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 						result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
 					ROS_INFO("id :: %d , value %f", id , result_[joint_id_to_name_[id]]->goal_position_);
 				}
-			}
+
 		}
 
 		//test
