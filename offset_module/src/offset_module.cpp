@@ -145,7 +145,7 @@ void OffsetModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	if (enable_ == false)
 		return;
 
-	if(new_count_ ==1) // init
+	if(new_count_ == 1) // init
 	{
 		for (std::map<std::string, robotis_framework::Dynamixel*>::iterator state_iter = dxls.begin();
 				state_iter != dxls.end(); state_iter++)
@@ -169,6 +169,7 @@ void OffsetModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 
 
 	result_[joint_id_to_name_[joint_select_]]->goal_position_ = change_joint_value_[joint_select_]; // 지정된 조인트에 목표 위치 입력
+	ROS_INFO("%d :: %f", joint_select_, change_joint_value_[joint_select_]);
 
 }
 
@@ -224,6 +225,8 @@ bool OffsetModule::read_joint_value_srv_function(offset_module::command::Request
 	res.dxl_state[23] = static_cast<int16_t>(((read_joint_value_[23]*RADIAN2DEGREE))/(0.088/2.5)); // GUI 에서 요청한 모든 조인트의 위치값을 저장함.
 	res.dxl_state[24] = static_cast<int16_t>(((read_joint_value_[24]*RADIAN2DEGREE))/(0.088)); // GUI 에서 요청한 모든 조인트의 위치값을 저장함.
 	res.dxl_state[25] = static_cast<int16_t>(((read_joint_value_[25]*RADIAN2DEGREE))/(0.088)); // GUI 에서 요청한 모든 조인트의 위치값을 저장함.
+
+	ROS_INFO("READ!!!!!!");
 
 	return true;
 }
