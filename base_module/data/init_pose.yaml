@@ -7,8 +7,8 @@ mov_time : 4.0		# movement time
 tar_pose :
   1  : 0.000048                       # l_shoulder_pitch
   2  : 0.000048                       # r_shoulder_pitch
-  3  : 45.00085007                    # l_shoulder_roll
-  4  : -45.00085007                   # r_shoulder_roll
+  7  : 45.00085007                    # l_shoulder_roll
+  8  : -45.00085007                   # r_shoulder_roll
   5  : -45.00085007                   # l_elbow_pitch
   6  : -45.00085007                   # r_elbow_pitch
 

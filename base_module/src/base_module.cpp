@@ -47,7 +47,7 @@ BaseModule::BaseModule()
 	result_["head_pitch"]       = new robotis_framework::DynamixelState();  // joint 24
 	result_["head_roll"]        = new robotis_framework::DynamixelState();  // joint 25
 
-// TEST
+	// TEST
 
 	result_["l_shoulder_pitch"] = new robotis_framework::DynamixelState();  // joint 1
 	result_["l_shoulder_roll"]  = new robotis_framework::DynamixelState();  // joint 3
@@ -132,7 +132,7 @@ void BaseModule::parse_init_pose_data_(const std::string &path)
 void BaseModule::initPoseMsgCallback(const std_msgs::String::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실
 {
 	std::string init_pose_path;// 로스 패키지에서 YAML파일의 경로를 읽어온다.
-  printf("%s", msg->data.c_str());
+	printf("%s", msg->data.c_str());
 	if(msg->data.compare("init_pose") == 0)
 	{
 		init_pose_path = ros::package::getPath("base_module") + "/data/init_pose.yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
@@ -226,28 +226,31 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 			}
 		}
 		// 팔 다이나믹셀 초기화
-		for(int id=1 ; id<7 ; id++)
+		for(int id=1 ; id<9 ; id++)
 		{
-			if(id == 1 || id == 3 || id == 4 || id == 6) // 방향 반대인 다이나믹셀
+			if(id != 3 && id != 4)
 			{
-				result_[joint_id_to_name_[id]]->goal_position_ = - motion_trajectory[id]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(id,0),
-						base_module_state->joint_ini_pose_goal(id,0),0,0,0,0,0,base_module_state->mov_time_state);
-				if(gazebo_check == true)
-									result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
-				ROS_INFO("id :: %d , value %f", id , result_[joint_id_to_name_[id]]->goal_position_);
-			}
-			else
-			{
-				result_[joint_id_to_name_[id]]->goal_position_ =  motion_trajectory[id]->fifth_order_traj_gen(base_module_state->joint_ini_pose_state(id,0),
-						base_module_state->joint_ini_pose_goal(id,0),0,0,0,0,0,base_module_state->mov_time_state);
-				if(gazebo_check == true)
-									result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
-				ROS_INFO("id :: %d , value %f", id , result_[joint_id_to_name_[id]]->goal_position_);
+				if(id == 1 || id == 7 || id == 8 || id == 6) // 방향 반대인 다이나믹셀
+				{
+					result_[joint_id_to_name_[id]]->goal_position_ = - motion_trajectory[id]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(id,0),
+							base_module_state->joint_ini_pose_goal(id,0),0,0,0,0,0,base_module_state->mov_time_state);
+					if(gazebo_check == true)
+						result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
+					ROS_INFO("id :: %d , value %f", id , result_[joint_id_to_name_[id]]->goal_position_);
+				}
+				else
+				{
+					result_[joint_id_to_name_[id]]->goal_position_ =  motion_trajectory[id]->fifth_order_traj_gen(base_module_state->joint_ini_pose_state(id,0),
+							base_module_state->joint_ini_pose_goal(id,0),0,0,0,0,0,base_module_state->mov_time_state);
+					if(gazebo_check == true)
+						result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
+					ROS_INFO("id :: %d , value %f", id , result_[joint_id_to_name_[id]]->goal_position_);
+				}
 			}
 		}
 
 		//test
-	/*	result_[joint_id_to_name_[10]]->goal_position_ =  -motion_trajectory[10]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(10,0),
+		/*	result_[joint_id_to_name_[10]]->goal_position_ =  -motion_trajectory[10]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(10,0),
 				base_module_state->joint_ini_pose_goal(10,0),0,0,0,0,0,base_module_state->mov_time_state);
 		result_[joint_id_to_name_[9]]->goal_position_ =  -motion_trajectory[9]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(9,0),
 				base_module_state->joint_ini_pose_goal(9,0),0,0,0,0,0,base_module_state->mov_time_state);

@@ -167,9 +167,12 @@ void OffsetModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 
 		new_count_ ++;
 	}
-	for(int i=1; i<7 ; i++)
+	for(int i=1; i<9 ; i++)
 	{
-		read_joint_value_[i] = dxls[joint_id_to_name_[i]]->dxl_state_->present_position_;
+		if(i !=3 && i != 4)
+		{
+			read_joint_value_[i] = dxls[joint_id_to_name_[i]]->dxl_state_->present_position_;
+		}
 	}
 	for(int i=9; i<26 ; i++)
 	{
@@ -199,7 +202,7 @@ void OffsetModule::change_joint_value_sub_function(const std_msgs::Int16MultiArr
 	default : temp_ratio = 0.088/3.0;
 	break;
 	}
-	if(joint_select_< 8)
+	if(joint_select_< 9)
 		temp_ratio = 0.088/2.5;
 
 	change_joint_value_[joint_select_] = static_cast<double>(msg->data[0]*(temp_ratio)*DEGREE2RADIAN); // GUI에서 변경할 조인트의 값을 받아옴.
@@ -216,9 +219,12 @@ void OffsetModule::offset_joint_value_sub_function(const std_msgs::Float64MultiA
 bool OffsetModule::read_joint_value_srv_function(offset_module::command::Request  &req, offset_module::command::Response &res)
 {
 	//팔 리드 데이터
-	for(int i = 1; i<7; i++)
+	for(int i = 1; i<9; i++)
 	{
-		res.dxl_state[i] = static_cast<int16_t>(((read_joint_value_[i]*RADIAN2DEGREE))/(0.088/2.5)); // GUI 에서 요청한 모든 조인트의 위치값을 저장함.
+		if(i !=3 && i != 4)
+		{
+			res.dxl_state[i] = static_cast<int16_t>(((read_joint_value_[i]*RADIAN2DEGREE))/(0.088/2.5)); // GUI 에서 요청한 모든 조인트의 위치값을 저장함.
+		}
 	}
 	// 다리 리드 데이터
 	for(int i = 11; i<23; i++)
@@ -245,9 +251,12 @@ void OffsetModule::save_onoff_sub_function(const std_msgs::Bool::ConstPtr& msg)
 		std::map<std::string, double> offset;
 		std::map<std::string, double> init_pose;
 
-		for(int i=1; i<7 ; i++)
+		for(int i=1; i<9 ; i++)
 		{
-			offset[joint_id_to_name_[i]] = offset_joint_value_[i];
+			if(i !=3 && i != 4)
+			{
+				offset[joint_id_to_name_[i]] = offset_joint_value_[i];
+			}
 		}
 		for(int i=9; i<26 ; i++)
 		{
@@ -292,7 +301,6 @@ void OffsetModule::parse_initial_offset_data()
 		double offset = it->second.as<double>();
 
 		offset_joint_value_[joint_name_to_id_[joint_name]] =  offset;
-		printf("%d  ::  %f\n", joint_name_to_id_[joint_name], offset_joint_value_[joint_name_to_id_[joint_name]]);
 	}
 }
 

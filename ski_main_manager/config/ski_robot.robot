@@ -10,9 +10,9 @@ control_cycle = 8   # milliseconds
 ## TYPE   | PORT NAME    | ID   | MODEL         | PROTOCOL | DEV NAME           | BULK READ ITEMS
 dynamixel | /dev/ttyUSB0 |  1   | MX-28-1       | 2.0      | l_shoulder_pitch   | present_position
 dynamixel | /dev/ttyUSB0 |  2   | MX-28-2       | 2.0      | r_shoulder_pitch   | present_position
-dynamixel | /dev/ttyUSB0 |  3   | MX-28-3       | 2.0      | l_shoulder_roll    | present_position
+dynamixel | /dev/ttyUSB0 |  7   | MX-28-7       | 2.0      | l_shoulder_roll    | present_position
 
-dynamixel | /dev/ttyUSB0 |  4   | MX-28-4       | 2.0      | r_shoulder_roll    | present_position
+dynamixel | /dev/ttyUSB0 |  8   | MX-28-8       | 2.0      | r_shoulder_roll    | present_position
 dynamixel | /dev/ttyUSB0 |  5   | MX-28-5       | 2.0      | l_elbow_pitch      | present_position
 dynamixel | /dev/ttyUSB0 |  6   | MX-28-6       | 2.0      | r_elbow_pitch      | present_position
 

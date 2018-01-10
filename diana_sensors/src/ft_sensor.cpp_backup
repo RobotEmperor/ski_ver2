@@ -1,0 +1,334 @@
+#include <stdio.h>
+#include <string.h>
+#include <inttypes.h>
+#include <ros/ros.h>
+
+#include "diana_msgs/ForceTorque.h"
+#include "ethercat.h"
+
+#define EC_TIMEOUTMON 500
+
+char IOmap[4096];
+//int expected_wkc;
+volatile int wkc;
+boolean needlf;
+boolean inOP;
+uint8 currentgroup = 0;
+
+void SendCommand(uint8_t *data, uint16_t *buf, int buf_length);
+void PrintValues(uint8_t *data);
+void GetSensorValue(double new_data[6], uint8_t *data);
+void SetRosMsg(diana_msgs::ForceTorque *ft_msg, double *data);
+double Kalman(double *input, double *data, int length);
+OSAL_THREAD_FUNC ec_check(void *ptr);
+
+int main(int argc, char *argv[])
+{
+  char ifname[] = "eth0";
+
+  int storage_size = 500;
+  double data_storage[2][6][storage_size];
+
+  for(int i=0 ; i<6 ; i++)
+    for(int j=0 ; j<storage_size ; j++) {
+      data_storage[0][i][j] = 0;
+      data_storage[1][i][j] = 0;
+    }
+
+  int oloop, iloop, chk;
+  needlf = FALSE;
+  inOP = FALSE;
+  
+  ros::init(argc, argv, "ec_node");
+  ros::NodeHandle nh;
+  ros::Publisher ec_data = nh.advertise<diana_msgs::ForceTorque>("/diana/force_torque_data", 0);
+
+  diana_msgs::ForceTorque msg;
+
+  if(ec_init(ifname))
+  {
+    if(ec_config_init(FALSE) > 0)
+    {
+      ec_config_map(&IOmap);
+      ec_configdc();
+
+      ec_statecheck(0, EC_STATE_SAFE_OP, EC_TIMEOUTSTATE * 4);
+      //ec_statecheck(1, EC_STATE_SAFE_OP, EC_TIMEOUTSTATE * 4);
+
+      // get count of outloop and inloops
+      /*oloop = ec_slave[0].Obytes;
+      if((oloop == 0) && (ec_slave[0].Obits > 0))
+        oloop = 1;
+      iloop = ec_slave[0].Ibytes;
+      if((iloop == 0) && (ec_slave[0].Ibits > 0))
+        iloop = 1;*/
+
+      // get expected wkc(working count) = (output wkc * 2) + intput wkc
+      //expected_wkc = (ec_group[0].outputsWKC *2 ) + ec_group[0].inputsWKC;
+
+      ec_slave[0].state = EC_STATE_OPERATIONAL;
+      //ec_slave[1].state = EC_STATE_OPERATIONAL;
+
+      ec_send_processdata();
+      ec_receive_processdata(EC_TIMEOUTRET);
+      ec_writestate(0);
+      //ec_writestate(1);
+
+      chk = 40;
+      do
+      {
+        ec_send_processdata();
+        ec_receive_processdata(EC_TIMEOUTRET);
+        ec_statecheck(0, EC_STATE_OPERATIONAL, 50000);
+        //ec_statecheck(1, EC_STATE_OPERATIONAL, 50000);
+      }
+      while(chk-- && 
+          ec_slave[0].state != EC_STATE_OPERATIONAL);// && 
+          //ec_slave[1].state != EC_STATE_OPERATIONAL);
+
+
+
+      while(ec_slave[0].state == EC_STATE_OPERATIONAL && 
+          //ec_slave[1].state == EC_STATE_OPERATIONAL && 
+          ros::ok())
+      {
+        // update ethercat slave....
+        ec_send_processdata();
+        ec_receive_processdata(EC_TIMEOUTRET);
+        //int wkc = ec_receive_processdata(EC_TIMEOUTRET);
+
+        printf("slave count : %d\n", ec_slavecount);
+        for(int n=0 ; n<ec_slavecount ; n++)
+        {
+          if(!needlf)
+          {
+            uint16_t buf[4];
+            int buf_size = 4;
+
+            buf[0] = 0x00;
+            buf[1] = 0x00;
+            buf[2] = 0x00;
+            buf[3] = 0x0C;
+            SendCommand(ec_slave[n+1].outputs, buf, buf_size);
+        //ec_send_processdata();
+        //ec_receive_processdata(EC_TIMEOUTRET);
+
+            //set cutoff frequency to 150Hz
+            buf[0] = 0x00;
+            buf[1] = 0x04;
+            buf[2] = 0x01;
+            buf[3] = 0x08;
+            SendCommand(ec_slave[n+1].outputs, buf, buf_size);
+        //ec_send_processdata();
+        //ec_receive_processdata(EC_TIMEOUTRET);
+
+            //start command
+            buf[0] = 0x00;
+            buf[1] = 0x00;
+            buf[2] = 0x00;
+            buf[3] = 0x0B;
+            SendCommand(ec_slave[n+1].outputs, buf, buf_size);
+        //ec_send_processdata();
+        //ec_receive_processdata(EC_TIMEOUTRET);
+
+            if(n+1 == ec_slavecount)
+              needlf = TRUE;
+          }
+
+          //PrintValues(ec_slave[n+1].inputs);
+          double data[6];
+          GetSensorValue(data, ec_slave[n+1].inputs);
+
+          for(int i=0 ; i<6 ; i++)
+          {
+            Kalman(data+i, data_storage[n][i], storage_size);
+          }
+
+          printf("\n");
+          printf("Force  : Fx= %10.2f, Fy= %10.2f, Fz= %10.2f \n",
+              data[0], data[1], data[2]);
+          printf("Torque : Tx= %10.2f, Ty= %10.2f, Tz= %10.2f \n",
+              data[3], data[4], data[5]);
+
+          SetRosMsg(&msg, data);
+
+          ec_data.publish(msg);
+          ros::spinOnce();
+        }
+        osal_usleep(10);
+      }
+
+
+
+      inOP = FALSE;
+
+      printf("Not all slaves reached operational state.\n");
+      ec_readstate();
+      for(int i = 1; i<=ec_slavecount ; i++)
+      {
+        if(ec_slave[i].state != EC_STATE_OPERATIONAL)
+        {
+          printf("Slave %d State=0x%2.2x StatusCode=0x%4.4x : %s\n",
+              i, ec_slave[i].state, ec_slave[i].ALstatuscode, ec_ALstatuscode2string(ec_slave[i].ALstatuscode));
+        }
+      }
+      printf("\nRequest init state for all slaves\n");
+      ec_slave[0].state = EC_STATE_INIT;
+      /* request INIT state for all slaves */
+      ec_writestate(0);
+    }
+    else
+    {
+      printf("No slaves found!\n");
+    }
+    ec_close();
+  }
+  else
+  {
+    printf("No socket connection on %s\nExcecute as root\n",ifname);
+  }
+}
+
+void SendCommand(uint8_t *data, uint16_t *buf, int buf_length)
+{
+  for(int i=0 ; i<buf_length ; i++)
+  {
+    *data++ = (buf[buf_length-i-1] >> 0) & 0xFF;
+    *data++ = (buf[buf_length-i-1] >> 8) & 0xFF;
+  }
+}
+
+void GetSensorValue(double new_data[6], uint8_t *data)
+{
+  int16_t force_torque_data[6];
+
+  // Raw_Fx, Raw_Fy, Raw_Fy (2 Bytes * 3)
+  force_torque_data[0] = (int16_t)(data[24] | data[25] << 8);
+  force_torque_data[1] = (int16_t)(data[26] | data[27] << 8);
+  force_torque_data[2] = (int16_t)(data[28] | data[29] << 8);
+
+  // Raw_Tx, Raw_Ty, Raw_Tz (2 Bytes * 3)
+  force_torque_data[3] = (int16_t)(data[30] | data[31] << 8);
+  force_torque_data[4] = (int16_t)(data[32] | data[33] << 8);
+  force_torque_data[5] = (int16_t)(data[34] | data[35] << 8);
+
+  double force_divider = 50;
+  double torque_divider = 2000;
+
+  for(int i=0 ; i<3 ; i++)
+  {
+    new_data[i] = (double)force_torque_data[i]/force_divider;
+    new_data[i+3] = (double)force_torque_data[i+3]/torque_divider;
+  }
+
+  /*
+     printf("\n");
+     printf("Raw_Force  : Fx= %10.2f, Fy= %10.2f, Fz= %10.2f \n",
+     force[0], force[1], force[2]);
+     printf("Raw_Torque : Tx= %10.2f, Ty= %10.2f, Tz= %10.2f \n",
+     torque[0], torque[1], torque[2]);
+   */
+}
+
+void SetRosMsg(diana_msgs::ForceTorque *ft_msg, double *data)
+{
+  ft_msg->force_x_raw_l = data[0];
+  ft_msg->force_y_raw_l = data[1];
+  ft_msg->force_z_raw_l = data[2];
+  ft_msg->torque_x_raw_l = data[3];
+  ft_msg->torque_y_raw_l = data[4];
+  ft_msg->torque_z_raw_l = data[5];
+}
+
+double Kalman(double *input, double *data, int length)
+{
+  double result = (*input / length);
+
+  for(int i=1 ; i<length ; i++)
+  {
+    result += (data[i] / length);
+    data[i-1] = data[i];
+  }
+  data[length-1] = *input;
+
+  *input = result;
+  return result;
+}
+
+void PrintValues(uint8_t *data)
+{
+  // CanRx1_id (2 Bytes)
+  uint16_t can_rx1_id = *data | (*(data+1) >> 8);
+  data += 2;
+
+  // CanRx1_len (2 Bytes)
+  uint16_t can_rx1_len = *data | (*(data+1) >> 8);
+  data += 2;
+
+  // CanRx1_data_d1 ~ d8 (1 Byte * 8)
+  uint8_t can_rx1_data[8];
+  for(int i=0 ; i<8 ; i++)
+    can_rx1_data[i] = *data++;
+
+  // CanRx2_id (2 Bytes)
+  uint16_t can_rx2_id = *data | (*(data+1) >> 8);
+  data += 2;
+
+  // CanRx2_len (2 Bytes)
+  uint16_t can_rx2_len = *data | (*(data+1) >> 8);
+  data += 2;
+
+  // CanRx2_data_d1 ~ d8 (1 Byte * 8)
+  uint8_t can_rx2_data[8];
+  for(int i=0 ; i<8 ; i++)
+    can_rx2_data[i] = *data++;
+
+  int16_t raw_force[3];
+  // Raw_Fx (2 Bytes)
+  raw_force[0] = (int16_t)(*data | (*(data+1) >> 8));
+  data += 2;
+  // Raw_Fy (2 Bytes)
+  raw_force[1] = (int16_t)(*data | (*(data+1) >> 8));
+  data += 2;
+  // Raw_Fz (2 Bytes)
+  raw_force[2] = (int16_t)(*data | (*(data+1) >> 8));
+  data += 2;
+
+  int16_t raw_torque[3];
+  // Raw_Tx (2 Bytes)
+  raw_torque[0] = (int16_t)(*data | (*(data+1) >> 8));
+  data += 2;
+  // Raw_Ty (2 Bytes)
+  raw_torque[1] = (int16_t)(*data | (*(data+1) >> 8));
+  data += 2;
+  // Raw_Tz (2 Bytes)
+  raw_torque[2] = (int16_t)(*data | (*(data+1) >> 8));
+  data += 2;
+
+  // OverloadStatus (1 Byte)
+  uint8_t overload_status = *data++;
+
+  // ErrorFlag (1 Byte)
+  uint8_t error_flag = *data++;
+
+  printf("CanRx1_id  : %d \n", can_rx1_id);
+  printf("CanRx1_len : %d \n", can_rx1_len);
+  printf("CanRx1_data_d1~d8 : ");
+  for(int i=0 ; i<8 ; i++)
+    printf("%3d ", can_rx1_data[i]);
+  printf("\n");
+  printf("CanRx2_id  : %d \n", can_rx2_id);
+  printf("CanRx2_len : %d \n", can_rx2_len);
+  printf("CanRx2_data_d1~d8 : ");
+  for(int i=0 ; i<8 ; i++)
+    printf("%3d ", can_rx2_data[i]);
+  printf("\n");
+  printf("Raw_Force  : Fx= %4d, Fy= %4d, Fz= %4d \n", raw_force[0], raw_force[1], raw_force[2]);
+  printf("Raw_Torque : Tx= %4d, Ty= %4d, Tz= %4d \n", raw_torque[0], raw_torque[1], raw_torque[2]);
+  printf("OverloadStatus : %2d \n", overload_status);
+  printf("ErrorFlag  : %2d \n\n\n", error_flag);
+}
+
+
+
+
