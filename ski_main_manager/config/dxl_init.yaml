@@ -1,20 +1,20 @@
 l_shoulder_pitch:
-  position_p_gain: 850
+  position_p_gain: 1700
   return_delay_time: 10
 r_shoulder_pitch:
-  position_p_gain: 850
+  position_p_gain: 1700
   return_delay_time: 10
 l_shoulder_roll:
-  position_p_gain: 850
+  position_p_gain: 1700
   return_delay_time: 10
 r_shoulder_roll:
-  position_p_gain: 850
+  position_p_gain: 1700
   return_delay_time: 10
 l_elbow_pitch:
-  position_p_gain: 850
+  position_p_gain: 1700
   return_delay_time: 10
 r_elbow_pitch:
-  position_p_gain: 850
+  position_p_gain: 1700
   return_delay_time: 10
 waist_yaw:
   position_p_gain: 850

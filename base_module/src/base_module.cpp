@@ -198,7 +198,7 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		// 허리 (9 , 10), 다리 (11 ~ 22), 머리 (23 ~ 25) 다이나믹셀 초기화
 		for(int id=9 ; id<26 ; id++)
 		{
-			if(id == 9 || id == 10 || id == 11 || id == 17 || id == 19 || id == 23 || id == 24 || id == 25) // 방향 반대인 다이나믹셀
+			if(id == 9 || id == 10 || id == 11 || id == 18 || id == 19 || id == 23 || id == 24 || id == 25) // 방향 반대인 다이나믹셀
 			{
 				result_[joint_id_to_name_[id]]->goal_position_ = - motion_trajectory[id]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(id,0),
 						base_module_state->joint_ini_pose_goal(id,0),0,0,0,0,0,base_module_state->mov_time_state);

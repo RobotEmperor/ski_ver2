@@ -279,7 +279,7 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	result_[joint_id_to_name_[13]]->goal_position_   =   l_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[15]]->goal_position_   =   l_kinematics_->joint_radian(3,0);
 
-	result_[joint_id_to_name_[17]]->goal_position_   =  -l_kinematics_->joint_radian(4,0);
+	result_[joint_id_to_name_[17]]->goal_position_   =   l_kinematics_->joint_radian(4,0);
 	result_[joint_id_to_name_[19]]->goal_position_   =  -l_kinematics_->joint_radian(5,0);
 	result_[joint_id_to_name_[21]]->goal_position_   =   l_kinematics_->joint_radian(6,0);
 
@@ -287,7 +287,7 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	result_[joint_id_to_name_[14]]->goal_position_   =   r_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[16]]->goal_position_   =   r_kinematics_->joint_radian(3,0);
 
-	result_[joint_id_to_name_[18]]->goal_position_   =   r_kinematics_->joint_radian(4,0);
+	result_[joint_id_to_name_[18]]->goal_position_   =  -r_kinematics_->joint_radian(4,0);
 	result_[joint_id_to_name_[20]]->goal_position_   =   r_kinematics_->joint_radian(5,0);
 	result_[joint_id_to_name_[22]]->goal_position_   =   r_kinematics_->joint_radian(6,0);
 
