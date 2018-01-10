@@ -61,10 +61,6 @@ BaseModule::BaseModule()
 	result_["l_knee_pitch"]     = new robotis_framework::DynamixelState();  // joint 17
 	result_["r_knee_pitch"]     = new robotis_framework::DynamixelState();  // joint 18
 
-
-
-
-
 	new_count_ = 1;
 	///////////////////////////
 
@@ -135,10 +131,24 @@ void BaseModule::parse_init_pose_data_(const std::string &path)
 }
 void BaseModule::initPoseMsgCallback(const std_msgs::String::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실
 {
-	std::string init_pose_path = ros::package::getPath("base_module") + "/data/ini_pose.yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
+	std::string init_pose_path;// 로스 패키지에서 YAML파일의 경로를 읽어온다.
+  printf("%s", msg->data.c_str());
+	if(msg->data.compare("init_pose") == 0)
+	{
+		init_pose_path = ros::package::getPath("base_module") + "/data/init_pose.yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
+		ROS_INFO("FILE LOAD  ::  init_pose");
+	}
+	else if(msg->data.compare("init_offset_pose") == 0)
+	{
+		init_pose_path = ros::package::getPath("base_module") + "/data/init_offset_pose.yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
+		ROS_INFO("FILE LOAD  ::  init_offset_pose");
+	}
+	else
+		return;
+
 	parse_init_pose_data_(init_pose_path); // YAML 파일 로드
 	base_module_state->is_moving_state = true;
-	ROS_INFO("FILE LOAD");
+	ROS_INFO("FILE LOAD complete");
 }
 void BaseModule::queueThread()
 {

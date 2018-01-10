@@ -167,19 +167,16 @@ void OffsetModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 
 		new_count_ ++;
 	}
-
-	for (std::map<std::string, robotis_framework::Dynamixel*>::iterator state_iter = dxls.begin();
-			state_iter != dxls.end(); state_iter++)
+	for(int i=1; i<7 ; i++)
 	{
-		std::string joint_name = state_iter->first;
-		robotis_framework::Dynamixel* dxl_info = state_iter->second;
-
-		joint_name_to_id_[joint_name] = dxl_info->id_;
-		read_joint_value_[joint_name_to_id_[joint_name]] = dxls[joint_name]->dxl_state_->present_position_;
+		read_joint_value_[i] = dxls[joint_id_to_name_[i]]->dxl_state_->present_position_;
+	}
+	for(int i=9; i<26 ; i++)
+	{
+		read_joint_value_[i] = dxls[joint_id_to_name_[i]]->dxl_state_->present_position_;
 	}
 
 	result_[joint_id_to_name_[joint_select_]]->goal_position_ = change_joint_value_[joint_select_]; // 지정된 조인트에 목표 위치 입력
-
 }
 
 void OffsetModule::joint_select_sub_function(const std_msgs::Int8::ConstPtr& msg)
@@ -283,16 +280,19 @@ void OffsetModule::parse_initial_offset_data()
 		ROS_ERROR("Fail to load yaml file!");
 		return;
 	}
+	YAML::Node offset_node = doc["offset"];
+	if (offset_node.size() == 0)
+		return;
 
-	for(int i=1; i<7 ; i++)
+	ROS_INFO("Load offsets...");
+
+	for (YAML::const_iterator it = offset_node.begin(); it != offset_node.end(); it++)
 	{
-		offset_joint_value_[i] =  doc[joint_id_to_name_[i]].as<double>();
-		printf("%d  ::  %f\n", i, offset_joint_value_[i]);
-	}
-	for(int i=9; i<26 ; i++)
-	{
-		offset_joint_value_[i] =  doc[joint_id_to_name_[i]].as<double>();
-		printf("%d  ::  %f\n", i, offset_joint_value_[i]);
+		std::string joint_name = it->first.as<std::string>();
+		double offset = it->second.as<double>();
+
+		offset_joint_value_[joint_name_to_id_[joint_name]] =  offset;
+		printf("%d  ::  %f\n", joint_name_to_id_[joint_name], offset_joint_value_[joint_name_to_id_[joint_name]]);
 	}
 }
 
