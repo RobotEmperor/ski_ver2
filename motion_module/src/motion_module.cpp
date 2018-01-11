@@ -324,66 +324,76 @@ void MotionModule::motion()
 			if(motion_time_count_center > time_center)
 			{
 				motion_count ++;
+				read_data = true;
 				motion_time_count_center = 0;
 			}
 			else
 			{
-				if(motion_time_count_center < time_center  && motion_count == 1) // right left turn
+				if(motion_time_count_center < time_center  && motion_count == 1 && read_data ==true) // right left turn
 				{
-					is_moving_l_ = true;
-					is_moving_r_ = true;
-					center_change_->parseMotionData(turn_type, "center_change");
-					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
-					center_change_->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
 
-
+						is_moving_l_ = true;
+						is_moving_r_ = true;
+						center_change_->parseMotionData(turn_type, "center_change");
+						center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
+						center_change_->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
+						read_data = false;
+						printf("!!!!!!!!!!!!!!!!!!!!");
 				}
 
-				if(motion_time_count_center < time_center  && motion_count == 2) // edge
+				if(motion_time_count_center < time_center  && motion_count == 2 && read_data ==true) // edge
 				{
-					is_moving_l_ = true;
-					is_moving_r_ = true;
-					center_change_->parseMotionData(turn_type, "edge_change");
-					center_change_->calculateStepEndPointValue(change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
 
+						is_moving_l_ = true;
+						is_moving_r_ = true;
+						center_change_->parseMotionData(turn_type, "edge_change");
+						center_change_->calculateStepEndPointValue(change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
+						read_data = false;
+						printf("!!!!!!!!!!!!!!!!!!!!");
 				}
 
-				if(motion_time_count_center < time_center  && motion_count == 3) // center
+				if(motion_time_count_center < time_center  && motion_count == 3 && read_data ==true) // center
 				{
 					is_moving_l_ = true;
 					is_moving_r_ = true;
 					center_change_->parseMotionData(turn_type, "center_change");
 					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
 					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
+					read_data = false;
+					printf("!!!!!!!!!!!!!!!!!!!!");
 
 				}
 
-				if(motion_time_count_center < time_center  && motion_count == 4) // right left turn
+				if(motion_time_count_center < time_center  && motion_count == 4 && read_data ==true) // right left turn
 				{
 					is_moving_l_ = true;
 					is_moving_r_ = true;
 					center_change_->parseMotionData(turn_type, "center_change");
 					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
 					center_change_->calculateStepEndPointValue(-change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
-
+					read_data = false;
+					printf("!!!!!!!!!!!!!!!!!!!!");
 				}
 
-				if(motion_time_count_center < time_center  && motion_count == 5) // edge
+				if(motion_time_count_center < time_center  && motion_count == 5  && read_data ==true) // edge
 				{
 					is_moving_l_ = true;
 					is_moving_r_ = true;
 					center_change_->parseMotionData(turn_type, "edge_change");
 					center_change_->calculateStepEndPointValue(-change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
-
+					read_data = false;
+					printf("!!!!!!!!!!!!!!!!!!!!");
 				}
 
-				if(motion_time_count_center < time_center  && motion_count == 6) // center
+				if(motion_time_count_center < time_center  && motion_count == 6 && read_data ==true) // center
 				{
 					is_moving_l_ = true;
 					is_moving_r_ = true;
 					center_change_->parseMotionData(turn_type, "center_change");
 					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
 					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
+					read_data = false;
+					printf("!!!!!!!!!!!!!!!!!!!!");
 
 				}
 			}
@@ -413,66 +423,73 @@ void MotionModule::motion()
 			{
 				motion_count ++;
 				motion_time_count_center = 0;
+				read_data = true;
 			}
 			else
 			{
-				if(motion_time_count_center < time_center  && motion_count == 1) // right left turn
+				if(motion_time_count_center < time_center  && motion_count == 1 && read_data ==true) // right left turn
 				{
 					is_moving_l_ = true;
 					is_moving_r_ = true;
 					center_change_->parseMotionData(turn_type, "center_change");
 					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
 					center_change_->calculateStepEndPointValue(-change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
+					read_data = false;
 
 
 				}
 
-				if(motion_time_count_center < time_center  && motion_count == 2) // edge
+				if(motion_time_count_center < time_center  && motion_count == 2 && read_data ==true) // edge
 				{
 					is_moving_l_ = true;
 					is_moving_r_ = true;
 					center_change_->parseMotionData(turn_type, "edge_change");
 					center_change_->calculateStepEndPointValue(-change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
+					read_data = false;
 
 				}
 
-				if(motion_time_count_center < time_center  && motion_count == 3) // center
+				if(motion_time_count_center < time_center  && motion_count == 3 && read_data ==true) // center
 				{
 					is_moving_l_ = true;
 					is_moving_r_ = true;
 					center_change_->parseMotionData(turn_type, "center_change");
 					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
 					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
+					read_data = false;
 
 				}
 
-				if(motion_time_count_center < time_center  && motion_count == 4) // right left turn
+				if(motion_time_count_center < time_center  && motion_count == 4 && read_data ==true) // right left turn
 				{
 					is_moving_l_ = true;
 					is_moving_r_ = true;
 					center_change_->parseMotionData(turn_type, "center_change");
 					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
 					center_change_->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
+					read_data = false;
 
 
 				}
 
-				if(motion_time_count_center < time_center  && motion_count == 5) // edge
+				if(motion_time_count_center < time_center  && motion_count == 5 && read_data ==true) // edge
 				{
 					is_moving_l_ = true;
 					is_moving_r_ = true;
 					center_change_->parseMotionData(turn_type, "edge_change");
 					center_change_->calculateStepEndPointValue(change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
+					read_data = false;
 
 				}
 
-				if(motion_time_count_center < time_center  && motion_count == 6) // center
+				if(motion_time_count_center < time_center  && motion_count == 6 && read_data ==true) // center
 				{
 					is_moving_l_ = true;
 					is_moving_r_ = true;
 					center_change_->parseMotionData(turn_type, "center_change");
 					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
 					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
+					read_data = false;
 
 				}
 			}
@@ -483,7 +500,6 @@ void MotionModule::motion()
 				leg_end_point_r_(m,1) = center_change_->step_end_point_value[1][m];
 				leg_end_point_l_(m,7) = time_center;
 				leg_end_point_r_(m,7) = time_center;
-
 
 			}
 			if(motion_count == 7)

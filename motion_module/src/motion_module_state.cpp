@@ -138,6 +138,7 @@ MotionModule::MotionModule()
 	motion_time_count_edge = 0;
 	motion_count = 1;
 	pattern_count = 0;
+	read_data = true;
 }
 MotionModule::~MotionModule()
 {

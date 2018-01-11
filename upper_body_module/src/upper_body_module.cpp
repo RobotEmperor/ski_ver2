@@ -181,10 +181,13 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	}
 	head_kinematics_ -> ZYXEulerAnglesSolution(result_rad_head_(3,0),result_rad_head_(4,0),result_rad_head_(5,0));
 
-	temp_head_yaw   = limitCheckHead(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z)),60,-60);
+	/*temp_head_yaw   = limitCheckHead(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z)),60,-60);
 	temp_head_pitch = limitCheckHead(head_kinematics_ -> zyx_euler_angle_y - result_head_enable*(tf_current_gyro_orientation_y),20,-20);
-	temp_head_roll  = limitCheckHead(head_kinematics_ -> zyx_euler_angle_x - result_head_enable*(tf_current_gyro_orientation_x + waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y),20,-20);
+	temp_head_roll  = limitCheckHead(head_kinematics_ -> zyx_euler_angle_x - result_head_enable*(tf_current_gyro_orientation_x + waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y),20,-20);*/
 
+	temp_head_yaw   = limitCheckHead(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*(waist_kinematics_ -> xyz_euler_angle_z),60,-60);
+	temp_head_pitch = limitCheckHead(head_kinematics_ -> zyx_euler_angle_y - result_head_enable*0,20,-20);
+	temp_head_roll  = limitCheckHead(head_kinematics_ -> zyx_euler_angle_x - result_head_enable*(0 + waist_kinematics_ -> xyz_euler_angle_x),20,-20);
 	//gazebo
 	result_[joint_id_to_name_[9]] -> goal_position_  = -(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z)); // waist roll
 	result_[joint_id_to_name_[10]]-> goal_position_  = -(waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y); // waist roll
@@ -263,175 +266,213 @@ void UpperBodyModule::motion()
 {
 	motion_time_count_center = motion_time_count_center + 0.008;
 
-		if(change_type.compare("left") == 0)  // - 부터 시작
+	if(change_type.compare("left") == 0)  // - 부터 시작
+	{
+		if(pattern_count < 6)
 		{
-			if(pattern_count < 6)
+			if(motion_time_count_center > time_center)
 			{
-				if(motion_time_count_center > time_center)
+				motion_count ++;
+				motion_time_count_center = 0;
+				read_data = true;
+			}
+			else
+			{
+				if(motion_time_count_center < time_center  && motion_count == 1 && read_data == true) // right left turn
 				{
-					motion_count ++;
-					motion_time_count_center = 0;
-				}
-				else
-				{
-					if(motion_time_count_center < time_center  && motion_count == 1) // right left turn
-					{
-						is_moving_waist_ = true;
-						center_change_->parseMotionData(turn_type, "center_change");
-						center_change_->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
+					is_moving_waist_ = true;
+					center_change_->parseMotionData(turn_type, "center_change");
+					center_change_->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
 
+					waist_end_point_(3,1) = 0;
+					waist_end_point_(3,7) = time_center;
 
-					}
+					read_data = false;
 
-					if(motion_time_count_center < time_center  && motion_count == 2) // edge
-					{
-						is_moving_waist_ = true;
-						center_change_->parseMotionData(turn_type, "center_change");
-						center_change_->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
-
-					}
-
-					if(motion_time_count_center < time_center  && motion_count == 3) // center
-					{
-						is_moving_waist_ = true;
-						center_change_->parseMotionData(turn_type, "center_change");
-						center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
-
-					}
-
-					if(motion_time_count_center < time_center  && motion_count == 4) // right left turn
-					{
-						is_moving_waist_ = true;
-						center_change_->parseMotionData(turn_type, "center_change");
-						center_change_->calculateStepEndPointValue(-change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
-
-
-					}
-
-					if(motion_time_count_center < time_center  && motion_count == 5) // edge
-					{
-						is_moving_waist_ = true;
-						center_change_->parseMotionData(turn_type, "center_change");
-						center_change_->calculateStepEndPointValue(-change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
-
-					}
-
-					if(motion_time_count_center < time_center  && motion_count == 6) // center
-					{
-						is_moving_waist_ = true;
-						center_change_->parseMotionData(turn_type, "center_change");
-						center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
-
-					}
 				}
 
-
-
-						for(int m = 0 ; m<2 ; m++)
-						{
-							waist_end_point_(2*m+3,1) = center_change_->step_end_point_value[m];
-							waist_end_point_(2*m+3,7) = time_center;
-
-							printf("Value111111 :::   %f  \n",waist_end_point_(2*m+3,1));
-						}
-
-
-				if(motion_count == 7)
+				if(motion_time_count_center < time_center  && motion_count == 2 && read_data == true) // edge
 				{
-					pattern_count ++;
-					motion_count = 1;
+					is_moving_waist_ = true;
+					center_change_->parseMotionData(turn_type, "center_change");
+					center_change_->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
+
+					waist_end_point_(3,1) = center_change_->step_end_point_value[0];
+					waist_end_point_(3,7) = time_center;
+
+					read_data = false;
+				}
+
+				if(motion_time_count_center < time_center  && motion_count == 3 && read_data == true) // center
+				{
+					is_moving_waist_ = true;
+					center_change_->parseMotionData(turn_type, "center_change");
+					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
+
+					waist_end_point_(3,1) = 0;
+					waist_end_point_(3,7) = time_center;
+
+					read_data = false;
+				}
+
+				if(motion_time_count_center < time_center  && motion_count == 4 && read_data == true) // right left turn
+				{
+					is_moving_waist_ = true;
+					center_change_->parseMotionData(turn_type, "center_change");
+					center_change_->calculateStepEndPointValue(-change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
+
+					waist_end_point_(3,1) = 0;
+					waist_end_point_(3,7) = time_center;
+
+					read_data = false;
+
+				}
+
+				if(motion_time_count_center < time_center  && motion_count == 5 && read_data == true)  // edge
+				{
+					is_moving_waist_ = true;
+					center_change_->parseMotionData(turn_type, "center_change");
+					center_change_->calculateStepEndPointValue(-change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
+
+					waist_end_point_(3,1) = center_change_->step_end_point_value[0];
+					waist_end_point_(3,7) = time_center;
+					read_data = false;
+				}
+
+				if(motion_time_count_center < time_center  && motion_count == 6 && read_data == true) // center
+				{
+					is_moving_waist_ = true;
+					center_change_->parseMotionData(turn_type, "center_change");
+					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
+
+					waist_end_point_(3,1) = 0;
+					waist_end_point_(3,7) = time_center;
+
+					read_data = false;
 				}
 			}
 
-			else
-				return;
-		}
 
 
-		if(change_type.compare("right") == 0)  // - 부터 시작
-		{
-			if(pattern_count < 6)
+
+			waist_end_point_(5,1) = center_change_->step_end_point_value[1];
+			waist_end_point_(5,7) = time_center;
+
+			/*	for(int m = 0 ; m<2 ; m++)
 						{
-							if(motion_time_count_center > time_center)
-							{
-								motion_count ++;
-								motion_time_count_center = 0;
-							}
-							else
-							{
-								if(motion_time_count_center < time_center  && motion_count == 1) // right left turn
-								{
-									is_moving_waist_ = true;
-									center_change_->parseMotionData(turn_type, "center_change");
-									center_change_->calculateStepEndPointValue(-change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
+							waist_end_point_(2*m+3,1) = center_change_->step_end_point_value[m];
+							waist_end_point_(2*m+3,7) = time_center;
+						}*/
 
 
-								}
-
-								if(motion_time_count_center < time_center  && motion_count == 2) // edge
-								{
-									is_moving_waist_ = true;
-									center_change_->parseMotionData(turn_type, "center_change");
-									center_change_->calculateStepEndPointValue(-change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
-
-								}
-
-								if(motion_time_count_center < time_center  && motion_count == 3) // center
-								{
-									is_moving_waist_ = true;
-									center_change_->parseMotionData(turn_type, "center_change");
-									center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
-
-								}
-
-								if(motion_time_count_center < time_center  && motion_count == 4) // right left turn
-								{
-									is_moving_waist_ = true;
-									center_change_->parseMotionData(turn_type, "center_change");
-									center_change_->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
-
-
-								}
-
-								if(motion_time_count_center < time_center  && motion_count == 5) // edge
-								{
-									is_moving_waist_ = true;
-									center_change_->parseMotionData(turn_type, "center_change");
-									center_change_->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
-
-								}
-
-								if(motion_time_count_center < time_center  && motion_count == 6) // center
-								{
-									is_moving_waist_ = true;
-									center_change_->parseMotionData(turn_type, "center_change");
-									center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
-
-								}
-							}
-									for(int m = 0 ; m<2 ; m++)
-									{
-										waist_end_point_(2*m+3,1) = center_change_->step_end_point_value[m];
-										waist_end_point_(2*m+3,7) = time_center;
-
-										printf("Value111111 :::   %f  \n",waist_end_point_(2*m+3,1)*RADIAN2DEGREE);
-									}
-
-
-							if(motion_count == 7)
-							{
-								pattern_count ++;
-								motion_count = 1;
-							}
-						}
-
-						else
-							return;
-
-
-
-
+			if(motion_count == 7)
+			{
+				pattern_count ++;
+				motion_count = 1;
+			}
 		}
+
+		else
+			return;
+	}
+
+
+	if(change_type.compare("right") == 0)  // - 부터 시작
+	{
+		if(pattern_count < 6)
+		{
+			if(motion_time_count_center > time_center)
+			{
+				motion_count ++;
+				motion_time_count_center = 0;
+				read_data = true;
+			}
+			else
+			{
+				if(motion_time_count_center < time_center  && motion_count == 1 && read_data == true) // right left turn
+				{
+					is_moving_waist_ = true;
+					center_change_->parseMotionData(turn_type, "center_change");
+					center_change_->calculateStepEndPointValue(-change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
+
+					waist_end_point_(3,1) = 0;
+					waist_end_point_(3,7) = time_center;
+
+					read_data = false;
+
+				}
+
+				if(motion_time_count_center < time_center  && motion_count == 2 && read_data == true) // edge
+				{
+					is_moving_waist_ = true;
+					center_change_->parseMotionData(turn_type, "center_change");
+					center_change_->calculateStepEndPointValue(-change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
+
+					waist_end_point_(3,1) = center_change_->step_end_point_value[0];
+					waist_end_point_(3,7) = time_center;
+
+					read_data = false;
+				}
+
+				if(motion_time_count_center < time_center  && motion_count == 3 && read_data == true) // center
+				{
+					is_moving_waist_ = true;
+					center_change_->parseMotionData(turn_type, "center_change");
+					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
+					waist_end_point_(3,1) = 0;
+					waist_end_point_(3,7) = time_center;
+					read_data = false;
+				}
+
+				if(motion_time_count_center < time_center  && motion_count == 4 && read_data == true) // right left turn
+				{
+					is_moving_waist_ = true;
+					center_change_->parseMotionData(turn_type, "center_change");
+					center_change_->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
+					waist_end_point_(3,1) = 0;
+					waist_end_point_(3,7) = time_center;
+					read_data = false;
+
+				}
+
+				if(motion_time_count_center < time_center  && motion_count == 5 && read_data == true) // edge
+				{
+					is_moving_waist_ = true;
+					center_change_->parseMotionData(turn_type, "center_change");
+					center_change_->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
+					waist_end_point_(3,1) = center_change_->step_end_point_value[0];
+					waist_end_point_(3,7) = time_center;
+					read_data = false;
+				}
+
+				if(motion_time_count_center < time_center  && motion_count == 6 && read_data == true) // center
+				{
+					is_moving_waist_ = true;
+					center_change_->parseMotionData(turn_type, "center_change");
+					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
+					waist_end_point_(3,1) = 0;
+					waist_end_point_(3,7) = time_center;
+					read_data = false;
+				}
+			}
+			waist_end_point_(5,1) = center_change_->step_end_point_value[1];
+			waist_end_point_(5,7) = time_center;
+
+
+			if(motion_count == 7)
+			{
+				pattern_count ++;
+				motion_count = 1;
+			}
+		}
+
+		else
+			return;
+
+
+
+
+	}
 
 
 

@@ -168,6 +168,8 @@ private:
 	double motion_count;
 
 	double pattern_count;
+
+	bool read_data;
 };
 
 }
