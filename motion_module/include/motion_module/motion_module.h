@@ -155,6 +155,19 @@ private:
 	double temp_change_value_edge, temp_change_value_center;
 	std::string temp_turn_type;
 	std::string temp_change_type;
+
+	void motion();
+	double change_value_center;
+	double change_value_edge;
+	double time_center;
+	double time_edge;
+	std::string turn_type;
+	std::string change_type;
+	double motion_time_count_center;
+	double motion_time_count_edge;
+	double motion_count;
+
+	double pattern_count;
 };
 
 }

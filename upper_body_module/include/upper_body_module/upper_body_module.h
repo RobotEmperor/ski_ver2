@@ -196,6 +196,21 @@ private:
 	double result_head_enable;
 	double head_enable_time;
 
+	//test
+
+	void motion();
+	double change_value_center;
+	double change_value_edge;
+	double time_center;
+	double time_edge;
+	std::string turn_type;
+	std::string change_type;
+	double motion_time_count_center;
+	double motion_time_count_edge;
+	double motion_count;
+
+	double pattern_count;
+
 
 
 };

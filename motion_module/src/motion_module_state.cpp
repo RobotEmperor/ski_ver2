@@ -47,8 +47,8 @@ MotionModule::MotionModule()
 
 
 	// test
-//	result_["l_knee_pitch"]     = new robotis_framework::DynamixelState();  // joint 17
-//	result_["r_knee_pitch"]     = new robotis_framework::DynamixelState();  // joint 18
+	//	result_["l_knee_pitch"]     = new robotis_framework::DynamixelState();  // joint 17
+	//	result_["r_knee_pitch"]     = new robotis_framework::DynamixelState();  // joint 18
 
 	///////////////////////////
 	l_kinematics_ = new heroehs_math::Kinematics;
@@ -125,6 +125,19 @@ MotionModule::MotionModule()
 	updating_duration_cop = 0;
 	copFz_p_gain = 0;
 	copFz_d_gain = 0;
+
+
+	// test
+	change_value_center = 0;
+	change_value_edge = 0;
+	time_center = 0;
+	time_edge = 0 ;
+	turn_type = "basic";
+	change_type = "basic";
+	motion_time_count_center = 0;
+	motion_time_count_edge = 0;
+	motion_count = 1;
+	pattern_count = 0;
 }
 MotionModule::~MotionModule()
 {
@@ -165,7 +178,7 @@ void MotionModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange
 	is_moving_l_ = true;
 	is_moving_r_ = true;
 
-	if (temp_change_value_center != msg->center_change || temp_change_value_edge != msg->edge_change|| temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
+/*	if (temp_change_value_center != msg->center_change || temp_change_value_edge != msg->edge_change|| temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
 	{
 		center_change_->parseMotionData(msg->turn_type, msg->change_type);
 
@@ -190,7 +203,19 @@ void MotionModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange
 	else
 	{  ROS_INFO("Nothing to change");
 	return;
-	}
+	}*/
+	change_value_center =msg->center_change;
+	change_value_edge = msg->edge_change;
+
+	time_center = msg->time_change;
+	time_edge = msg->time_change_waist;
+
+	turn_type = msg->turn_type;
+	change_type = msg->change_type;
+
+	pattern_count  = 1;
+	motion_count = 1;
+	motion_time_count_center = 0;
 }
 void MotionModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) // gyro data get
 {
@@ -240,7 +265,7 @@ void MotionModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& ms
 	cop_cal->jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
 	cop_cal->copCalculationResult();
 	cop_compensation->centerOfPressureReferencePoint(temp_turn_type,   cop_cal->cf_px_l, cop_cal->cf_py_l, cop_cal->cf_pz_l,
-			                                             cop_cal->cf_px_r, cop_cal->cf_py_r, cop_cal->cf_pz_r, temp_change_value_center);
+			cop_cal->cf_px_r, cop_cal->cf_py_r, cop_cal->cf_pz_r, temp_change_value_center);
 }
 void MotionModule::setBalanceParameterCallback(const diana_msgs::BalanceParam::ConstPtr& msg)
 {

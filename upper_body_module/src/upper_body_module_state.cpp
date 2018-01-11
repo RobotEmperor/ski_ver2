@@ -129,6 +129,18 @@ UpperBodyModule::UpperBodyModule()
 	head_enable = 0;
 	result_head_enable = 0;
 	head_enable_time = 2.0;
+
+	// test
+	change_value_center = 0;
+	change_value_edge = 0;
+	time_center = 0;
+	time_edge = 0 ;
+	turn_type = "basic";
+	change_type = "basic";
+	motion_time_count_center = 0;
+	motion_time_count_edge = 0;
+	motion_count = 1;
+	pattern_count = 0;
 }
 UpperBodyModule::~UpperBodyModule()
 {
@@ -296,7 +308,8 @@ void UpperBodyModule::copFzMsgCallBack(const std_msgs::Float64MultiArray::ConstP
 // center change msg ///////////////////////////////////
 void UpperBodyModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg) // GUI 에서 motion_num topic을 sub 받아 실행 모션 번호 디텍트
 {
-	if (temp_change_value_center != msg->center_change || temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
+	is_moving_waist_ = true;
+	/*if (temp_change_value_center != msg->center_change || temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
 	{
 		center_change_->parseMotionData(msg->turn_type, msg->change_type);
 		center_change_->calculateStepEndPointValue(msg->center_change,100,msg->change_type); // 0.01 단위로 조정 가능.
@@ -315,7 +328,19 @@ void UpperBodyModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterCha
 	else
 	{  ROS_INFO("Nothing to change");
 	return;
-	}
+	}*/
+	change_value_center =msg->center_change;
+	change_value_edge = msg->edge_change;
+
+	time_center = msg->time_change;
+	time_edge = msg->time_change_waist;
+
+	turn_type = msg->turn_type;
+	change_type = msg->change_type;
+
+	pattern_count  = 1;
+	motion_count = 1;
+	motion_time_count_center = 0;
 }
 //////////////////////////////////////////////////////////////////////
 
