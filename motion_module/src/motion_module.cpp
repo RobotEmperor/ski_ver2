@@ -250,14 +250,6 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	//	result_[joint_id_to_name_[18]]->goal_position_ = r_kinematics_->joint_radian(4,0);
 	//	result_[joint_id_to_name_[17]]->goal_position_ = -l_kinematics_->joint_radian(4,0);
 
-	printf("11  ::   %f\n",  -l_kinematics_->joint_radian(1,0));
-	printf("13  ::   %f\n",   l_kinematics_->joint_radian(2,0));
-	printf("15  ::   %f\n",   l_kinematics_->joint_radian(3,0));
-	printf("17  ::   %f\n",   l_kinematics_->joint_radian(4,0));
-	printf("19  ::   %f\n",  -l_kinematics_->joint_radian(5,0));
-	printf("21  ::   %f\n",   l_kinematics_->joint_radian(6,0));
-
-
 	//<---  cartesian space control  --->
 	result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);
 	result_[joint_id_to_name_[13]]->goal_position_ =  l_kinematics_->joint_radian(2,0);
@@ -346,7 +338,6 @@ void MotionModule::motion()
 						center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
 						center_change_->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
 						read_data = false;
-						printf("!!!!!!!!!!!!!!!!!!!!");
 				}
 
 				if(motion_time_count_center < time_center  && motion_count == 2 && read_data ==true) // edge
@@ -357,7 +348,6 @@ void MotionModule::motion()
 						center_change_->parseMotionData(turn_type, "edge_change");
 						center_change_->calculateStepEndPointValue(change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
 						read_data = false;
-						printf("!!!!!!!!!!!!!!!!!!!!");
 				}
 
 				if(motion_time_count_center < time_center  && motion_count == 3 && read_data ==true) // center
@@ -368,7 +358,6 @@ void MotionModule::motion()
 					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
 					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
 					read_data = false;
-					printf("!!!!!!!!!!!!!!!!!!!!");
 
 				}
 
@@ -380,7 +369,6 @@ void MotionModule::motion()
 					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
 					center_change_->calculateStepEndPointValue(-change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
 					read_data = false;
-					printf("!!!!!!!!!!!!!!!!!!!!");
 				}
 
 				if(motion_time_count_center < time_center  && motion_count == 5  && read_data ==true) // edge
@@ -390,7 +378,6 @@ void MotionModule::motion()
 					center_change_->parseMotionData(turn_type, "edge_change");
 					center_change_->calculateStepEndPointValue(-change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
 					read_data = false;
-					printf("!!!!!!!!!!!!!!!!!!!!");
 				}
 
 				if(motion_time_count_center < time_center  && motion_count == 6 && read_data ==true) // center
@@ -401,7 +388,6 @@ void MotionModule::motion()
 					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
 					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
 					read_data = false;
-					printf("!!!!!!!!!!!!!!!!!!!!");
 
 				}
 			}

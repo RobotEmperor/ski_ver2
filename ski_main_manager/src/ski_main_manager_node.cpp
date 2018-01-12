@@ -14,6 +14,7 @@
 #include "arm_module/arm_module.h"
 
 
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "Heroehs_ski_main_manager_ver2");
