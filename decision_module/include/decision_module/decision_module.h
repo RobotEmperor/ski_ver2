@@ -18,17 +18,6 @@
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 #include <stdio.h>
-
-//#include "robotis_framework_common/sensor_module.h"
-//library
-//#include "robotis_math/robotis_math.h"
-//#include "heroehs_math/fifth_order_trajectory_generate.h"
-//#include "heroehs_math/kinematics.h"
-//#include "heroehs_math/end_point_to_rad_cal.h"
-//#include "diana_balance_control/control_function.h"
-//#include "diana_balance_control/diana_balance_control.h"
-//#include "diana_balance_control/cop_calculation_function.h"
-
 //message
 //m - standard
 #include <std_msgs/Int16.h>
@@ -36,44 +25,31 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Bool.h>
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/PointStamped.h>
 #include <sensor_msgs/Imu.h>
 
 //m - personal
 #include "diana_msgs/CenterChange.h"
+#include "decision_module/decision_module_state.h"
 
+using namespace decision_module;
+
+bool ready_check;
+
+DecisionModule *decision_process;
+
+
+// publisher
+ros::Publisher center_change_pub;
+// subscriber
+ros::Subscriber ready_check_sub;
+// msg
+diana_msgs::CenterChange center_change_msg;
+
+void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
 void control_loop(const ros::TimerEvent&);
-
-
-namespace decision_module
-{
-class DecisionModule
-{
-public:
-	DecisionModule();
-	virtual ~DecisionModule();
-
-	/* ROS Functions */
-	void initialize();
-	void process();
-	bool gazebo_check;
-
-	// publisher
-	ros::Publisher center_change_pub;
-
-
-
-	// subscriber
-
-	// msg
-	diana_msgs::CenterChange center_change_msg;
-private:
-
-
-};
-
-}
 
 
 

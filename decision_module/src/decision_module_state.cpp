@@ -4,33 +4,28 @@
  *  Created on: Jan 12, 2018
  *      Author: robotemperor
  */
-#include "decision_module/decision_module.h"
+#include "decision_module/decision_module_state.h"
 
 using namespace decision_module;
 
 DecisionModule::DecisionModule()
 {
-
+	gazebo_check = false;
 }
 DecisionModule::~DecisionModule()
 {
-
 }
 
 void DecisionModule::initialize()
 {
-
-
-
-
 	ROS_INFO("< -------  Initialize Module : Decision Module  !!  ------->");
 }
 
+
 void DecisionModule::process()
 {
-
-
-    printf("1111111111111 \n");
-
-
+	printf("RUN! \n");
 }
+
+
+
