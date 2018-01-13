@@ -206,7 +206,7 @@ void CopCompensationFunc::parse_margin_data()
 		return;
 	}
 	//margin load //
-  margin_pflug_bogen_l_fz_x = doc["pflug_bogen_l_fz_x"].as<double>();
+    margin_pflug_bogen_l_fz_x = doc["pflug_bogen_l_fz_x"].as<double>();
 	margin_pflug_bogen_l_fz_y = doc["pflug_bogen_l_fz_y"].as<double>();
 
 	margin_pflug_bogen_r_fz_x = doc["pflug_bogen_r_fz_x"].as<double>();

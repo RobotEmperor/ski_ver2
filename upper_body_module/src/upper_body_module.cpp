@@ -38,7 +38,7 @@ void UpperBodyModule::initialize(const int control_cycle_msec, robotis_framework
 	head_end_point_(4,1) = -10*DEGREE2RADIAN; //
 	end_to_rad_head_->cal_end_point_tra_betta->final_pose = -10*DEGREE2RADIAN;
 	end_to_rad_head_->cal_end_point_tra_betta->current_pose = -10*DEGREE2RADIAN;
-	end_to_rad_head_->current_pose_change(1,0) = -10*DEGREE2RADIAN;
+	end_to_rad_head_->current_pose_change(4,0) = -10*DEGREE2RADIAN;
 
 
 	for(int joint_num_= 3; joint_num_< 6 ; joint_num_ ++)  // waist 3, 5번 // head 345 초기화

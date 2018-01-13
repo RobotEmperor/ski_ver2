@@ -179,7 +179,7 @@ void MotionModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange
 	is_moving_l_ = true;
 	is_moving_r_ = true;
 
-/*	if (temp_change_value_center != msg->center_change || temp_change_value_edge != msg->edge_change|| temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
+	/*	if (temp_change_value_center != msg->center_change || temp_change_value_edge != msg->edge_change|| temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
 	{
 		center_change_->parseMotionData(msg->turn_type, msg->change_type);
 
@@ -259,6 +259,12 @@ void MotionModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& ms
 	currentTX_r = (double) msg->torque_x_raw_r;
 	currentTY_r = (double) msg->torque_y_raw_r;
 	currentTZ_r = (double) msg->torque_z_raw_r;
+
+	if(currentFX_l && currentFY_l && currentFZ_l && currentTX_l && currentTY_l && currentTZ_l)
+	{
+		copFz_p_gain = 0;
+		copFz_d_gain = 0;
+	} // cop control disable
 
 	cop_cal->ftSensorDataLeftGet(currentFX_l, currentFY_l, currentFZ_l, currentTX_l, currentTY_l, currentTZ_l);
 	cop_cal->ftSensorDataRightGet(currentFX_r, currentFY_r, currentFZ_r, currentTX_r, currentTY_r, currentTZ_r);

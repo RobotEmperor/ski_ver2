@@ -12,9 +12,6 @@ int main(int argc, char **argv)
 	DecisionModule *decision_process;
 	decision_process = new DecisionModule;
 
-
-
-
 	ros::init(argc, argv, "decision_module");
 	ros::NodeHandle ros_node;
 	ready_check_sub = ros_node.subscribe("/ready_check", 5, readyCheckMsgCallBack);
@@ -26,8 +23,6 @@ int main(int argc, char **argv)
 	{
 		ros::spinOnce();
 	}
-
-
 
 	return 0;
 }
