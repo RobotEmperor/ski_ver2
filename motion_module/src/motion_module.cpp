@@ -307,6 +307,28 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	r_leg_point_rpy_msg_.y=  result_pose_r_modified_.pitch;
 	r_leg_point_rpy_msg_.z=  result_pose_r_modified_.yaw;
 	r_leg_point_rpy_pub.publish(r_leg_point_rpy_msg_);
+
+	// l_ compensation xyz
+	l_compensation_xyz_msg_.x=  cop_compensation->control_value_Fz_x;
+	l_compensation_xyz_msg_.y=  cop_compensation->control_value_Fz_y;
+	l_compensation_xyz_msg_.z=  0;
+	l_compensation_xyz_pub.publish(l_compensation_xyz_msg_);
+	// l_ compensation radian alpha betta kamma
+	l_compensation_rpy_msg_.x=  balance_ctrl_.foot_roll_adjustment_by_gyro_roll_;
+	l_compensation_rpy_msg_.y=  balance_ctrl_.foot_pitch_adjustment_by_gyro_pitch_;
+	l_compensation_rpy_msg_.z=  0;
+	l_compensation_rpy_pub.publish(l_compensation_rpy_msg_);
+
+	// r_ compensation xyz
+	r_compensation_xyz_msg_.x=  cop_compensation->control_value_Fz_x;
+	r_compensation_xyz_msg_.y=  cop_compensation->control_value_Fz_y;
+	r_compensation_xyz_msg_.z=  0;
+	r_compensation_xyz_pub.publish(r_compensation_xyz_msg_);
+	// r_ compensation radian alpha betta kamma
+	r_compensation_rpy_msg_.x=  balance_ctrl_.foot_roll_adjustment_by_gyro_roll_;
+	r_compensation_rpy_msg_.y=  balance_ctrl_.foot_pitch_adjustment_by_gyro_pitch_;
+	r_compensation_rpy_msg_.z=  0;
+	r_compensation_rpy_pub.publish(r_compensation_rpy_msg_);
 }
 void MotionModule::stop()
 {

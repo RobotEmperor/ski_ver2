@@ -153,9 +153,13 @@ void MotionModule::queueThread()
 	/* publisher topics */
 	l_leg_point_xyz_pub = ros_node.advertise<geometry_msgs::Vector3>("/l_leg_point_xyz",100);
 	l_leg_point_rpy_pub = ros_node.advertise<geometry_msgs::Vector3>("/l_leg_point_rpy",100);
-
 	r_leg_point_xyz_pub = ros_node.advertise<geometry_msgs::Vector3>("/r_leg_point_xyz",100);
 	r_leg_point_rpy_pub = ros_node.advertise<geometry_msgs::Vector3>("/r_leg_point_rpy",100);
+
+	l_compensation_xyz_pub = ros_node.advertise<geometry_msgs::Vector3>("/l_compensation_xyz",100);;
+	l_compensation_rpy_pub = ros_node.advertise<geometry_msgs::Vector3>("/l_compensation_rpy",100);;
+	r_compensation_xyz_pub = ros_node.advertise<geometry_msgs::Vector3>("/r_compensation_xyz",100);;
+	r_compensation_rpy_pub = ros_node.advertise<geometry_msgs::Vector3>("/r_compensation_rpy",100);;
 
 	cop_fz_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/cop_fz",100);
 

@@ -68,6 +68,12 @@ public:
 	ros::Publisher l_leg_point_rpy_pub;
 	ros::Publisher r_leg_point_xyz_pub;
 	ros::Publisher r_leg_point_rpy_pub;
+
+	ros::Publisher l_compensation_xyz_pub;
+	ros::Publisher l_compensation_rpy_pub;
+	ros::Publisher r_compensation_xyz_pub;
+	ros::Publisher r_compensation_rpy_pub;
+
 	ros::Publisher cop_fz_pub;
 
 
@@ -96,6 +102,11 @@ private:
 	geometry_msgs::Vector3 l_leg_point_rpy_msg_;
 	geometry_msgs::Vector3 r_leg_point_xyz_msg_;
 	geometry_msgs::Vector3 r_leg_point_rpy_msg_;
+
+	geometry_msgs::Vector3 l_compensation_xyz_msg_;
+	geometry_msgs::Vector3 l_compensation_rpy_msg_;
+	geometry_msgs::Vector3 r_compensation_xyz_msg_;
+	geometry_msgs::Vector3 r_compensation_rpy_msg_;
 
 	boost::thread queue_thread_;
 

@@ -107,6 +107,9 @@ void ArmModule::queueThread()
 	ros::CallbackQueue callback_queue;
 	ros_node.setCallbackQueue(&callback_queue);
 
+	//publisher
+	tf_gyro_value_pub  = ros_node.advertise<geometry_msgs::Vector3>("/tf_gyro_value",100);
+
 	// subscriber topics
 	desired_pose_arm_sub_   = ros_node.subscribe("/desired_pose_arm", 5, &ArmModule::desiredPoseArmMsgCallbackTEST, this);
 	current_waist_pose_sub_ = ros_node.subscribe("/current_waist_pose", 5, &ArmModule::currentWaistPoseMsgCallback, this);

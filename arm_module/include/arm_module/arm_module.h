@@ -66,6 +66,9 @@ public:
 
 	double traj_time_test;
 
+	// publisher
+	ros::Publisher tf_gyro_value_pub;
+
 	// sensor data & balance on off
 	ros::Subscriber desired_pose_arm_sub_;
 	ros::Subscriber current_waist_pose_sub_;
@@ -96,6 +99,9 @@ private:
 	int new_count_;
 	bool is_moving_l_arm_;
 	bool is_moving_r_arm_;
+
+	// tf gyro value
+	geometry_msgs::Vector3 tf_gyro_value_msg;
 
 
 

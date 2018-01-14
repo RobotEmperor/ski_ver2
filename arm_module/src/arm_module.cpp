@@ -173,16 +173,10 @@ void ArmModule::process(std::map<std::string, robotis_framework::Dynamixel *> dx
 	result_[joint_id_to_name_[4]]->goal_position_ =  -limitCheckArmAngle(r_arm_kinematics_->joint_radian(2,0) - gyro_roll_function->PID_calculate(0,tf_current_gyro_x) - fabs(gyro_yaw_function->PID_calculate(0,tf_current_gyro_z)), -5, -85);
 	result_[joint_id_to_name_[6]]->goal_position_ =  -r_arm_kinematics_->joint_radian(3,0); //+ gyro_pitch_function->PID_calculate(0,tf_current_gyro_y) + gyro_yaw_function->PID_calculate(0,tf_current_gyro_z);
 
-	//double joint_l[4] = {0,0,45*DEGREE2RADIAN,-45*DEGREE2RADIAN};
-	//double joint_r[4] = {0,0,-45,-45};
-	//l_arm_kinematics_ -> FowardKinematicsArm(joint_l,"left");
-/*	printf("1   ::   %f  \n",l_arm_kinematics_->joint_radian(1,0));
-	printf("3   ::   %f  \n",l_arm_kinematics_->joint_radian(2,0));
-	printf("5   ::   %f  \n",l_arm_kinematics_->joint_radian(3,0));
-
-	printf("2   ::   %f  \n",r_arm_kinematics_->joint_radian(1,0));
-	printf("4   ::   %f  \n",r_arm_kinematics_->joint_radian(2,0));
-	printf("6   ::   %f  \n",r_arm_kinematics_->joint_radian(3,0));*/
+	tf_gyro_value_msg.x = tf_current_gyro_x;
+	tf_gyro_value_msg.y = tf_current_gyro_y;
+	tf_gyro_value_msg.z = tf_current_gyro_z;
+	tf_gyro_value_pub.publish(tf_gyro_value_msg);
 }
 void ArmModule::stop()
 {

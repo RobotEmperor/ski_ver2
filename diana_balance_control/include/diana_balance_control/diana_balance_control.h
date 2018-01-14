@@ -63,6 +63,9 @@ public:
 
   BalancePDController foot_roll_gyro_ctrl_;
   BalancePDController foot_pitch_gyro_ctrl_;
+  // result of balance control
+  double foot_roll_adjustment_by_gyro_roll_;
+  double foot_pitch_adjustment_by_gyro_pitch_;
 
 private:
 
@@ -84,11 +87,6 @@ private:
   double cob_x_manual_adjustment_m_;
   double cob_y_manual_adjustment_m_;
   double cob_z_manual_adjustment_m_;
-
-  // result of balance control
-  double foot_roll_adjustment_by_gyro_roll_;
-  double foot_pitch_adjustment_by_gyro_pitch_;
-
 
   // sum of results of balance control
   Eigen::VectorXd pose_cob_adjustment_;
