@@ -29,13 +29,11 @@ public:
 	void FowardKnematicsCenterToSensorLeft(double joint[7]);
 	void InverseKinematics(double pX_, double pY_, double pZ_, double z_alpha_, double y_betta_, double x_kamma_);
 
-	Eigen::MatrixXd RotationZedToHead(double zed_x, double zed_y, double zed_z);
-	void TransformationOriginToWaist(double x, double y, double z, double roll, double pitch, double yaw);
-	void TransformationWaistToHead(double x, double y, double z, double roll, double pitch, double yaw);
-	void TransformateHeadPointOnOrigin(double x, double y, double z);
+
 
 	Eigen::MatrixXd tf_origin_to_waist;
 	Eigen::MatrixXd tf_waist_to_head;
+	Eigen::MatrixXd tf_flag_to_head;
 
 	Eigen::MatrixXd CenterToGroundTransformation(Eigen::MatrixXd point);
 
@@ -47,7 +45,15 @@ public:
 	Eigen::MatrixXd center_to_foot_transform_right_leg;
 
 	double real_theta_public[7];
+
+	Eigen::MatrixXd RotationZedToHead(double zed_x, double zed_y, double zed_z);
+	void TransformationOriginToWaist(double x, double y, double z, double roll, double pitch, double yaw);
+	void TransformationWaistToHead(double x, double y, double z, double roll, double pitch, double yaw);
+	void TransformateHeadPointOnOrigin(double x, double y, double z);
+
 	double head_point_on_origin_x, head_point_on_origin_y, head_point_on_origin_z;
+	double origin_on_flag_x, origin_on_flag_y, origin_on_flag_z;
+
 private:
 
 	//forward_kinematics leg
@@ -112,11 +118,6 @@ private:
 	Eigen::Matrix4d arm_to_origin_tf_;
 	Eigen::MatrixXd origin_desired_point_;
 	//Eigen::Matrix4d origin_to_arm_end_point_tf_;
-
-
-
-
-
 };
 
 class KinematicsEulerAngle

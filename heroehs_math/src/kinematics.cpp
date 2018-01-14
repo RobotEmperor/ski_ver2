@@ -124,9 +124,19 @@ Kinematics::Kinematics()
 	tf_waist_to_head.resize(4,4);
 	tf_waist_to_head.fill(0);
 	tf_waist_to_head(3,3) = 1;
+	tf_flag_to_head.resize(4,4);
+	tf_flag_to_head.fill(0);
+	tf_flag_to_head(0,0) = 1;
+	tf_flag_to_head(1,1) = 1;
+	tf_flag_to_head(2,2) = 1;
+	tf_flag_to_head(3,3) = 1;
 	head_point_on_origin_x = 0;
 	head_point_on_origin_y = 0;
 	head_point_on_origin_z = 0;
+
+	origin_on_flag_x = 0;
+	origin_on_flag_y = 0;
+	origin_on_flag_z = 0;
 }
 Kinematics::~Kinematics()
 {
@@ -605,13 +615,24 @@ void Kinematics::TransformateHeadPointOnOrigin(double x, double y, double z)
 	point_head.resize(4,1);
 	point_head.fill(0);
 	point_head<< point_zed(0,0),
-			         point_zed(1,0),
-			         point_zed(2,0),
-			         1;
+			point_zed(1,0),
+			point_zed(2,0),
+			1;
 	temp_tf = tf_origin_to_waist*tf_waist_to_head*point_head;
 	head_point_on_origin_x = temp_tf(0,0);
 	head_point_on_origin_y = temp_tf(1,0);
 	head_point_on_origin_z = temp_tf(2,0);
+
+	tf_flag_to_head(3,0) = -point_head(0,0);
+	tf_flag_to_head(3,1) = -point_head(1,0);
+	tf_flag_to_head(3,2) = -point_head(2,0);
+
+	temp_tf = tf_origin_to_waist*tf_waist_to_head;
+	temp_tf = tf_flag_to_head * (temp_tf.inverse());
+
+	origin_on_flag_x = temp_tf(0,0);
+	origin_on_flag_y = temp_tf(1,0);
+	origin_on_flag_z = temp_tf(2,0);
 }
 //////////////////////////////////////////////////////////Arm Kinematics/////////////////////////////////////////////////////////////////////////
 KinematicsArm::KinematicsArm()
@@ -799,7 +820,7 @@ void KinematicsArm::FowardKinematicsArm(double joint[4], std::string left_right)
 
 	P_ = H_arm[0]*H_arm[1]*H_arm[2]*H_arm[3];
 
-/*  printf("forward_kinematics arm\n");
+	/*  printf("forward_kinematics arm\n");
 	printf("%f  %f  %f %f \n",P_(0,0),P_(0,1),P_(0,2),P_(0,3));
 	printf("%f  %f  %f %f \n",P_(1,0),P_(1,1),P_(1,2),P_(1,3));
 	printf("%f  %f  %f %f \n",P_(2,0),P_(2,1),P_(2,2),P_(2,3));

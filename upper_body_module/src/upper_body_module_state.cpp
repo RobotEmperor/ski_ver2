@@ -241,11 +241,11 @@ void UpperBodyModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) 
 	tf_current_gyro_x = tf_gyro_value(0,0);
 	tf_current_gyro_y = tf_gyro_value(1,0);
 	tf_current_gyro_z = tf_gyro_value(2,0);
-	quaternionToAngle(currentGyroOrientationW, currentGyroOrientationX, currentGyroOrientationY, currentGyroOrientationZ);
-	gyroRotationTransformation(tf_gyro_value(2,0), tf_gyro_value(1,0), tf_gyro_value(0,0));
-	tf_current_gyro_orientation_x = tf_gyro_value(0,0);
-	tf_current_gyro_orientation_y = tf_gyro_value(1,0);
-	tf_current_gyro_orientation_z = tf_gyro_value(2,0);
+//	quaternionToAngle(currentGyroOrientationW, currentGyroOrientationX, currentGyroOrientationY, currentGyroOrientationZ);
+//	gyroRotationTransformation(tf_gyro_value(2,0), tf_gyro_value(1,0), tf_gyro_value(0,0));
+//	tf_current_gyro_orientation_x = tf_gyro_value(0,0);
+//	tf_current_gyro_orientation_y = tf_gyro_value(1,0);
+//	tf_current_gyro_orientation_z = tf_gyro_value(2,0);
 }
 void UpperBodyModule::gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x)
 {
