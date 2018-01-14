@@ -58,8 +58,6 @@ public:
 	BaseModuleState *base_module_state;
 	heroehs_math::FifthOrderTrajectory *motion_trajectory[26];
 
-
-
 private:
 	void queueThread();
 	void parse_init_pose_data_(const std::string &path);

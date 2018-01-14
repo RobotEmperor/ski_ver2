@@ -156,7 +156,6 @@ void BaseModule::queueThread()
 	ros::CallbackQueue callback_queue;
 
 	ros_node.setCallbackQueue(&callback_queue);
-
 	/* subscribe topics */
 	// for gui
 	ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/init_pose", 5, &BaseModule::initPoseMsgCallback, this);
@@ -177,7 +176,6 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		return;
 	}
 
-	//new_count_ ++;
 	//// read current position ////
 	if(new_count_ == 1)
 	{
@@ -229,22 +227,22 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 		for(int id=1 ; id<7 ; id++)
 		{
 
-				if(id == 1 || id == 3 || id == 4 || id == 6) // 방향 반대인 다이나믹셀
-				{
-					result_[joint_id_to_name_[id]]->goal_position_ = - motion_trajectory[id]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(id,0),
-							base_module_state->joint_ini_pose_goal(id,0),0,0,0,0,0,base_module_state->mov_time_state);
-					if(gazebo_check == true)
-						result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
-					ROS_INFO("id :: %d , value %f", id , result_[joint_id_to_name_[id]]->goal_position_);
-				}
-				else
-				{
-					result_[joint_id_to_name_[id]]->goal_position_ =  motion_trajectory[id]->fifth_order_traj_gen(base_module_state->joint_ini_pose_state(id,0),
-							base_module_state->joint_ini_pose_goal(id,0),0,0,0,0,0,base_module_state->mov_time_state);
-					if(gazebo_check == true)
-						result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
-					ROS_INFO("id :: %d , value %f", id , result_[joint_id_to_name_[id]]->goal_position_);
-				}
+			if(id == 1 || id == 3 || id == 4 || id == 6) // 방향 반대인 다이나믹셀
+			{
+				result_[joint_id_to_name_[id]]->goal_position_ = - motion_trajectory[id]->fifth_order_traj_gen(-base_module_state->joint_ini_pose_state(id,0),
+						base_module_state->joint_ini_pose_goal(id,0),0,0,0,0,0,base_module_state->mov_time_state);
+				if(gazebo_check == true)
+					result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
+				ROS_INFO("id :: %d , value %f", id , result_[joint_id_to_name_[id]]->goal_position_);
+			}
+			else
+			{
+				result_[joint_id_to_name_[id]]->goal_position_ =  motion_trajectory[id]->fifth_order_traj_gen(base_module_state->joint_ini_pose_state(id,0),
+						base_module_state->joint_ini_pose_goal(id,0),0,0,0,0,0,base_module_state->mov_time_state);
+				if(gazebo_check == true)
+					result_[joint_id_to_name_[id]]->present_position_ = result_[joint_id_to_name_[id]]->goal_position_; // gazebo
+				ROS_INFO("id :: %d , value %f", id , result_[joint_id_to_name_[id]]->goal_position_);
+			}
 
 		}
 
