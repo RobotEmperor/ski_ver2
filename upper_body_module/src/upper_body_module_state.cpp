@@ -31,7 +31,8 @@ UpperBodyModule::UpperBodyModule()
 	///////////////////////////
 	//center change waist
 	center_change_ = new diana_motion_waist::CenterChange;
-	temp_change_value_center = 0.0;
+	temp_change_value_waist = 0.0;
+	temp_change_value_edge  = 0.0;
 	temp_turn_type = "basic";
 	temp_change_type = "basic";
 
@@ -241,11 +242,11 @@ void UpperBodyModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) 
 	tf_current_gyro_x = tf_gyro_value(0,0);
 	tf_current_gyro_y = tf_gyro_value(1,0);
 	tf_current_gyro_z = tf_gyro_value(2,0);
-//	quaternionToAngle(currentGyroOrientationW, currentGyroOrientationX, currentGyroOrientationY, currentGyroOrientationZ);
-//	gyroRotationTransformation(tf_gyro_value(2,0), tf_gyro_value(1,0), tf_gyro_value(0,0));
-//	tf_current_gyro_orientation_x = tf_gyro_value(0,0);
-//	tf_current_gyro_orientation_y = tf_gyro_value(1,0);
-//	tf_current_gyro_orientation_z = tf_gyro_value(2,0);
+	//	quaternionToAngle(currentGyroOrientationW, currentGyroOrientationX, currentGyroOrientationY, currentGyroOrientationZ);
+	//	gyroRotationTransformation(tf_gyro_value(2,0), tf_gyro_value(1,0), tf_gyro_value(0,0));
+	//	tf_current_gyro_orientation_x = tf_gyro_value(0,0);
+	//	tf_current_gyro_orientation_y = tf_gyro_value(1,0);
+	//	tf_current_gyro_orientation_z = tf_gyro_value(2,0);
 }
 void UpperBodyModule::gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x)
 {
@@ -310,18 +311,23 @@ void UpperBodyModule::copFzMsgCallBack(const std_msgs::Float64MultiArray::ConstP
 void UpperBodyModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg) // GUI 에서 motion_num topic을 sub 받아 실행 모션 번호 디텍트
 {
 	is_moving_waist_ = true;
-	if (temp_change_value_center != msg->waist_change || temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
+	if (temp_change_value_waist != msg->waist_change || temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
 	{
 		center_change_->parseMotionData(msg->turn_type, msg->change_type);
 		center_change_->calculateStepEndPointValue(msg->waist_change,100,msg->change_type); // 0.01 단위로 조정 가능.
 
-		for(int m = 0 ; m<2 ; m++)
+
+		waist_end_point_(5,1) = center_change_->step_end_point_value[0];
+		waist_end_point_(5,7) = msg->time_change_waist;
+
+		if(temp_change_value_edge != msg->edge_change)
 		{
-			waist_end_point_(2*m+3,1) = center_change_->step_end_point_value[m];
-			waist_end_point_(2*m+3,7) = msg->time_change_waist;
+			waist_end_point_(3,1) = center_change_->step_end_point_value[1];
+			waist_end_point_(3,7) = msg->time_change_waist;
 		}
 
-		temp_change_value_center = msg->waist_change;
+		temp_change_value_edge  = msg->edge_change;
+		temp_change_value_waist = msg->waist_change;
 		temp_turn_type    = msg->turn_type;
 		temp_change_type  = msg->change_type; // 이전값 저장
 		ROS_INFO("Turn !!  Change");
@@ -331,7 +337,7 @@ void UpperBodyModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterCha
 	{  ROS_INFO("Nothing to change");
 	return;
 	}
-/*	change_value_center =msg->center_change;
+	/*	change_value_center =msg->center_change;
 	change_value_edge = msg->edge_change;
 
 	time_center = msg->time_change;

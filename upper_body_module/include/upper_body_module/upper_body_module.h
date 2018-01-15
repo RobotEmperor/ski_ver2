@@ -171,7 +171,7 @@ private:
 
 	//center change lib
 	diana_motion_waist::CenterChange *center_change_;
-	double temp_change_value_center;
+	double temp_change_value_waist, temp_change_value_edge;
 	std::string temp_turn_type;
 	std::string temp_change_type;
 
