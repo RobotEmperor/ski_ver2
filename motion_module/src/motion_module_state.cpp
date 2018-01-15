@@ -210,8 +210,6 @@ void MotionModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange
 				leg_end_point_r_(m,7) = msg->time_change;
 			}
 		}
-
-
 		temp_change_value_center = msg->center_change;
 		temp_change_value_edge = msg->edge_change;
 		temp_turn_type    = msg->turn_type;

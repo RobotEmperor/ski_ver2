@@ -214,8 +214,9 @@ void CopCompensationFunc::parse_margin_data()
 }
 void CopCompensationFunc::centerOfPressureReferencePoint(std::string turn_type, double cur_l_point_x, double cur_l_point_y, double cur_l_point_z, double cur_r_point_x, double cur_r_point_y, double cur_r_point_z, double current_control_value)
 {
-	if(!turn_type.compare("pflug_bogen"))
+	if(turn_type.compare("pflug_bogen") == 0)
 	{
+
 		if(current_control_value > 0)//right
 		{
 			reference_point_Fz_x = cur_l_point_x;
@@ -226,6 +227,8 @@ void CopCompensationFunc::centerOfPressureReferencePoint(std::string turn_type, 
 
 			reference_point_Fx_y = cur_l_point_y - cur_l_point_y*margin_pflug_bogen_l_fx_y;
 			reference_point_Fx_z = cur_l_point_z - cur_l_point_z*margin_pflug_bogen_l_fx_z;
+
+
 		}
 		else if(current_control_value < 0)//left
 		{
