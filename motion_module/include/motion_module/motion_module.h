@@ -87,6 +87,7 @@ public:
 	void ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg);
 	void setBalanceParameterCallback(const diana_msgs::BalanceParam::ConstPtr& msg);
 	void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg);
+	void desiredPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
 
 private:
 	void queueThread();

@@ -70,6 +70,7 @@ public:
 
 	void parsePgainValue(std::string joint_name_);
 	void savePgainValue();
+
 	ros::ServiceServer read_p_gain_value_srv;
 
 	ros::Publisher current_arm_state_pub;

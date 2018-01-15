@@ -310,17 +310,18 @@ void UpperBodyModule::copFzMsgCallBack(const std_msgs::Float64MultiArray::ConstP
 void UpperBodyModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg) // GUI 에서 motion_num topic을 sub 받아 실행 모션 번호 디텍트
 {
 	is_moving_waist_ = true;
-	/*if (temp_change_value_center != msg->center_change || temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
+	if (temp_change_value_center != msg->waist_change || temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
 	{
 		center_change_->parseMotionData(msg->turn_type, msg->change_type);
-		center_change_->calculateStepEndPointValue(msg->center_change,100,msg->change_type); // 0.01 단위로 조정 가능.
+		center_change_->calculateStepEndPointValue(msg->waist_change,100,msg->change_type); // 0.01 단위로 조정 가능.
 
 		for(int m = 0 ; m<2 ; m++)
 		{
 			waist_end_point_(2*m+3,1) = center_change_->step_end_point_value[m];
 			waist_end_point_(2*m+3,7) = msg->time_change_waist;
 		}
-		temp_change_value_center = msg->center_change;
+
+		temp_change_value_center = msg->waist_change;
 		temp_turn_type    = msg->turn_type;
 		temp_change_type  = msg->change_type; // 이전값 저장
 		ROS_INFO("Turn !!  Change");
@@ -329,8 +330,8 @@ void UpperBodyModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterCha
 	else
 	{  ROS_INFO("Nothing to change");
 	return;
-	}*/
-	change_value_center =msg->center_change;
+	}
+/*	change_value_center =msg->center_change;
 	change_value_edge = msg->edge_change;
 
 	time_center = msg->time_change;
@@ -341,7 +342,7 @@ void UpperBodyModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterCha
 
 	pattern_count  = 1;
 	motion_count = 1;
-	motion_time_count_center = 0;
+	motion_time_count_center = 0;*/
 }
 //////////////////////////////////////////////////////////////////////
 

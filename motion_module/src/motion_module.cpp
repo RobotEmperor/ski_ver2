@@ -170,7 +170,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 		return;
 	}
 	updateBalanceParameter();
-	motion();
+	//motion();
 
 	//// read current position ////
 	if(new_count_ == 1)
@@ -354,22 +354,23 @@ void MotionModule::motion()
 				if(motion_time_count_center < time_center  && motion_count == 1 && read_data ==true) // right left turn
 				{
 
-						is_moving_l_ = true;
-						is_moving_r_ = true;
-						center_change_->parseMotionData(turn_type, "center_change");
-						center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
-						center_change_->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
-						read_data = false;
+					is_moving_l_ = true;
+					is_moving_r_ = true;
+					center_change_->parseMotionData(turn_type, "center_change");
+					center_change_->parseMotionData(turn_type, "edge_change");
+					center_change_->calculateStepEndPointValue(change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
+					center_change_->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
+					read_data = false;
 				}
 
 				if(motion_time_count_center < time_center  && motion_count == 2 && read_data ==true) // edge
 				{
 
-						is_moving_l_ = true;
-						is_moving_r_ = true;
-						center_change_->parseMotionData(turn_type, "edge_change");
-						center_change_->calculateStepEndPointValue(change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
-						read_data = false;
+					is_moving_l_ = true;
+					is_moving_r_ = true;
+					center_change_->parseMotionData(turn_type, "edge_change");
+					center_change_->calculateStepEndPointValue(change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
+					read_data = false;
 				}
 
 				if(motion_time_count_center < time_center  && motion_count == 3 && read_data ==true) // center
@@ -377,7 +378,8 @@ void MotionModule::motion()
 					is_moving_l_ = true;
 					is_moving_r_ = true;
 					center_change_->parseMotionData(turn_type, "center_change");
-					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
+					center_change_->parseMotionData(turn_type, "edge_change");
+					center_change_->calculateStepEndPointValue(change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
 					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
 					read_data = false;
 
@@ -388,7 +390,8 @@ void MotionModule::motion()
 					is_moving_l_ = true;
 					is_moving_r_ = true;
 					center_change_->parseMotionData(turn_type, "center_change");
-					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
+					center_change_->parseMotionData(turn_type, "edge_change");
+					center_change_->calculateStepEndPointValue(change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
 					center_change_->calculateStepEndPointValue(-change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
 					read_data = false;
 				}
@@ -407,7 +410,8 @@ void MotionModule::motion()
 					is_moving_l_ = true;
 					is_moving_r_ = true;
 					center_change_->parseMotionData(turn_type, "center_change");
-					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
+					center_change_->parseMotionData(turn_type, "edge_change");
+					center_change_->calculateStepEndPointValue(-change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
 					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
 					read_data = false;
 
@@ -448,7 +452,7 @@ void MotionModule::motion()
 					is_moving_l_ = true;
 					is_moving_r_ = true;
 					center_change_->parseMotionData(turn_type, "center_change");
-					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
+					//center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
 					center_change_->calculateStepEndPointValue(-change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
 					read_data = false;
 
@@ -459,8 +463,8 @@ void MotionModule::motion()
 				{
 					is_moving_l_ = true;
 					is_moving_r_ = true;
-					center_change_->parseMotionData(turn_type, "edge_change");
-					center_change_->calculateStepEndPointValue(-change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
+					//center_change_->parseMotionData(turn_type, "edge_change");
+					//center_change_->calculateStepEndPointValue(-change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
 					read_data = false;
 
 				}
@@ -470,7 +474,7 @@ void MotionModule::motion()
 					is_moving_l_ = true;
 					is_moving_r_ = true;
 					center_change_->parseMotionData(turn_type, "center_change");
-					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
+					//center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
 					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
 					read_data = false;
 
@@ -481,7 +485,7 @@ void MotionModule::motion()
 					is_moving_l_ = true;
 					is_moving_r_ = true;
 					center_change_->parseMotionData(turn_type, "center_change");
-					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
+					//center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
 					center_change_->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
 					read_data = false;
 
@@ -492,8 +496,8 @@ void MotionModule::motion()
 				{
 					is_moving_l_ = true;
 					is_moving_r_ = true;
-					center_change_->parseMotionData(turn_type, "edge_change");
-					center_change_->calculateStepEndPointValue(change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
+					//center_change_->parseMotionData(turn_type, "edge_change");
+					//center_change_->calculateStepEndPointValue(change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
 					read_data = false;
 
 				}
@@ -503,7 +507,7 @@ void MotionModule::motion()
 					is_moving_l_ = true;
 					is_moving_r_ = true;
 					center_change_->parseMotionData(turn_type, "center_change");
-					center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
+					//center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
 					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
 					read_data = false;
 

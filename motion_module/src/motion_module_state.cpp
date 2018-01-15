@@ -168,6 +168,7 @@ void MotionModule::queueThread()
 	/* subscribe topics */
 	get_imu_data_sub_ = ros_node.subscribe("/imu/data", 100, &MotionModule::imuDataMsgCallback, this);
 	get_ft_data_sub_ = ros_node.subscribe("/diana/force_torque_data", 100, &MotionModule::ftDataMsgCallback, this);
+	ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/desired_pose_leg", 5, &MotionModule::desiredPoseMsgCallback, this);
 
 	// for gui
 	set_balance_param_sub_ = ros_node.subscribe("/diana/balance_parameter", 5, &MotionModule::setBalanceParameterCallback, this);
@@ -183,22 +184,34 @@ void MotionModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange
 	is_moving_l_ = true;
 	is_moving_r_ = true;
 
-	/*	if (temp_change_value_center != msg->center_change || temp_change_value_edge != msg->edge_change|| temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
+	if (temp_change_value_center != msg->center_change || temp_change_value_edge != msg->edge_change|| temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
 	{
 		center_change_->parseMotionData(msg->turn_type, msg->change_type);
 
 		if(!msg->change_type.compare("edge_change"))
-			center_change_->calculateStepEndPointValue(msg->edge_change,100,msg->change_type); // 0.01 단위로 조정 가능.
-		else
-			center_change_->calculateStepEndPointValue(msg->center_change,100,msg->change_type); // 0.01 단위로 조정 가능.
-
-		for(int m = 0 ; m<6 ; m++)
 		{
-			leg_end_point_l_(m,1) = center_change_->step_end_point_value[0][m];
-			leg_end_point_r_(m,1) = center_change_->step_end_point_value[1][m];
-			leg_end_point_l_(m,7) = msg->time_change;
-			leg_end_point_r_(m,7) = msg->time_change;
+			center_change_->calculateStepEndPointValue(msg->edge_change,100,msg->change_type); // 0.01 단위로 조정 가능.
+			for(int m = 0 ; m<6 ; m++)
+			{
+				leg_end_point_l_(m,1) = center_change_->step_end_point_value[0][m];
+				leg_end_point_r_(m,1) = center_change_->step_end_point_value[1][m];
+				leg_end_point_l_(m,7) = msg->time_change_edge;
+				leg_end_point_r_(m,7) = msg->time_change_edge;
+			}
 		}
+		else
+		{
+			center_change_->calculateStepEndPointValue(msg->center_change,100,msg->change_type); // 0.01 단위로 조정 가능.
+			for(int m = 0 ; m<6 ; m++)
+			{
+				leg_end_point_l_(m,1) = center_change_->step_end_point_value[0][m];
+				leg_end_point_r_(m,1) = center_change_->step_end_point_value[1][m];
+				leg_end_point_l_(m,7) = msg->time_change;
+				leg_end_point_r_(m,7) = msg->time_change;
+			}
+		}
+
+
 		temp_change_value_center = msg->center_change;
 		temp_change_value_edge = msg->edge_change;
 		temp_turn_type    = msg->turn_type;
@@ -208,7 +221,10 @@ void MotionModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange
 	else
 	{  ROS_INFO("Nothing to change");
 	return;
-	}*/
+	}
+
+	/*temp_turn_type    = msg->turn_type;
+
 	change_value_center =msg->center_change;
 	change_value_edge = msg->edge_change;
 
@@ -218,9 +234,15 @@ void MotionModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange
 	turn_type = msg->turn_type;
 	change_type = msg->change_type;
 
+		if(change_type.compare("left") == 0)
+		change_value_edge = - change_value_edge;
+
+	//center_change_->parseMotionData(turn_type, "edge_change");
+	//center_change_->calculateStepEndPointValue(change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
+
 	pattern_count  = 1;
 	motion_count = 1;
-	motion_time_count_center = 0;
+	motion_time_count_center = 0;*/
 }
 void MotionModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) // gyro data get
 {
@@ -312,5 +334,17 @@ void MotionModule::setBalanceParameterCallback(const diana_msgs::BalanceParam::C
 	balance_updating_sys_time_sec_ = 0;
 
 	cop_compensation->parse_margin_data(); // cop margin data ;
+}
+void MotionModule::desiredPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg) // GUI 에서 init pose topic을 sub 받아 실행
+{
+	for(int joint_num_= 0; joint_num_< 6; joint_num_++)
+	{
+		leg_end_point_l_(joint_num_, 1) = msg->data[joint_num_]; // left leg
+		leg_end_point_r_(joint_num_, 1) = msg->data[joint_num_+6]; // right leg
+		leg_end_point_l_(joint_num_,7) = 4;
+		leg_end_point_r_(joint_num_,7) = 4;
+	}
+	is_moving_l_ = true;
+	is_moving_r_ = true;
 }
 
