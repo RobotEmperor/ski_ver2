@@ -95,6 +95,15 @@ MotionModule::MotionModule()
 	balance_updating_duration_sec_ = 2.0;
 	balance_updating_sys_time_sec_ = 2.0;
 	balance_update_= false;
+	// gyro joint space
+	gyro_pitch_function = new control_function::PID_function(0.008,15*DEGREE2RADIAN,-15*DEGREE2RADIAN,0,0,0);
+	gain_pitch_p_adjustment = new heroehs_math::FifthOrderTrajectory;
+	gain_pitch_d_adjustment = new heroehs_math::FifthOrderTrajectory;
+
+	updating_duration = 0;
+	gyro_pitch_p_gain  = 0;
+	gyro_pitch_d_gain  = 0;
+
 
 	tf_current_gyro_x = 0;
 	tf_current_gyro_y = 0;
@@ -314,12 +323,16 @@ void MotionModule::setBalanceParameterCallback(const diana_msgs::BalanceParam::C
 	else
 		balance_updating_duration_sec_ = msg->updating_duration;
 
-	desired_balance_param_.cob_x_offset_m         = msg->cob_x_offset_m        ;
-	desired_balance_param_.cob_y_offset_m         = msg->cob_y_offset_m        ;
-	desired_balance_param_.foot_roll_gyro_p_gain  = msg->foot_roll_gyro_p_gain ;
-	desired_balance_param_.foot_roll_gyro_d_gain  = msg->foot_roll_gyro_d_gain ;
-	desired_balance_param_.foot_pitch_gyro_p_gain = msg->foot_pitch_gyro_p_gain;
-	desired_balance_param_.foot_pitch_gyro_d_gain = msg->foot_pitch_gyro_d_gain;
+	desired_balance_param_.cob_x_offset_m         = 0;
+	desired_balance_param_.cob_y_offset_m         = 0;
+	desired_balance_param_.foot_roll_gyro_p_gain  = 0;
+	desired_balance_param_.foot_roll_gyro_d_gain  = 0;
+	desired_balance_param_.foot_pitch_gyro_p_gain = 0;
+	desired_balance_param_.foot_pitch_gyro_d_gain = 0;
+
+	updating_duration = msg->updating_duration;
+	gyro_pitch_p_gain  = msg->foot_pitch_gyro_p_gain;
+	gyro_pitch_d_gain  = msg->foot_pitch_gyro_d_gain;
 
 	updating_duration_cop = msg->updating_duration;
 	copFz_p_gain = msg->foot_copFz_p_gain;

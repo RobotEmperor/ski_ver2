@@ -153,6 +153,12 @@ void MotionModule::updateBalanceParameter()
 	Eigen::MatrixXd value;
 	value.resize(1,8);
 	value.fill(0);
+	value(0,7) = updating_duration;
+	value(0,1) = gyro_pitch_p_gain;
+	gyro_pitch_function->kp_ = gain_pitch_p_adjustment -> fifth_order_traj_gen_one_value(value);
+	value(0,1) = gyro_pitch_d_gain;
+	gyro_pitch_function->kd_ = gain_pitch_d_adjustment -> fifth_order_traj_gen_one_value(value);
+
 	value(0,7) = updating_duration_cop;
 	value(0,1) = copFz_p_gain;
 	cop_compensation->pidControllerFz_x->kp_ = gain_copFz_p_adjustment -> fifth_order_traj_gen_one_value(value);
@@ -251,7 +257,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	//	result_[joint_id_to_name_[17]]->goal_position_ = -l_kinematics_->joint_radian(4,0);
 
 	//<---  cartesian space control  --->
-	result_[joint_id_to_name_[11]]->goal_position_ = -l_kinematics_->joint_radian(1,0);
+	result_[joint_id_to_name_[11]]->goal_position_ = -(l_kinematics_->joint_radian(1,0) + gyro_pitch_function->PID_calculate(0,tf_current_gyro_y));
 	result_[joint_id_to_name_[13]]->goal_position_ =  l_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[15]]->goal_position_ =  l_kinematics_->joint_radian(3,0);
 
@@ -259,7 +265,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
 	result_[joint_id_to_name_[21]]->goal_position_ =  l_kinematics_->joint_radian(6,0);
 
-	result_[joint_id_to_name_[12]]->goal_position_ =  r_kinematics_->joint_radian(1,0);
+	result_[joint_id_to_name_[12]]->goal_position_ =  r_kinematics_->joint_radian(1,0) + gyro_pitch_function->PID_calculate(0,tf_current_gyro_y);
 	result_[joint_id_to_name_[14]]->goal_position_ =  r_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[16]]->goal_position_ =  r_kinematics_->joint_radian(3,0);
 
@@ -315,7 +321,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	l_compensation_xyz_pub.publish(l_compensation_xyz_msg_);
 	// l_ compensation radian alpha betta kamma
 	l_compensation_rpy_msg_.x=  balance_ctrl_.foot_roll_adjustment_by_gyro_roll_;
-	l_compensation_rpy_msg_.y=  balance_ctrl_.foot_pitch_adjustment_by_gyro_pitch_;
+	l_compensation_rpy_msg_.y=  gyro_pitch_function->PID_calculate(0,tf_current_gyro_y);
 	l_compensation_rpy_msg_.z=  0;
 	l_compensation_rpy_pub.publish(l_compensation_rpy_msg_);
 
@@ -326,7 +332,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	r_compensation_xyz_pub.publish(r_compensation_xyz_msg_);
 	// r_ compensation radian alpha betta kamma
 	r_compensation_rpy_msg_.x=  balance_ctrl_.foot_roll_adjustment_by_gyro_roll_;
-	r_compensation_rpy_msg_.y=  balance_ctrl_.foot_pitch_adjustment_by_gyro_pitch_;
+	r_compensation_rpy_msg_.y=  gyro_pitch_function->PID_calculate(0,tf_current_gyro_y);
 	r_compensation_rpy_msg_.z=  0;
 	r_compensation_rpy_pub.publish(r_compensation_rpy_msg_);
 }

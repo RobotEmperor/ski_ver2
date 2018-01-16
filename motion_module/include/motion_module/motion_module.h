@@ -148,6 +148,14 @@ private:
 	double balance_updating_sys_time_sec_;
 	bool balance_update_;
 
+	// balance gyro joint space pitch
+	heroehs_math::FifthOrderTrajectory *gain_pitch_p_adjustment;
+	heroehs_math::FifthOrderTrajectory *gain_pitch_d_adjustment;
+	control_function::PID_function *gyro_pitch_function;
+	double updating_duration;
+	double gyro_pitch_p_gain;
+	double gyro_pitch_d_gain;
+
 	// cop
 	diana::CopCalculationFunc *cop_cal;
 	double currentFX_l,currentFY_l,currentFZ_l,currentTX_l,currentTY_l,currentTZ_l;
