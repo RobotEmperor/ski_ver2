@@ -17,11 +17,5 @@ rosbag record -a &
 
 sleep 4 
 
-echo -n "Wait yout command Motor torque enable (y/n)"
-
-read input
-
-if [ "$input" == "y" ];then
-      roslaunch ski_main_manager ski_main_manager.launch 										
-fi
+roslaunch ski_main_manager ski_main_manager.launch
 
