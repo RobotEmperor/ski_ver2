@@ -38,13 +38,13 @@ using namespace decision_module;
 
 bool ready_check;
 
-DecisionModule *decision_process;
+DecisionModule decision_process;
 
 
 // publisher
 ros::Publisher center_change_pub;
 // subscriber
-ros::Subscriber ready_check_sub;
+
 // msg
 diana_msgs::CenterChange center_change_msg;
 

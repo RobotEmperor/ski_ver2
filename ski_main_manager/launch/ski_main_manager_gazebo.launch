@@ -11,7 +11,7 @@
       
     <!-- ski_robot Manager -->
     <node name="ski_main_manager_node" pkg="ski_main_manager" type="ski_main_manager_node" output="screen"/>
-    <node name="decision_module" pkg="decision_module" type="decision_module" output="screen"/>
+    <node name="decision_module" pkg="decision_module" type="decision_module" output="screen"/> 
     
 </launch>
 

@@ -7,16 +7,25 @@
 
 #include "decision_module/decision_module.h"
 
+void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
+{
+	//ready_check = msg->data;
+	//printf("RUN! %d \n", ready_check);
+
+}
+
+
 int main(int argc, char **argv)
 {
-	DecisionModule *decision_process;
-	decision_process = new DecisionModule;
-
 	ros::init(argc, argv, "decision_module");
 	ros::NodeHandle ros_node;
-	ready_check_sub = ros_node.subscribe("/ready_check", 5, readyCheckMsgCallBack);
+
+	ros::Subscriber ready_check_sub = ros_node.subscribe("/ready_check", 5, readyCheckMsgCallBack);
+
+	center_change_pub = ros_node.advertise<diana_msgs::CenterChange>("/d",1);
 	ros::Timer timer = ros_node.createTimer(ros::Duration(0.008), control_loop);
 
+	center_change_pub.publish(center_change_msg);
 
 
 	while(ros_node.ok())
@@ -24,20 +33,14 @@ int main(int argc, char **argv)
 		ros::spinOnce();
 	}
 
-	return 0;
+    return 0;
 }
 
-void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
-{
-	ready_check = msg->data;
-	printf("RUN! %d \n", ready_check);
-
-}
 
 void control_loop(const ros::TimerEvent&)
 {
 	if(ready_check)
-		decision_process->process();
+		decision_process.process();
 	else
 		return;
 
