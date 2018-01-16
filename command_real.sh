@@ -7,7 +7,7 @@ roscore &
 
 sleep 5
 
-rosrun diana_sensor ft_node &
+rosrun diana_sensors ft_node &
 
 roslaunch microstrain_3dm_gx5_45 microstrain.launch&
 
