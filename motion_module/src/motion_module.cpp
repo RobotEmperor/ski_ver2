@@ -257,7 +257,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	//	result_[joint_id_to_name_[17]]->goal_position_ = -l_kinematics_->joint_radian(4,0);
 
 	//<---  cartesian space control  --->
-	result_[joint_id_to_name_[11]]->goal_position_ = -(l_kinematics_->joint_radian(1,0) - gyro_pitch_function->PID_calculate(0,tf_current_gyro_y));
+	result_[joint_id_to_name_[11]]->goal_position_ = -(l_kinematics_->joint_radian(1,0) + gyro_pitch_function->PID_calculate(0,tf_current_gyro_y));
 	result_[joint_id_to_name_[13]]->goal_position_ =  l_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[15]]->goal_position_ =  l_kinematics_->joint_radian(3,0);
 
@@ -265,7 +265,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	result_[joint_id_to_name_[19]]->goal_position_ = -l_kinematics_->joint_radian(5,0);
 	result_[joint_id_to_name_[21]]->goal_position_ =  l_kinematics_->joint_radian(6,0);
 
-	result_[joint_id_to_name_[12]]->goal_position_ =  r_kinematics_->joint_radian(1,0) - gyro_pitch_function->PID_calculate(0,tf_current_gyro_y);
+	result_[joint_id_to_name_[12]]->goal_position_ =  r_kinematics_->joint_radian(1,0) + gyro_pitch_function->PID_calculate(0,tf_current_gyro_y);
 	result_[joint_id_to_name_[14]]->goal_position_ =  r_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[16]]->goal_position_ =  r_kinematics_->joint_radian(3,0);
 
