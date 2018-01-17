@@ -11,7 +11,7 @@ rosrun diana_sensors ft_node &
 
 roslaunch microstrain_3dm_gx5_45 microstrain.launch&
 
-cd ~/media/ski/sd64/bagfile
+cd 
 
 rosbag record -a &
 
