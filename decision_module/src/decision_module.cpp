@@ -23,14 +23,19 @@ int main(int argc, char **argv)
 	ros::Subscriber ready_check_sub = ros_node.subscribe("/ready_check", 5, readyCheckMsgCallBack);
 
 	center_change_pub = ros_node.advertise<diana_msgs::CenterChange>("/d",1);
-	ros::Timer timer = ros_node.createTimer(ros::Duration(0.008), control_loop);
+	ros::Timer timer = ros_node.createTimer(ros::Duration(0.007), control_loop);
 
 	center_change_pub.publish(center_change_msg);
 
 
+    ros::Rate loop_rate(1);
+
 	while(ros_node.ok())
 	{
 		ros::spinOnce();
+
+		loop_rate.sleep();
+
 	}
 
     return 0;
