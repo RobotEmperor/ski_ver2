@@ -80,6 +80,8 @@ public:
 	ros::Subscriber balance_param_waist_sub;
 	ros::Subscriber head_balance_sub;
 	ros::Subscriber flag_position_get_sub;
+
+	ros::Subscriber edge_change_signal_sub;
 	//current cop and reference cop from leg module
 	ros::Subscriber cop_fz_sub;
 
@@ -102,6 +104,9 @@ public:
 
 	//flag position function
 	void currentFlagPositionFunction(double x, double y, double z);
+
+	//edge_change_signal_sub
+	void edgeChangeSignalMsgCallback(const std_msgs::Bool::ConstPtr& msg);
 
 
 
@@ -172,6 +177,8 @@ private:
 	//center change lib
 	diana_motion_waist::CenterChange *center_change_;
 	double temp_change_value_waist, temp_change_value_edge;
+	double temp_time_change_waist_roll;
+	double temp_time_change_waist_yaw;
 	std::string temp_turn_type;
 	std::string temp_change_type;
 
@@ -211,6 +218,9 @@ private:
 
 	double pattern_count;
 	bool read_data;
+
+
+	bool edge_change_check;
 
 
 

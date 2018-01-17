@@ -22,12 +22,7 @@ MotionModule::MotionModule()
 	control_mode_ = robotis_framework::PositionControl;
 
 	new_count_ = 0;
-	// Dynamixel initialize ////
-
-
-
-
-
+	// Dynamixel initialize //
 	result_["l_hip_pitch"] = new robotis_framework::DynamixelState();  // joint 11
 	result_["l_hip_roll"]  = new robotis_framework::DynamixelState();  // joint 13
 
@@ -112,7 +107,8 @@ MotionModule::MotionModule()
 	center_change_ = new diana_motion::CenterChange;
 	cop_cal = new  diana::CopCalculationFunc;
 	temp_change_value_center = 0;
-	temp_change_value_edge = 0;
+	temp_time_center_change  = 0;
+	temp_time_edge_change = 0;
 	temp_turn_type = "basic";
 	temp_change_type = "basic";
 	currentFX_l=0.0;
@@ -137,16 +133,8 @@ MotionModule::MotionModule()
 
 
 	// test
-	change_value_center = 0;
-	change_value_edge = 0;
-	time_center = 0;
-	time_edge = 0 ;
-	turn_type = "basic";
-	change_type = "basic";
-	motion_time_count_center = 0;
-	motion_time_count_edge = 0;
-	motion_count = 1;
-	pattern_count = 0;
+	time_count_center_change = 0;
+	center_change_moving_check = false;
 	read_data = true;
 }
 MotionModule::~MotionModule()
@@ -171,6 +159,7 @@ void MotionModule::queueThread()
 	r_compensation_rpy_pub = ros_node.advertise<geometry_msgs::Vector3>("/r_compensation_rpy",100);;
 
 	cop_fz_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/cop_fz",100);
+	edge_change_signal_pub = ros_node.advertise<std_msgs::Bool>("/edge_change_signal",10);
 
 	current_leg_pose_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/current_leg_pose",100);
 
@@ -193,21 +182,15 @@ void MotionModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange
 	is_moving_l_ = true;
 	is_moving_r_ = true;
 
-	if (temp_change_value_center != msg->center_change || temp_change_value_edge != msg->edge_change|| temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
+	if (temp_change_value_center != msg->center_change || temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
 	{
 		center_change_->parseMotionData(msg->turn_type, msg->change_type);
 
 		if(!msg->change_type.compare("edge_change"))
 		{
-			center_change_->calculateStepEndPointValue(msg->edge_change,100,msg->change_type); // 0.01 단위로 조정 가능.
-			for(int m = 0 ; m<6 ; m++)
-			{
-				leg_end_point_l_(m,1) = center_change_->step_end_point_value[0][m];
-				leg_end_point_r_(m,1) = center_change_->step_end_point_value[1][m];
-				leg_end_point_l_(m,7) = msg->time_change_edge;
-				leg_end_point_r_(m,7) = msg->time_change_edge;
-			}
+			return;
 		}
+
 		else
 		{
 			center_change_->calculateStepEndPointValue(msg->center_change,100,msg->change_type); // 0.01 단위로 조정 가능.
@@ -218,9 +201,12 @@ void MotionModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange
 				leg_end_point_l_(m,7) = msg->time_change;
 				leg_end_point_r_(m,7) = msg->time_change;
 			}
+			center_change_moving_check = true;
 		}
 		temp_change_value_center = msg->center_change;
-		temp_change_value_edge = msg->edge_change;
+		temp_time_center_change  = msg->time_change;
+		temp_time_edge_change = msg->time_change_edge;
+
 		temp_turn_type    = msg->turn_type;
 		temp_change_type  = msg->change_type; // 이전값 저장
 		ROS_INFO("Turn !!  Change");

@@ -143,6 +143,10 @@ UpperBodyModule::UpperBodyModule()
 	motion_count = 1;
 	pattern_count = 0;
 	read_data = true;
+
+	edge_change_check = false;
+	temp_time_change_waist_roll = 0;
+	temp_time_change_waist_yaw  = 0;
 }
 UpperBodyModule::~UpperBodyModule()
 {
@@ -175,6 +179,9 @@ void UpperBodyModule::queueThread()
 	// test desired pose
 	head_test = ros_node.subscribe("/desired_pose_head", 5, &UpperBodyModule::desiredPoseHeadMsgCallbackTEST, this);
 	waist_test = ros_node.subscribe("/desired_pose_waist", 5, &UpperBodyModule::desiredPoseWaistMsgCallbackTEST, this);
+
+	//edge change check
+	edge_change_signal_sub = ros_node.subscribe("/edge_change_signal", 5, &UpperBodyModule::edgeChangeSignalMsgCallback, this);
 
 
 
@@ -316,18 +323,20 @@ void UpperBodyModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterCha
 		center_change_->parseMotionData(msg->turn_type, msg->change_type);
 		center_change_->calculateStepEndPointValue(msg->waist_change,100,msg->change_type); // 0.01 단위로 조정 가능.
 
-
-		waist_end_point_(5,1) = center_change_->step_end_point_value[0];
-		waist_end_point_(5,7) = msg->time_change_waist;
-
-		if(temp_change_value_edge != msg->edge_change)
+		if(!msg->change_type.compare("center_change"))
 		{
-			waist_end_point_(3,1) = center_change_->step_end_point_value[1];
-			waist_end_point_(3,7) = msg->time_change_waist;
+			if(msg->waist_change == 0)
+			{
+				waist_end_point_(3,1) = center_change_->step_end_point_value[1];  // waist yaw
+				waist_end_point_(3,7) = msg->time_change;
+			}
+			waist_end_point_(5,1) = center_change_->step_end_point_value[0];  // waist roll
+			waist_end_point_(5,7) = msg->time_change;
 		}
 
 		temp_change_value_edge  = msg->edge_change;
 		temp_change_value_waist = msg->waist_change;
+		temp_time_change_waist_yaw  =  msg->time_change_edge;
 		temp_turn_type    = msg->turn_type;
 		temp_change_type  = msg->change_type; // 이전값 저장
 		ROS_INFO("Turn !!  Change");
@@ -349,6 +358,12 @@ void UpperBodyModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterCha
 	pattern_count  = 1;
 	motion_count = 1;
 	motion_time_count_center = 0;*/
+}
+
+void UpperBodyModule::edgeChangeSignalMsgCallback(const std_msgs::Bool::ConstPtr& msg)
+{
+	edge_change_check = msg->data;
+
 }
 //////////////////////////////////////////////////////////////////////
 

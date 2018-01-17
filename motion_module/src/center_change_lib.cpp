@@ -99,7 +99,7 @@ void CenterChange::parseMotionData(std::string turn_type, std::string change_typ
 		return;
 	}
 	// motion data load initialize//
-	YAML::Node pose_node = doc["motion_"+change_type];// YAML 에 string "motion"을 읽어온다.
+	YAML::Node pose_node = doc["motion_"+ change_type];// YAML 에 string "motion"을 읽어온다.
 	//	 motion data load //
 	if(!change_type.compare("center_change")) // 문자열이 같을때 0
 	{
@@ -117,6 +117,12 @@ void CenterChange::parseMotionData(std::string turn_type, std::string change_typ
 					middle_end_point_value_center[0][i] = it->second[i].as<double>();
 					middle_end_point_value_center[1][i] = it->second[i+6].as<double>();
 				}
+
+				for(int i=3; i<6; i++)
+				{
+					middle_end_point_value_center[0][i] = it->second[i].as<double>()*DEGREE2RADIAN;
+					middle_end_point_value_center[1][i] = it->second[i+6].as<double>()*DEGREE2RADIAN;
+				}
 			}
 			break;
 			case 1:
@@ -126,6 +132,11 @@ void CenterChange::parseMotionData(std::string turn_type, std::string change_typ
 					right_end_point_value_center[0][i] = it->second[i].as<double>();
 					right_end_point_value_center[1][i] = it->second[i+6].as<double>();
 				}
+				for(int i=3; i<6; i++)
+				{
+					right_end_point_value_center[0][i] = it->second[i].as<double>()*DEGREE2RADIAN;
+					right_end_point_value_center[1][i] = it->second[i+6].as<double>()*DEGREE2RADIAN;
+				}
 			}
 			break;
 			case -1:
@@ -134,6 +145,11 @@ void CenterChange::parseMotionData(std::string turn_type, std::string change_typ
 				{
 					left_end_point_value_center[0][i] = it->second[i].as<double>();
 					left_end_point_value_center[1][i] = it->second[i+6].as<double>();
+				}
+				for(int i=3; i<6; i++)
+				{
+					left_end_point_value_center[0][i] = it->second[i].as<double>()*DEGREE2RADIAN;
+					left_end_point_value_center[1][i] = it->second[i+6].as<double>()*DEGREE2RADIAN;
 				}
 			}
 			break;
@@ -196,7 +212,7 @@ void CenterChange::calculateStepEndPointValue(double desired_value, double step_
 			}
 			return;
 		}
-		for(int i=0; i<3; i++)
+		for(int i=0; i<6; i++)
 		{
 			step_end_point_value[0][i] = middle_end_point_value_center[0][i];
 			step_end_point_value[1][i] = middle_end_point_value_center[1][i];
@@ -213,7 +229,7 @@ void CenterChange::calculateStepEndPointValue(double desired_value, double step_
 			}
 			return;
 		}
-		for(int i=0; i<3; i++)
+		for(int i=0; i<6; i++)
 		{
 			step_end_point_value[0][i] = middle_end_point_value_center[0][i] + ((left_end_point_value_center[0][i] - middle_end_point_value_center[0][i])/step_value)*(-desired_value*step_value);
 			step_end_point_value[1][i] = middle_end_point_value_center[1][i] + ((left_end_point_value_center[1][i] - middle_end_point_value_center[1][i])/step_value)*(-desired_value*step_value);
@@ -230,7 +246,7 @@ void CenterChange::calculateStepEndPointValue(double desired_value, double step_
 			}
 			return;
 		}
-		for(int i=0; i<3; i++)
+		for(int i=0; i<6; i++)
 		{
 			step_end_point_value[0][i] = middle_end_point_value_center[0][i] + ((right_end_point_value_center[0][i] - middle_end_point_value_center[0][i])/step_value)*(desired_value*step_value);
 			step_end_point_value[1][i] = middle_end_point_value_center[1][i] + ((right_end_point_value_center[1][i] - middle_end_point_value_center[1][i])/step_value)*(desired_value*step_value);

@@ -247,7 +247,7 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	r_arm_kinematics_ ->OriginToArmTransformationPoint(waist_kinematics_->xyz_euler_angle_z , waist_kinematics_->xyz_euler_angle_x, r_arm_kinematics_->joint_radian(1,0), r_arm_kinematics_->joint_radian(2,0), r_arm_kinematics_->joint_radian(3,0));
 
 /*
-		//<---  catesian space control test --->
+    //<---  catesian space control test --->
 	result_[joint_id_to_name_[9]] -> goal_position_   = -waist_kinematics_->xyz_euler_angle_z;// waist yaw
 	result_[joint_id_to_name_[10]] -> goal_position_  = waist_kinematics_->xyz_euler_angle_x; // waist roll
 
@@ -272,8 +272,8 @@ void PoseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 	result_[joint_id_to_name_[4]]  -> goal_position_  = -r_arm_kinematics_->joint_radian(2,0);
 	result_[joint_id_to_name_[6]]  -> goal_position_  = -r_arm_kinematics_->joint_radian(3,0);
 
-	result_[joint_id_to_name_[9]]->goal_position_    =  -waist_kinematics_->xyz_euler_angle_z;// waist yaw
-	result_[joint_id_to_name_[10]]->goal_position_   =  -waist_kinematics_->xyz_euler_angle_x; // waist roll
+	result_[joint_id_to_name_[9]]->goal_position_    =  -waist_kinematics_ -> xyz_euler_angle_z;// waist yaw
+	result_[joint_id_to_name_[10]]->goal_position_   =  -waist_kinematics_ -> xyz_euler_angle_x; // waist roll
 
 	result_[joint_id_to_name_[11]]->goal_position_   =  -l_kinematics_->joint_radian(1,0);
 	result_[joint_id_to_name_[13]]->goal_position_   =   l_kinematics_->joint_radian(2,0);

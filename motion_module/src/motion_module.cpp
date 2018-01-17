@@ -176,7 +176,7 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 		return;
 	}
 	updateBalanceParameter();
-	//motion();
+	edge_motion();
 
 	//// read current position ////
 	if(new_count_ == 1)
@@ -203,8 +203,11 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 	{
 		ROS_INFO("Motion run !!!!");
 		// trajectory is working cartesian space control
+		printf("value %d   ::   %f  ::  \n",3,leg_end_point_l_(3,1) * RADIAN2DEGREE);
 		result_end_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
 		result_end_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
+
+
 		//<---  read   --->
 		for(int id=11 ; id<23 ; id++)
 		{
@@ -341,207 +344,45 @@ void MotionModule::stop()
 	return;
 }
 
-void MotionModule::motion()
+void MotionModule::edge_motion()
 {
-	motion_time_count_center = motion_time_count_center + 0.008;
-
-	if(change_type.compare("left") == 0)  // - 부터 시작
+	if(center_change_moving_check == true && temp_change_value_center !=0)
 	{
-		if(pattern_count < 6)
+		time_count_center_change = time_count_center_change + 0.008;
+
+		if(time_count_center_change > temp_time_center_change)
 		{
-			if(motion_time_count_center > time_center)
+			center_change_->parseMotionData("pflug_bogen", "edge_change");
+
+			if(temp_change_value_center > 0)
 			{
-				motion_count ++;
-				read_data = true;
-				motion_time_count_center = 0;
+				center_change_->calculateStepEndPointValue(1,100,"edge_change"); // 0.01 단위로 조정 가능.
 			}
-			else
+			if(temp_change_value_center < 0)
 			{
-				if(motion_time_count_center < time_center  && motion_count == 1 && read_data ==true) // right left turn
-				{
-
-					is_moving_l_ = true;
-					is_moving_r_ = true;
-					center_change_->parseMotionData(turn_type, "center_change");
-					center_change_->parseMotionData(turn_type, "edge_change");
-					center_change_->calculateStepEndPointValue(change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
-					center_change_->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
-					read_data = false;
-				}
-
-				if(motion_time_count_center < time_center  && motion_count == 2 && read_data ==true) // edge
-				{
-
-					is_moving_l_ = true;
-					is_moving_r_ = true;
-					center_change_->parseMotionData(turn_type, "edge_change");
-					center_change_->calculateStepEndPointValue(change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
-					read_data = false;
-				}
-
-				if(motion_time_count_center < time_center  && motion_count == 3 && read_data ==true) // center
-				{
-					is_moving_l_ = true;
-					is_moving_r_ = true;
-					center_change_->parseMotionData(turn_type, "center_change");
-					center_change_->parseMotionData(turn_type, "edge_change");
-					center_change_->calculateStepEndPointValue(change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
-					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
-					read_data = false;
-
-				}
-
-				if(motion_time_count_center < time_center  && motion_count == 4 && read_data ==true) // right left turn
-				{
-					is_moving_l_ = true;
-					is_moving_r_ = true;
-					center_change_->parseMotionData(turn_type, "center_change");
-					center_change_->parseMotionData(turn_type, "edge_change");
-					center_change_->calculateStepEndPointValue(change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
-					center_change_->calculateStepEndPointValue(-change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
-					read_data = false;
-				}
-
-				if(motion_time_count_center < time_center  && motion_count == 5  && read_data ==true) // edge
-				{
-					is_moving_l_ = true;
-					is_moving_r_ = true;
-					center_change_->parseMotionData(turn_type, "edge_change");
-					center_change_->calculateStepEndPointValue(-change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
-					read_data = false;
-				}
-
-				if(motion_time_count_center < time_center  && motion_count == 6 && read_data ==true) // center
-				{
-					is_moving_l_ = true;
-					is_moving_r_ = true;
-					center_change_->parseMotionData(turn_type, "center_change");
-					center_change_->parseMotionData(turn_type, "edge_change");
-					center_change_->calculateStepEndPointValue(-change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
-					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
-					read_data = false;
-
-				}
+				center_change_->calculateStepEndPointValue(-1,100,"edge_change"); // 0.01 단위로 조정 가능.
 			}
 
-			for(int m = 0 ; m<6 ; m++)
+			for(int m = 3 ; m<6 ; m++)
 			{
 				leg_end_point_l_(m,1) = center_change_->step_end_point_value[0][m];
 				leg_end_point_r_(m,1) = center_change_->step_end_point_value[1][m];
-				leg_end_point_l_(m,7) = time_center;
-				leg_end_point_r_(m,7) = time_center;
+				leg_end_point_l_(m,7) = temp_time_edge_change;
+				leg_end_point_r_(m,7) = temp_time_edge_change;
 			}
-			if(motion_count == 7)
-			{
-				pattern_count ++;
-				motion_count = 1;
-			}
+			is_moving_l_ = true;
+			is_moving_r_ = true;
+
+			center_change_moving_check = false;
+			time_count_center_change = 0;
+			edge_change_signal_msg.data = true;
+			edge_change_signal_pub.publish(edge_change_signal_msg);
 		}
-
-		else
-			return;
-	}
-	if(change_type.compare("right") == 0)  // - 부터 시작
-	{
-		if(pattern_count < 6)
-		{
-			if(motion_time_count_center > time_center)
-			{
-				motion_count ++;
-				motion_time_count_center = 0;
-				read_data = true;
-			}
-			else
-			{
-				if(motion_time_count_center < time_center  && motion_count == 1 && read_data ==true) // right left turn
-				{
-					is_moving_l_ = true;
-					is_moving_r_ = true;
-					center_change_->parseMotionData(turn_type, "center_change");
-					//center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
-					center_change_->calculateStepEndPointValue(-change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
-					read_data = false;
-
-
-				}
-
-				if(motion_time_count_center < time_center  && motion_count == 2 && read_data ==true) // edge
-				{
-					is_moving_l_ = true;
-					is_moving_r_ = true;
-					//center_change_->parseMotionData(turn_type, "edge_change");
-					//center_change_->calculateStepEndPointValue(-change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
-					read_data = false;
-
-				}
-
-				if(motion_time_count_center < time_center  && motion_count == 3 && read_data ==true) // center
-				{
-					is_moving_l_ = true;
-					is_moving_r_ = true;
-					center_change_->parseMotionData(turn_type, "center_change");
-					//center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
-					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
-					read_data = false;
-
-				}
-
-				if(motion_time_count_center < time_center  && motion_count == 4 && read_data ==true) // right left turn
-				{
-					is_moving_l_ = true;
-					is_moving_r_ = true;
-					center_change_->parseMotionData(turn_type, "center_change");
-					//center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
-					center_change_->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
-					read_data = false;
-
-
-				}
-
-				if(motion_time_count_center < time_center  && motion_count == 5 && read_data ==true) // edge
-				{
-					is_moving_l_ = true;
-					is_moving_r_ = true;
-					//center_change_->parseMotionData(turn_type, "edge_change");
-					//center_change_->calculateStepEndPointValue(change_value_edge,100,"edge_change"); // 0.01 단위로 조정 가능.
-					read_data = false;
-
-				}
-
-				if(motion_time_count_center < time_center  && motion_count == 6 && read_data ==true) // center
-				{
-					is_moving_l_ = true;
-					is_moving_r_ = true;
-					center_change_->parseMotionData(turn_type, "center_change");
-					//center_change_->calculateStepEndPointValue(0,100,"edge_change"); // 0.01 단위로 조정 가능.
-					center_change_->calculateStepEndPointValue(0,100,"center_change"); // 0.01 단위로 조정 가능.
-					read_data = false;
-
-				}
-			}
-
-			for(int m = 0 ; m<6 ; m++)
-			{
-				leg_end_point_l_(m,1) = center_change_->step_end_point_value[0][m];
-				leg_end_point_r_(m,1) = center_change_->step_end_point_value[1][m];
-				leg_end_point_l_(m,7) = time_center;
-				leg_end_point_r_(m,7) = time_center;
-
-			}
-			if(motion_count == 7)
-			{
-				pattern_count ++;
-				motion_count = 1;
-			}
-		}
-
-		else
-			return;
 	}
 	else
 		return;
-
 }
+
 
 
 

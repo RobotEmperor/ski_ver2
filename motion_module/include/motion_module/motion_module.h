@@ -32,9 +32,11 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Bool.h>
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/PointStamped.h>
 #include <sensor_msgs/Imu.h>
+#include "diana_msgs/CenterChange.h"
 
 //m - personal
 #include "diana_msgs/BalanceParam.h"
@@ -75,6 +77,7 @@ public:
 	ros::Publisher r_compensation_rpy_pub;
 
 	ros::Publisher cop_fz_pub;
+	ros::Publisher edge_change_signal_pub;
 
 
 	// sensor data & balance on off
@@ -108,6 +111,9 @@ private:
 	geometry_msgs::Vector3 l_compensation_rpy_msg_;
 	geometry_msgs::Vector3 r_compensation_xyz_msg_;
 	geometry_msgs::Vector3 r_compensation_rpy_msg_;
+
+	//center change
+	std_msgs::Bool edge_change_signal_msg;
 
 	boost::thread queue_thread_;
 
@@ -172,24 +178,20 @@ private:
 
 	//center change lib
 	diana_motion::CenterChange *center_change_;
-	double temp_change_value_edge, temp_change_value_center;
+	double temp_change_value_center;
 	std::string temp_turn_type;
 	std::string temp_change_type;
+	double temp_time_center_change;
+	double temp_time_edge_change;
 
-	void motion();
-	double change_value_center;
-	double change_value_edge;
-	double time_center;
-	double time_edge;
-	std::string turn_type;
-	std::string change_type;
-	double motion_time_count_center;
-	double motion_time_count_edge;
-	double motion_count;
 
-	double pattern_count;
 
 	bool read_data;
+
+	// edge motion()
+	void edge_motion();
+	double time_count_center_change;
+	bool   center_change_moving_check;
 };
 
 }
