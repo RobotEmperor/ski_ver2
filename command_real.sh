@@ -13,7 +13,7 @@ roslaunch microstrain_3dm_gx5_45 microstrain.launch&
 
 cd
 
-cd /media/ski/sd641/bagfile/ &
+cd /media/ski/sd64/bagfile/ &
 
 rosbag record -a &
 
