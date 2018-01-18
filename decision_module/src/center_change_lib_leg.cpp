@@ -1,14 +1,14 @@
 /*
- * center_change_lib.cpp
+ * center_change_lib_leg.cpp
  *
- *  Created on: Nov 21, 2017
+ *  Created on: Jan 18, 2018
  *      Author: robotemperor
  */
-#include "motion_module/center_change_lib.h"
+#include "decision_module/center_change_lib_leg.h"
 
-using namespace diana_motion;
+using namespace diana_motion_leg;
 
-CenterChange::CenterChange()
+CenterChangeLeg::CenterChangeLeg()
 {
 	std::string path_ = ros::package::getPath("ski_main_manager") + "/data/turn/initialize.yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
 	YAML::Node doc; // YAML file class 선언!
@@ -83,9 +83,9 @@ CenterChange::CenterChange()
 		step_end_point_value[1][i] = middle_end_point_value_center[1][i];
 	}
 }
-CenterChange::~CenterChange()
+CenterChangeLeg::~CenterChangeLeg()
 {}
-void CenterChange::parseMotionData(std::string turn_type, std::string change_type)
+void CenterChangeLeg::parseMotionData(std::string turn_type, std::string change_type)
 {
 	std::string path_ = ros::package::getPath("ski_main_manager") + "/data/turn/"+ turn_type + ".yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
 	YAML::Node doc; // YAML file class 선언!
@@ -199,7 +199,7 @@ void CenterChange::parseMotionData(std::string turn_type, std::string change_typ
 		return;
 
 }
-void CenterChange::calculateStepEndPointValue(double desired_value, double step_value, std::string change_type)
+void CenterChangeLeg::calculateStepEndPointValue(double desired_value, double step_value, std::string change_type)
 {
 	if(desired_value == 0)
 	{
@@ -255,12 +255,151 @@ void CenterChange::calculateStepEndPointValue(double desired_value, double step_
 	else
 		return;
 }
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+CarvingChange::CarvingChange()
+{
+
+}
+CarvingChange::~CarvingChange()
+{}
+void CarvingChange::parseMotionData()
+{
+	std::string path_ = ros::package::getPath("ski_main_manager") + "/data/turn/carving.yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
+	YAML::Node doc; // YAML file class 선언!
+	try
+	{
+		// load yaml
+		doc = YAML::LoadFile(path_.c_str()); // 파일 경로를 입력하여 파일을 로드 한다.
+	}catch(const std::exception& e) // 에러 점검
+	{
+		ROS_ERROR("Fail to load LEG parse data yaml file!");
+		return;
+	}
+	// motion data load initialize//
+	motion_time[0] = doc["motion_time_1"].as<double>();// YAML 에 string "motion"을 읽어온다.
+	motion_time[1] = doc["motion_time_2"].as<double>();// YAML 에 string "motion"을 읽어온다.
+	motion_time[2] = doc["motion_time_3"].as<double>();// YAML 에 string "motion"을 읽어온다.
+	motion_time[3] = doc["motion_time_4"].as<double>();// YAML 에 string "motion"을 읽어온다.
+
+	YAML::Node motion_center_node = doc["motion_center"];
+
+	for (YAML::iterator it = motion_center_node.begin(); it != motion_center_node.end(); ++it) //motion_node 벡터의 처음과 시작 끝까지 for 문으로 반복한다.
+	{
+		for(int i = 0; i < 12; i++)
+		{
+			motion_center[i] = it->second[i].as<double>();
+			printf("11111111 ::  %d    ::    %f\n", i, motion_center[i]);
+		}
+	}
+
+	YAML::Node motion_left_node = doc["motion_left_change"];
+
+	for (YAML::iterator it = motion_left_node.begin(); it != motion_left_node.end(); ++it) //motion_node 벡터의 처음과 시작 끝까지 for 문으로 반복한다.
+	{
+		int standard;
+		// 한 줄에서 int 와 double 을 분리한다.
+		standard = it->first.as<int>();
+		for(int i = 0; i < 12; i++)
+		{
+			motion_left_change[standard][i] = it->second[i].as<double>();
+		}
+	}
+
+	YAML::Node motion_right_node = doc["motion_right_change"];
+
+	for (YAML::iterator it = motion_right_node.begin(); it != motion_right_node.end(); ++it) //motion_node 벡터의 처음과 시작 끝까지 for 문으로 반복한다.
+	{
+		int standard;
+		// 한 줄에서 int 와 double 을 분리한다.
+		standard = it->first.as<int>();
+		for(int i = 0; i < 12; i++)
+		{
+			motion_right_change[standard][i] = it->second[i].as<double>();
+		}
+	}
+
+	YAML::Node motion_waist_left_node = doc["motion_waist_left_change"];
+
+	for (YAML::iterator it = motion_waist_left_node.begin(); it != motion_waist_left_node.end(); ++it) //motion_node 벡터의 처음과 시작 끝까지 for 문으로 반복한다.
+	{
+		int standard;
+		// 한 줄에서 int 와 double 을 분리한다.
+		standard = it->first.as<int>();
+		for(int i = 0; i < 2; i++)
+		{
+			motion_waist_left_change[standard][i] = it->second[i].as<double>();
+		}
+	}
+
+	YAML::Node motion_waist_right_node = doc["motion_waist_right_change"];
+
+	for (YAML::iterator it = motion_waist_right_node.begin(); it != motion_waist_right_node.end(); ++it) //motion_node 벡터의 처음과 시작 끝까지 for 문으로 반복한다.
+	{
+		int standard;
+		// 한 줄에서 int 와 double 을 분리한다.
+		standard = it->first.as<int>();
+		for(int i = 0; i < 2; i++)
+		{
+			motion_waist_right_change[standard][i] = it->second[i].as<double>();
+		}
+	}
+}
 
 
+//	 motion data load //
 
+/*for (YAML::iterator it = pose_node.begin(); it != pose_node.end(); ++it) //motion_node 벡터의 처음과 시작 끝까지 for 문으로 반복한다.
+		{
+			int standard;
+			// 한 줄에서 int 와 double 을 분리한다.
+			standard = it->first.as<int>();
+			switch(standard)
+			{
+			case 0:
+			{
+				for(int i=0; i<3; i++)
+				{
+					middle_end_point_value_center[0][i] = it->second[i].as<double>();
+					middle_end_point_value_center[1][i] = it->second[i+6].as<double>();
+				}
 
-
-
+				for(int i=3; i<6; i++)
+				{
+					middle_end_point_value_center[0][i] = it->second[i].as<double>()*DEGREE2RADIAN;
+					middle_end_point_value_center[1][i] = it->second[i+6].as<double>()*DEGREE2RADIAN;
+				}
+			}
+			break;
+			case 1:
+			{
+				for(int i=0; i<3; i++)
+				{
+					right_end_point_value_center[0][i] = it->second[i].as<double>();
+					right_end_point_value_center[1][i] = it->second[i+6].as<double>();
+				}
+				for(int i=3; i<6; i++)
+				{
+					right_end_point_value_center[0][i] = it->second[i].as<double>()*DEGREE2RADIAN;
+					right_end_point_value_center[1][i] = it->second[i+6].as<double>()*DEGREE2RADIAN;
+				}
+			}
+			break;
+			case -1:
+			{
+				for(int i=0; i<3; i++)
+				{
+					left_end_point_value_center[0][i] = it->second[i].as<double>();
+					left_end_point_value_center[1][i] = it->second[i+6].as<double>();
+				}
+				for(int i=3; i<6; i++)
+				{
+					left_end_point_value_center[0][i] = it->second[i].as<double>()*DEGREE2RADIAN;
+					left_end_point_value_center[1][i] = it->second[i+6].as<double>()*DEGREE2RADIAN;
+				}
+			}
+			break;
+			}
+		}*/
 
 
 

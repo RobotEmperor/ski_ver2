@@ -29,12 +29,14 @@ UpperBodyModule::UpperBodyModule()
 	result_["head_roll"]   = new robotis_framework::DynamixelState(); // joint 25
 
 	///////////////////////////
+/*
 	//center change waist
 	center_change_ = new diana_motion_waist::CenterChange;
 	temp_change_value_waist = 0.0;
 	temp_change_value_edge  = 0.0;
 	temp_turn_type = "basic";
 	temp_change_type = "basic";
+*/
 
 	// motion control variables
 	waist_kinematics_ = new heroehs_math::KinematicsEulerAngle;
@@ -144,9 +146,10 @@ UpperBodyModule::UpperBodyModule()
 	pattern_count = 0;
 	read_data = true;
 
-	edge_change_check = false;
-	temp_time_change_waist_roll = 0;
-	temp_time_change_waist_yaw  = 0;
+	waist_roll_check = false;
+
+
+	time_count_center_change = 0;
 }
 UpperBodyModule::~UpperBodyModule()
 {
@@ -180,10 +183,6 @@ void UpperBodyModule::queueThread()
 	head_test = ros_node.subscribe("/desired_pose_head", 5, &UpperBodyModule::desiredPoseHeadMsgCallbackTEST, this);
 	waist_test = ros_node.subscribe("/desired_pose_waist", 5, &UpperBodyModule::desiredPoseWaistMsgCallbackTEST, this);
 
-	//edge change check
-	edge_change_signal_sub = ros_node.subscribe("/edge_change_signal", 5, &UpperBodyModule::edgeChangeSignalMsgCallback, this);
-
-
 
 	ros::WallDuration duration(control_cycle_msec_ / 1000.0);
 	while(ros_node.ok())
@@ -195,6 +194,8 @@ void UpperBodyModule::desiredPoseWaistMsgCallbackTEST(const std_msgs::Float64Mul
 {
 	waist_end_point_(3, 1) = msg->data[0]; // yaw  트레젝토리 6 * 8 은 xyz yaw(z) pitch(y) roll(x) 이며 8은 처음 위치 나중 위치 / 속도 속도 / 가속도 가속도 / 시간 시간 / 임
 	waist_end_point_(5, 1) = msg->data[1]; // roll
+	waist_end_point_(3, 7) = msg->data[2];
+	waist_end_point_(5, 7) = msg->data[3];
 	is_moving_waist_ = true;
 }
 void UpperBodyModule::desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg)
@@ -202,7 +203,14 @@ void UpperBodyModule::desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64Mult
 	head_end_point_(3, 1) = msg->data[0]; // yaw  트레젝토리 6 * 8 은 xyz yaw(z) pitch(y) roll(x) 이며 8은 처음 위치 나중 위치 / 속도 속도 / 가속도 가속도 / 시간 시간 / 임
 	head_end_point_(4, 1) = msg->data[1];
 	head_end_point_(5, 1) = msg->data[2]; // roll
+
+	for(int joint_num_= 3; joint_num_< 6 ; joint_num_ ++)  // waist 3, 5번 // head 345 초기화
+	{
+		head_end_point_ (joint_num_, 7) = msg->data[3];
+	}
+
 	is_moving_head_ = true;
+
 }
 /////////////////////////////////////////////////////
 // flag position data get////////////////////////////
@@ -317,7 +325,7 @@ void UpperBodyModule::copFzMsgCallBack(const std_msgs::Float64MultiArray::ConstP
 // center change msg ///////////////////////////////////
 void UpperBodyModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg) // GUI 에서 motion_num topic을 sub 받아 실행 모션 번호 디텍트
 {
-	is_moving_waist_ = true;
+	/*is_moving_waist_ = true;
 	if (temp_change_value_waist != msg->waist_change || temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
 	{
 		center_change_->parseMotionData(msg->turn_type, msg->change_type);
@@ -329,13 +337,21 @@ void UpperBodyModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterCha
 			{
 				waist_end_point_(3,1) = center_change_->step_end_point_value[1];  // waist yaw
 				waist_end_point_(3,7) = msg->time_change;
+
+				waist_end_point_(5,1) = center_change_->step_end_point_value[0];  // waist roll
+				waist_end_point_(5,7) = msg->time_change;
 			}
-			waist_end_point_(5,1) = center_change_->step_end_point_value[0];  // waist roll
-			waist_end_point_(5,7) = msg->time_change;
+			else
+			{
+				waist_end_point_(5,1) = center_change_->step_end_point_value[0];  // waist roll
+				waist_end_point_(5,7) = msg->time_change;
+				waist_roll_check = true;
+			}
 		}
 
 		temp_change_value_edge  = msg->edge_change;
 		temp_change_value_waist = msg->waist_change;
+		temp_time_change_waist_roll  =  msg->time_change;
 		temp_time_change_waist_yaw  =  msg->time_change_edge;
 		temp_turn_type    = msg->turn_type;
 		temp_change_type  = msg->change_type; // 이전값 저장
@@ -346,7 +362,7 @@ void UpperBodyModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterCha
 	{  ROS_INFO("Nothing to change");
 	return;
 	}
-	/*	change_value_center =msg->center_change;
+		change_value_center =msg->center_change;
 	change_value_edge = msg->edge_change;
 
 	time_center = msg->time_change;
@@ -358,12 +374,6 @@ void UpperBodyModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterCha
 	pattern_count  = 1;
 	motion_count = 1;
 	motion_time_count_center = 0;*/
-}
-
-void UpperBodyModule::edgeChangeSignalMsgCallback(const std_msgs::Bool::ConstPtr& msg)
-{
-	edge_change_check = msg->data;
-
 }
 //////////////////////////////////////////////////////////////////////
 

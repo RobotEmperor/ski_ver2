@@ -8,6 +8,7 @@
 
 using namespace decision_module;
 
+
 DecisionModule::DecisionModule()
 {
 	gazebo_check = false;
@@ -27,5 +28,9 @@ void DecisionModule::process()
 	printf("RUN! \n");
 }
 
+
+void DecisionModule::desired_leg_motion()
+{
+}
 
 

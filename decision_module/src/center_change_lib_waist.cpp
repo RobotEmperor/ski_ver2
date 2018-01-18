@@ -1,15 +1,16 @@
 /*
- * center_change_upper_lib.cpp
+ * center_change_lib_waist.cpp
  *
- *  Created on: Dec 20, 2017
+ *  Created on: Jan 18, 2018
  *      Author: robotemperor
  */
 
-#include "upper_body_module/center_change_upper_lib.h"
+
+#include "decision_module/center_change_lib_waist.h"
 
 using namespace diana_motion_waist;
 
-CenterChange::CenterChange()
+CenterChangeWaist::CenterChangeWaist()
 {
 	std::string path_ = ros::package::getPath("ski_main_manager") + "/data/turn/initialize.yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
 	YAML::Node doc; // YAML file class 선언!
@@ -64,10 +65,10 @@ CenterChange::CenterChange()
 		step_end_point_value[i] = middle_end_point_value_center[i];
 	}
 }
-CenterChange::~CenterChange()
+CenterChangeWaist::~CenterChangeWaist()
 {}
 
-void CenterChange::parseMotionData(std::string turn_type, std::string change_type)
+void CenterChangeWaist::parseMotionData(std::string turn_type, std::string change_type)
 {
 	std::string path_ = ros::package::getPath("ski_main_manager") + "/data/turn/"+ turn_type + ".yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
 
@@ -125,7 +126,7 @@ void CenterChange::parseMotionData(std::string turn_type, std::string change_typ
 		return;
 
 }
-void CenterChange::calculateStepEndPointValue(double desired_value, double step_value, std::string change_type)
+void CenterChangeWaist::calculateStepEndPointValue(double desired_value, double step_value, std::string change_type)
 {
 	if(desired_value == 0)
 	{
@@ -152,3 +153,4 @@ void CenterChange::calculateStepEndPointValue(double desired_value, double step_
 	else
 		return;
 }
+

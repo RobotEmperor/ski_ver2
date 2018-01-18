@@ -9,6 +9,7 @@ project(decision_module)
 ################################################################################
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  roslib
   std_msgs
   cmake_modules
   geometry_msgs
@@ -52,8 +53,8 @@ include_directories(
   ${yaml_cpp_INCLUDE_DIRS}
 )
 
-add_executable(decision_module src/decision_module.cpp src/decision_module_state.cpp)
-target_link_libraries(decision_module ${yaml_cpp_LIBRARIES} ${catkin_LIBRARIES} )
+add_executable(decision_module src/decision_module src/decision_module_state.cpp src/center_change_lib_leg.cpp src/center_change_lib_waist.cpp)
+target_link_libraries(decision_module ${yaml_cpp_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(decision_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 

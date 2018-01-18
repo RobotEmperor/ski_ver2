@@ -1,12 +1,12 @@
 /*
- * center_change_upper_lib.h
+ * center_change_lib_waist.h
  *
- *  Created on: Dec 20, 2017
+ *  Created on: Jan 18, 2018
  *      Author: robotemperor
  */
 
-#ifndef SKI_VER2_UPPER_BODY_MODULE_INCLUDE_UPPER_BODY_MODULE_CENTER_CHANGE_UPPER_LIB_H_
-#define SKI_VER2_UPPER_BODY_MODULE_INCLUDE_UPPER_BODY_MODULE_CENTER_CHANGE_UPPER_LIB_H_
+#ifndef SKI_VER2_DECISION_MODULE_INCLUDE_DECISION_MODULE_CENTER_CHANGE_LIB_WAIST_H_
+#define SKI_VER2_DECISION_MODULE_INCLUDE_DECISION_MODULE_CENTER_CHANGE_LIB_WAIST_H_
 
 #include <ros/ros.h>
 #include <ros/package.h>
@@ -23,11 +23,11 @@ using namespace std;
 
 namespace diana_motion_waist
 {
-  class CenterChange
+  class CenterChangeWaist
 	{
 	public:
-  	CenterChange();
-  	~CenterChange();
+	  CenterChangeWaist();
+  	~CenterChangeWaist();
 
   	void parseMotionData(std::string turn_type, std::string change_type);
   	void calculateStepEndPointValue(double desired_value, double step_value, std::string change_type);
@@ -44,4 +44,4 @@ namespace diana_motion_waist
 
 
 
-#endif /* SKI_VER2_UPPER_BODY_MODULE_INCLUDE_UPPER_BODY_MODULE_CENTER_CHANGE_UPPER_LIB_H_ */
+#endif /* SKI_VER2_DECISION_MODULE_INCLUDE_DECISION_MODULE_CENTER_CHANGE_LIB_WAIST_H_ */

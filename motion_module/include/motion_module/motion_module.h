@@ -22,7 +22,6 @@
 #include "heroehs_math/kinematics.h"
 #include "heroehs_math/end_point_to_rad_cal.h"
 #include "diana_balance_control/diana_balance_control.h"
-#include "motion_module/center_change_lib.h"
 #include "diana_balance_control/cop_calculation_function.h"
 
 //message
@@ -77,7 +76,6 @@ public:
 	ros::Publisher r_compensation_rpy_pub;
 
 	ros::Publisher cop_fz_pub;
-	ros::Publisher edge_change_signal_pub;
 
 
 	// sensor data & balance on off
@@ -112,8 +110,6 @@ private:
 	geometry_msgs::Vector3 r_compensation_xyz_msg_;
 	geometry_msgs::Vector3 r_compensation_rpy_msg_;
 
-	//center change
-	std_msgs::Bool edge_change_signal_msg;
 
 	boost::thread queue_thread_;
 
@@ -177,12 +173,15 @@ private:
 	double copFz_d_gain;
 
 	//center change lib
-	diana_motion::CenterChange *center_change_;
+	std::string temp_turn_type;
+	double temp_change_value_center;
+
+/*	diana_motion::CenterChange *center_change_;
 	double temp_change_value_center;
 	std::string temp_turn_type;
 	std::string temp_change_type;
 	double temp_time_center_change;
-	double temp_time_edge_change;
+	double temp_time_edge_change;*/
 
 
 

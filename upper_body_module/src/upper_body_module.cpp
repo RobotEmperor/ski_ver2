@@ -119,7 +119,7 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 		return;
 	}
 	updateBalanceGyroParameter();
-	motion();
+	//motion();
 	if(new_count_ == 1)
 	{
 		new_count_ ++;
@@ -165,11 +165,11 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	// flag 에 따른 머리 제어 추가
 	if(is_moving_head_ == false)
 	{
-		ROS_INFO("Upper Head Stay");
+		//ROS_INFO("Upper Head Stay");
 	}
 	else
 	{
-		ROS_INFO("Upper Module head!!!!");
+		//ROS_INFO("Upper Module head!!!!");
 
 		// limit must be calculated 23 24 25
 		head_end_point_(3,1) = limitCheckHead(head_end_point_(3,1),60,-60);
@@ -190,8 +190,6 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	temp_head_pitch = limitCheckHead(head_kinematics_ -> zyx_euler_angle_y - result_head_enable*0,20,-20);
 	temp_head_roll  = limitCheckHead(head_kinematics_ -> zyx_euler_angle_x - result_head_enable*(0 + waist_kinematics_ -> xyz_euler_angle_x),20,-20);
 	//gazebo
-
-
 	result_[joint_id_to_name_[9]] -> goal_position_  = -(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z)); // waist yaw
 	result_[joint_id_to_name_[10]]-> goal_position_  = -(waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y); // waist roll
 
@@ -269,14 +267,15 @@ void UpperBodyModule::stop()
 
 void UpperBodyModule::motion()
 {
-	if(edge_change_check == true)
+
+/*	time_count_center_change = time_count_center_change + 0.008;
+
+	if(time_count_center_change > temp_time_change_waist_roll)
 	{
 		waist_end_point_(3,1) = center_change_->step_end_point_value[1];  // waist yaw
 		waist_end_point_(3,7) = temp_time_change_waist_yaw;
 		is_moving_waist_ = true;
-
-		edge_change_check = false;
-	}
+	}*/
 }
 
 

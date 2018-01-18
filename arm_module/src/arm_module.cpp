@@ -142,11 +142,11 @@ void ArmModule::process(std::map<std::string, robotis_framework::Dynamixel *> dx
 	}
 	if(is_moving_l_arm_ == false && is_moving_r_arm_ == false)
 	{
-		ROS_INFO("Arm Stay");
+		//ROS_INFO("Arm Stay");
 	}
 	else
 	{
-		ROS_INFO("Arm Module run !!!!");
+		//ROS_INFO("Arm Module run !!!!");
 		l_arm_end_point_(1,1)=limitCheckArmPosition(l_arm_end_point_(1,1),  0.35,  0.07);
 		r_arm_end_point_(1,1)=limitCheckArmPosition(r_arm_end_point_(1,1), -0.07, -0.35);
 

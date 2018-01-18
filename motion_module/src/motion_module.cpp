@@ -197,13 +197,12 @@ void MotionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 
 	if(is_moving_l_ == false && is_moving_r_ == false) // desired pose
 	{
-		ROS_INFO("Motion Stay");
+		//ROS_INFO("Motion Stay");
 	}
 	else
 	{
-		ROS_INFO("Motion run !!!!");
+		//ROS_INFO("Motion run !!!!");
 		// trajectory is working cartesian space control
-		printf("value %d   ::   %f  ::  \n",3,leg_end_point_l_(3,1) * RADIAN2DEGREE);
 		result_end_l_ = end_to_rad_l_->cal_end_point_to_rad(leg_end_point_l_);
 		result_end_r_ = end_to_rad_r_->cal_end_point_to_rad(leg_end_point_r_);
 
@@ -346,7 +345,7 @@ void MotionModule::stop()
 
 void MotionModule::edge_motion()
 {
-	if(center_change_moving_check == true && temp_change_value_center !=0)
+	/*if(center_change_moving_check == true && temp_change_value_center !=0)
 	{
 		time_count_center_change = time_count_center_change + 0.008;
 
@@ -375,12 +374,10 @@ void MotionModule::edge_motion()
 
 			center_change_moving_check = false;
 			time_count_center_change = 0;
-			edge_change_signal_msg.data = true;
-			edge_change_signal_pub.publish(edge_change_signal_msg);
 		}
 	}
 	else
-		return;
+		return;*/
 }
 
 

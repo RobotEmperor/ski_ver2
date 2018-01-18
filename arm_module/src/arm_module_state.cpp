@@ -132,6 +132,13 @@ void ArmModule::desiredPoseArmMsgCallbackTEST(const std_msgs::Float64MultiArray:
 	r_arm_end_point_(0, 1) = msg->data[3];
 	r_arm_end_point_(1, 1) = msg->data[4];
 	r_arm_end_point_(2, 1) = msg->data[5];
+
+	for(int joint_num_= 0; joint_num_< 6 ; joint_num_ ++)
+	{
+		l_arm_end_point_ (joint_num_, 7) = msg->data[6];
+		r_arm_end_point_ (joint_num_, 7) = msg->data[6];
+	}
+
 	is_moving_l_arm_ = true;
 	is_moving_r_arm_ = true;
 }

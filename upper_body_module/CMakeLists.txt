@@ -55,7 +55,6 @@ include_directories(
 
 add_library(upper_body_module
   src/upper_body_module.cpp
-  src/center_change_upper_lib.cpp
   src/upper_body_module_state.cpp
 )
 

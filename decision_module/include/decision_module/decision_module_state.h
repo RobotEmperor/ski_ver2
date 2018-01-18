@@ -19,15 +19,10 @@
 #include <fstream>
 #include <stdio.h>
 
-//#include "robotis_framework_common/sensor_module.h"
-//library
-//#include "robotis_math/robotis_math.h"
-//#include "heroehs_math/fifth_order_trajectory_generate.h"
-//#include "heroehs_math/kinematics.h"
-//#include "heroehs_math/end_point_to_rad_cal.h"
-//#include "diana_balance_control/control_function.h"
-//#include "diana_balance_control/diana_balance_control.h"
-//#include "diana_balance_control/cop_calculation_function.h"
+#include "decision_module/center_change_lib_leg.h"
+#include "decision_module/center_change_lib_waist.h"
+
+
 
 //message
 //m - standard
@@ -44,13 +39,16 @@
 //m - personal
 #include "diana_msgs/CenterChange.h"
 
+using namespace diana_motion_leg;
+using namespace diana_motion_waist;
+
 namespace decision_module
 {
 class DecisionModule
 {
 public:
 	DecisionModule();
-   ~DecisionModule();
+	~DecisionModule();
 
 	/* ROS Functions */
 	void initialize();
@@ -58,6 +56,9 @@ public:
 	bool gazebo_check;
 
 private:
+	void desired_leg_motion();
+
+
 
 };
 

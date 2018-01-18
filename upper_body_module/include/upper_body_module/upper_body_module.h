@@ -24,7 +24,6 @@
 #include "diana_balance_control/control_function.h"
 #include "diana_balance_control/diana_balance_control.h"
 #include "diana_balance_control/cop_calculation_function.h"
-#include "upper_body_module/center_change_upper_lib.h"
 
 //message
 //m - standard
@@ -105,9 +104,6 @@ public:
 	//flag position function
 	void currentFlagPositionFunction(double x, double y, double z);
 
-	//edge_change_signal_sub
-	void edgeChangeSignalMsgCallback(const std_msgs::Bool::ConstPtr& msg);
-
 
 
 private:
@@ -174,13 +170,13 @@ private:
 	Eigen::MatrixXd tf_gyro_value;
 
 
-	//center change lib
+/*	//center change lib
 	diana_motion_waist::CenterChange *center_change_;
 	double temp_change_value_waist, temp_change_value_edge;
 	double temp_time_change_waist_roll;
 	double temp_time_change_waist_yaw;
 	std::string temp_turn_type;
-	std::string temp_change_type;
+	std::string temp_change_type;*/
 
 	//flag position
 	double flag1_x, flag1_y, flag1_z;
@@ -220,7 +216,8 @@ private:
 	bool read_data;
 
 
-	bool edge_change_check;
+	double time_count_center_change;
+	bool   waist_roll_check;
 
 
 
