@@ -29,6 +29,30 @@ void initialize()
 	motion_time_count = 0;
 
 	leg_trj_time = 0;
+
+	for(int i=0;i<6;i++)
+	{
+		leg_xyz_ypr_l[i] = 0;
+		leg_xyz_ypr_r[i] = 0;
+	}
+	leg_trj_time = 0;
+
+	waist_roll = 0;
+	waist_yaw  = 0;
+	waist_roll_time = 0;
+	waist_yaw_time  = 0;
+
+	for(int i=0;i<6;i++)
+	{
+		pre_leg_xyz_ypr_l[i] = 0;
+		pre_leg_xyz_ypr_r[i] = 0;
+	}
+	pre_leg_trj_time = 0;
+
+	pre_waist_roll = 0;
+	pre_waist_yaw  = 0;
+	pre_waist_roll_time = 0;
+	pre_waist_yaw_time  = 0;
 }
 
 
@@ -161,31 +185,55 @@ void desired_leg_pose_pflug()
 				motion_time_count = 0;
 			}
 		}
-
-		desired_pose_waist_msg.data.push_back(waist_yaw);
-		desired_pose_waist_msg.data.push_back(waist_roll);
-		desired_pose_waist_msg.data.push_back(waist_yaw_time);
-		desired_pose_waist_msg.data.push_back(waist_roll_time);
-		desired_pose_waist_pub.publish(desired_pose_waist_msg);
-		desired_pose_waist_msg.data.clear();
-
-		for(int m = 0 ; m<6 ; m++)
+		if(pre_leg_xyz_ypr_l[0] != leg_xyz_ypr_l[0] || pre_leg_xyz_ypr_l[1] != leg_xyz_ypr_l[1] || pre_leg_xyz_ypr_l[2] != leg_xyz_ypr_l[2] || pre_leg_xyz_ypr_l[3] != leg_xyz_ypr_l[3] ||
+				pre_leg_xyz_ypr_l[4] != leg_xyz_ypr_l[4] || pre_leg_xyz_ypr_l[5] != leg_xyz_ypr_l[5] || pre_leg_xyz_ypr_r[0] != leg_xyz_ypr_r[0] || pre_leg_xyz_ypr_r[1] != leg_xyz_ypr_r[1] ||
+				pre_leg_xyz_ypr_r[2] != leg_xyz_ypr_r[2] || pre_leg_xyz_ypr_r[3] != leg_xyz_ypr_r[3] || pre_leg_xyz_ypr_r[4] != leg_xyz_ypr_r[4] || pre_leg_xyz_ypr_r[5] != leg_xyz_ypr_r[5] ||
+				pre_waist_roll != waist_roll             || pre_waist_yaw != waist_yaw               || pre_leg_trj_time != leg_trj_time         || pre_waist_roll_time != waist_roll_time   ||
+				pre_waist_yaw_time != waist_yaw_time)
 		{
-			desired_pose_leg_msg.data.push_back(leg_xyz_ypr_l[m]);
+
+			desired_pose_waist_msg.data.push_back(waist_yaw);
+			desired_pose_waist_msg.data.push_back(waist_roll);
+			desired_pose_waist_msg.data.push_back(waist_yaw_time);
+			desired_pose_waist_msg.data.push_back(waist_roll_time);
+			desired_pose_waist_pub.publish(desired_pose_waist_msg);
+			desired_pose_waist_msg.data.clear();
+
+			for(int m = 0 ; m<6 ; m++)
+			{
+				desired_pose_leg_msg.data.push_back(leg_xyz_ypr_l[m]);
+			}
+			for(int m = 0 ; m<6 ; m++)
+			{
+				desired_pose_leg_msg.data.push_back(leg_xyz_ypr_r[m]);
+			}
+			desired_pose_leg_msg.data.push_back(leg_trj_time);
+			desired_pose_leg_pub.publish(desired_pose_leg_msg);
+			desired_pose_leg_msg.data.clear();
 		}
-		for(int m = 0 ; m<6 ; m++)
-		{
-			desired_pose_leg_msg.data.push_back(leg_xyz_ypr_r[m]);
-		}
-		desired_pose_leg_msg.data.push_back(leg_trj_time);
-		desired_pose_leg_pub.publish(desired_pose_leg_msg);
-		desired_pose_leg_msg.data.clear();
 	}
 	else
 		return;
+
+	for(int i=0;i<6;i++)
+	{
+		pre_leg_xyz_ypr_l[i] = leg_xyz_ypr_l[i];
+		pre_leg_xyz_ypr_r[i] = leg_xyz_ypr_r[i];
+	}
+	pre_leg_trj_time = leg_trj_time;
+
+	pre_waist_roll = waist_roll;
+	pre_waist_yaw  = waist_yaw;
+	pre_waist_roll_time = waist_roll_time;
+	pre_waist_yaw_time  = waist_yaw_time;
 }
 
 void desired_leg_pose_carving()
+{
+
+}
+
+void carving_motion_generate()
 {
 
 }

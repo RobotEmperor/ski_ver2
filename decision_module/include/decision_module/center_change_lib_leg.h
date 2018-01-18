@@ -48,6 +48,7 @@ public:
 	~CarvingChange();
 
 	void parseMotionData();
+	void carving_motion_generate();
 
 	double motion_time[4];
 	double motion_center[12];

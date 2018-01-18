@@ -75,6 +75,14 @@ double waist_roll;
 double waist_yaw;
 double waist_roll_time, waist_yaw_time;
 
+double pre_leg_xyz_ypr_l[6];
+double pre_leg_xyz_ypr_r[6];
+double pre_leg_trj_time;
+
+double pre_waist_roll;
+double pre_waist_yaw;
+double pre_waist_roll_time, pre_waist_yaw_time;
+
 
 
 
