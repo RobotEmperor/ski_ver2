@@ -131,6 +131,7 @@ void CenterChangeLeg::parseMotionData(std::string turn_type, std::string change_
 				{
 					right_end_point_value_center[0][i] = it->second[i].as<double>();
 					right_end_point_value_center[1][i] = it->second[i+6].as<double>();
+
 				}
 				for(int i=3; i<6; i++)
 				{
@@ -150,6 +151,8 @@ void CenterChangeLeg::parseMotionData(std::string turn_type, std::string change_
 				{
 					left_end_point_value_center[0][i] = it->second[i].as<double>()*DEGREE2RADIAN;
 					left_end_point_value_center[1][i] = it->second[i+6].as<double>()*DEGREE2RADIAN;
+
+
 				}
 			}
 			break;

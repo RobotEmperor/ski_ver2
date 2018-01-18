@@ -107,8 +107,7 @@ double motion_time_count;
 bool center_change_moving_check;
 
 //carving
-
-CarvingChange *carving_motion;
+double motion_time_count_carving;
 
 
 
