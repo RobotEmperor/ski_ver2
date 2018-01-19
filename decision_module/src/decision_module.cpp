@@ -255,6 +255,10 @@ void desired_leg_pose_carving()
 				leg_xyz_ypr_r[m] = center_change_leg->step_end_point_value[1][m];
 				leg_trj_time = time_edge_change;
 			}
+
+			waist_roll = center_change_waist->step_end_point_value[1];
+			waist_roll_time =  time_edge_change;
+
 			center_change_moving_check = true;
 			motion_time_count_carving = 0;
 
@@ -273,14 +277,9 @@ void desired_leg_pose_carving()
 
 			if(motion_time_count_carving > time_edge_change)
 			{
-				center_change_waist->parseMotionData("carving", "center_change");
-				center_change_waist->calculateStepEndPointValue(change_value_center,100,"center_change");
 
 				center_change_leg->parseMotionData("carving", "center_change");
 				center_change_leg->calculateStepEndPointValue(change_value_center,100,"center_change"); // 0.01 단위로 조정 가능.
-
-				waist_roll = center_change_waist->step_end_point_value[1];
-				waist_roll_time =  time_center_change;
 
 				for(int m = 0 ; m<6 ; m++)
 				{
