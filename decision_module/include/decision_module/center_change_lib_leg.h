@@ -41,13 +41,13 @@ private:
 	double middle_end_point_value_center[2][6]; // The number 2 pose
 };
 
-class CarvingChange
+class MotionChange
 {
 public:
-	CarvingChange();
-	~CarvingChange();
+	MotionChange();
+	~MotionChange();
 
-	void parseMotionData();
+	void parseMotionData(std::string trun_type);
 	double calculate_velocity(double first_motion,double second_motion, double interval_time);
 	double calculate_motion_velocity(double first_v1, double second_v2);
 	void calculate_init_final_velocity(int motion_number);

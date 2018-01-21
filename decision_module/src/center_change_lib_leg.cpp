@@ -261,7 +261,7 @@ void CenterChangeLeg::calculateStepEndPointValue(double desired_value, double st
 		return;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-CarvingChange::CarvingChange()
+MotionChange::MotionChange()
 {
 	for(int i = 0; i<11; i++)
 	{
@@ -334,14 +334,14 @@ CarvingChange::CarvingChange()
 
 		}
 	}
-	parseMotionData();
+	parseMotionData("pflug_bogen_ver2");
 }
-CarvingChange::~CarvingChange()
+MotionChange::~MotionChange()
 {}
 
-void CarvingChange::parseMotionData()
+void MotionChange::parseMotionData(std::string trun_type)
 {
-	std::string path_ = ros::package::getPath("ski_main_manager") + "/data/turn/carving_ver2.yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
+	std::string path_ = ros::package::getPath("ski_main_manager") + "/data/turn/"+ trun_type +".yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
 	YAML::Node doc; // YAML file class 선언!
 	try
 	{
@@ -529,11 +529,11 @@ void CarvingChange::parseMotionData()
 		}
 	}
 }
-double CarvingChange::calculate_velocity(double first_motion,double second_motion, double interval_time)
+double MotionChange::calculate_velocity(double first_motion,double second_motion, double interval_time)
 {
 	return (second_motion - first_motion)/interval_time;
 }
-void CarvingChange::calculate_init_final_velocity(int motion_number)
+void MotionChange::calculate_init_final_velocity(int motion_number)
 {
 	for(int var = 0; var <12 ; var++)
 	{
@@ -731,7 +731,7 @@ void CarvingChange::calculate_init_final_velocity(int motion_number)
 		motion_init_arm_right_vel[motion_number][var] = motion_final_arm_right_vel[motion_number-1][var];
 	}
 }
-double CarvingChange::calculate_motion_velocity(double first_v1, double second_v2)
+double MotionChange::calculate_motion_velocity(double first_v1, double second_v2)
 {
 	if(first_v1*second_v2 > 0)
 		return second_v2;

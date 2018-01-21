@@ -73,9 +73,9 @@ void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& ms
 
 
 void control_loop(const ros::TimerEvent&);
-void desired_leg_pose_pflug();
-void carving_motion_left(int motion_number);
-void carving_motion_right(int motion_number);
+void motion_left(int motion_number);
+void motion_right(int motion_number);
+void motion_center(int motion_number);
 
 double leg_xyz_ypr_l[6];
 double leg_xyz_ypr_r[6];
@@ -119,8 +119,9 @@ bool center_change_moving_check;
 //carving
 double motion_time_count_carving;
 int motion_seq;
-int entire_motion_number;
-CarvingChange *carving_motion;
+int entire_motion_number_pflug;
+int entire_motion_number_carving;
+MotionChange *motion;
 
 
 
