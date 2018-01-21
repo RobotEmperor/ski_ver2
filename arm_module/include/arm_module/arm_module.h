@@ -46,6 +46,7 @@
 #include "robotis_controller_msgs/StatusMsg.h"
 #include "diana_msgs/CenterChange.h"
 #include "diana_msgs/BalanceParamArm.h"
+#include "diana_msgs/DesiredPoseCommand.h"
 
 namespace arm_module
 {
@@ -75,6 +76,7 @@ public:
 	ros::Subscriber get_imu_data_sub_;
 	ros::Subscriber get_ft_data_sub_;
 	ros::Subscriber balance_param_arm_sub;
+	ros::Subscriber desired_pose_all_sub;
 
 
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
@@ -82,6 +84,8 @@ public:
 
 	void desiredPoseArmMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
 	void currentWaistPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
+
+	void desiredPoseAllMsgCallback(const diana_msgs::DesiredPoseCommand::ConstPtr& msg);
 
 
 private:

@@ -103,8 +103,6 @@ MotionModule::MotionModule()
 
 	cop_cal = new  diana::CopCalculationFunc;
 
-	temp_change_value_center = 0;
-	temp_turn_type = "basic";
 	/*	center_change_ = new diana_motion::CenterChange;
 	temp_change_value_center = 0;
 	temp_time_center_change  = 0;
@@ -130,12 +128,6 @@ MotionModule::MotionModule()
 	updating_duration_cop = 0;
 	copFz_p_gain = 0;
 	copFz_d_gain = 0;
-
-
-	// test
-	time_count_center_change = 0;
-	center_change_moving_check = false;
-	read_data = true;
 }
 MotionModule::~MotionModule()
 {
@@ -167,37 +159,14 @@ void MotionModule::queueThread()
 	get_ft_data_sub_ = ros_node.subscribe("/diana/force_torque_data", 100, &MotionModule::ftDataMsgCallback, this);
 	ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/desired_pose_leg", 5, &MotionModule::desiredPoseMsgCallback, this);
 
+	desired_pose_all_sub = ros_node.subscribe("/desired_pose_all", 5, &MotionModule::desiredPoseAllMsgCallback, this);
+
 	// for gui
 	set_balance_param_sub_ = ros_node.subscribe("/diana/balance_parameter", 5, &MotionModule::setBalanceParameterCallback, this);
-	ros::Subscriber center_change_msg_sub = ros_node.subscribe("/diana/center_change", 5, &MotionModule::desiredCenterChangeMsgCallback, this);
 
 	ros::WallDuration duration(control_cycle_msec_ / 1000.0);
 	while(ros_node.ok())
 		callback_queue.callAvailable(duration);
-}
-
-void MotionModule::desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg) // GUI 에서 motion_num topic을 sub 받아 실행 모션 번호 디텍트
-{
-	temp_turn_type    = msg->turn_type;
-	temp_change_value_center = msg->center_change;
-	/*
-	is_moving_l_ = true;
-	is_moving_r_ = true;
-
-	if (temp_change_value_center != msg->center_change || temp_turn_type.compare(msg->turn_type) || temp_change_type.compare(msg->change_type))
-	{
-
-
-
-		temp_turn_type    = msg->turn_type;
-		temp_change_type  = msg->change_type; // 이전값 저장
-		ROS_INFO("Turn !!  Change");
-	} // 변한 것이 있으면 값을 계산
-	else
-	{  ROS_INFO("Nothing to change");
-	return;
-	}
-	 */
 }
 void MotionModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) // gyro data get
 {
@@ -252,8 +221,8 @@ void MotionModule::ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& ms
 
 	cop_cal->jointStateGetForTransForm(l_kinematics_->joint_radian, r_kinematics_->joint_radian);
 	cop_cal->copCalculationResult();
-	cop_compensation->centerOfPressureReferencePoint(temp_turn_type,   cop_cal->cf_px_l, cop_cal->cf_py_l, cop_cal->cf_pz_l,
-			cop_cal->cf_px_r, cop_cal->cf_py_r, cop_cal->cf_pz_r, temp_change_value_center);
+	/*cop_compensation->centerOfPressureReferencePoint(temp_turn_type,   cop_cal->cf_px_l, cop_cal->cf_py_l, cop_cal->cf_pz_l,
+			cop_cal->cf_px_r, cop_cal->cf_py_r, cop_cal->cf_pz_r, temp_change_value_center);*/
 }
 void MotionModule::setBalanceParameterCallback(const diana_msgs::BalanceParam::ConstPtr& msg)
 {
@@ -305,5 +274,26 @@ void MotionModule::desiredPoseMsgCallback(const std_msgs::Float64MultiArray::Con
 	}
 	is_moving_l_ = true;
 	is_moving_r_ = true;
+}
+
+void MotionModule::desiredPoseAllMsgCallback(const diana_msgs::DesiredPoseCommand::ConstPtr& msg)
+{
+	for(int joint_num_= 0; joint_num_< 6; joint_num_++)
+	{
+		leg_end_point_l_(joint_num_, 1) = msg->leg_final_position[joint_num_];
+		leg_end_point_r_(joint_num_, 1) = msg->leg_final_position[joint_num_+6];
+
+		leg_end_point_l_(joint_num_, 2) = msg->leg_init_vel[joint_num_];
+		leg_end_point_r_(joint_num_, 2) = msg->leg_init_vel[joint_num_+6];
+
+		leg_end_point_l_(joint_num_, 3) = msg->leg_final_vel[joint_num_];
+		leg_end_point_r_(joint_num_, 3) = msg->leg_final_vel[joint_num_+6];
+
+		leg_end_point_l_(joint_num_,7)  = msg->time_leg;
+		leg_end_point_r_(joint_num_,7)  = msg->time_leg;
+	}
+	is_moving_l_ = true;
+	is_moving_r_ = true;
+
 }
 

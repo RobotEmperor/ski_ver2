@@ -33,6 +33,7 @@
 
 //m - personal
 #include "diana_msgs/CenterChange.h"
+#include "diana_msgs/DesiredPoseCommand.h"
 
 
 using namespace decision_module;
@@ -46,6 +47,10 @@ ros::Publisher desired_pose_leg_pub;
 ros::Publisher desired_pose_waist_pub;
 ros::Publisher desired_pose_head_pub;
 ros::Publisher desired_pose_arm_pub;
+
+//pose publisher
+ros::Publisher desired_pose_all_pub;
+
 // subscriber
 
 
@@ -55,17 +60,22 @@ std_msgs::Float64MultiArray desired_pose_waist_msg; // desired_pose command msg
 std_msgs::Float64MultiArray desired_pose_head_msg; // desired_pose command msg
 std_msgs::Float64MultiArray desired_pose_arm_msg; // desired_pose command msg
 
+//msg
+diana_msgs::DesiredPoseCommand desired_pose_all_msg;
+
 
 void initialize();
 
 
 void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
+void updateMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
 void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg);
 
 
 void control_loop(const ros::TimerEvent&);
 void desired_leg_pose_pflug();
-void desired_leg_pose_carving();
+void carving_motion_left(int motion_number);
+void carving_motion_right(int motion_number);
 
 double leg_xyz_ypr_l[6];
 double leg_xyz_ypr_r[6];
@@ -108,6 +118,9 @@ bool center_change_moving_check;
 
 //carving
 double motion_time_count_carving;
+int motion_seq;
+int entire_motion_number;
+CarvingChange *carving_motion;
 
 
 

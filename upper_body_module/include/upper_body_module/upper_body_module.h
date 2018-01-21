@@ -44,6 +44,7 @@
 #include "diana_msgs/ForceTorque.h"
 #include "robotis_controller_msgs/StatusMsg.h"
 #include "diana_msgs/CenterChange.h"
+#include "diana_msgs/DesiredPoseCommand.h"
 
 
 namespace upper_body_module
@@ -75,20 +76,20 @@ public:
 	ros::Subscriber head_test;
 	ros::Subscriber waist_test;
 	ros::Subscriber get_imu_data_sub_;
-	ros::Subscriber center_change_msg_sub;
 	ros::Subscriber balance_param_waist_sub;
 	ros::Subscriber head_balance_sub;
 	ros::Subscriber flag_position_get_sub;
 
-	ros::Subscriber edge_change_signal_sub;
+	ros::Subscriber desired_pose_all_sub;
+
+
 	//current cop and reference cop from leg module
 	ros::Subscriber cop_fz_sub;
 
-
-	//void currentLegPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
-	void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg);
 	void desiredPoseWaistMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
 	void desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg);
+	void desiredPoseAllMsgCallback(const diana_msgs::DesiredPoseCommand::ConstPtr& msg);
+
 	//sensor
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
 	//pid gain value for gyro
@@ -169,15 +170,6 @@ private:
 	double gyro_yaw_d_gain;
 	Eigen::MatrixXd tf_gyro_value;
 
-
-/*	//center change lib
-	diana_motion_waist::CenterChange *center_change_;
-	double temp_change_value_waist, temp_change_value_edge;
-	double temp_time_change_waist_roll;
-	double temp_time_change_waist_yaw;
-	std::string temp_turn_type;
-	std::string temp_change_type;*/
-
 	//flag position
 	double flag1_x, flag1_y, flag1_z;
 	double flag2_x, flag2_y, flag2_z;
@@ -198,26 +190,6 @@ private:
 	double head_enable;
 	double result_head_enable;
 	double head_enable_time;
-
-	//test
-
-	void motion();
-	double change_value_center;
-	double change_value_edge;
-	double time_center;
-	double time_edge;
-	std::string turn_type;
-	std::string change_type;
-	double motion_time_count_center;
-	double motion_time_count_edge;
-	double motion_count;
-
-	double pattern_count;
-	bool read_data;
-
-
-	double time_count_center_change;
-	bool   waist_roll_check;
 
 
 

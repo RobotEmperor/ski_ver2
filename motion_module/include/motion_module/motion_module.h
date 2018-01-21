@@ -42,6 +42,7 @@
 #include "diana_msgs/ForceTorque.h"
 #include "robotis_controller_msgs/StatusMsg.h"
 #include "diana_msgs/CenterChange.h"
+#include "diana_msgs/DesiredPoseCommand.h"
 
 using namespace diana;
 
@@ -82,13 +83,15 @@ public:
 	ros::Subscriber get_imu_data_sub_;
 	ros::Subscriber get_ft_data_sub_;
 	ros::Subscriber set_balance_param_sub_;
+	ros::Subscriber desired_pose_all_sub;
 
 	/* ROS Topic Callback Functions */
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
 	void ftDataMsgCallback(const diana_msgs::ForceTorque::ConstPtr& msg);
 	void setBalanceParameterCallback(const diana_msgs::BalanceParam::ConstPtr& msg);
-	void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg);
 	void desiredPoseMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& msg);
+
+	void desiredPoseAllMsgCallback(const diana_msgs::DesiredPoseCommand::ConstPtr& msg);
 
 private:
 	void queueThread();
@@ -171,26 +174,6 @@ private:
 	double updating_duration_cop;
 	double copFz_p_gain;
 	double copFz_d_gain;
-
-	//center change lib
-	std::string temp_turn_type;
-	double temp_change_value_center;
-
-/*	diana_motion::CenterChange *center_change_;
-	double temp_change_value_center;
-	std::string temp_turn_type;
-	std::string temp_change_type;
-	double temp_time_center_change;
-	double temp_time_edge_change;*/
-
-
-
-	bool read_data;
-
-	// edge motion()
-	void edge_motion();
-	double time_count_center_change;
-	bool   center_change_moving_check;
 };
 
 }

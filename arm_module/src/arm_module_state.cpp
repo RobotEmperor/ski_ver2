@@ -115,6 +115,8 @@ void ArmModule::queueThread()
 	current_waist_pose_sub_ = ros_node.subscribe("/current_waist_pose", 5, &ArmModule::currentWaistPoseMsgCallback, this);
 	get_imu_data_sub_       = ros_node.subscribe("/imu/data", 100, &ArmModule::imuDataMsgCallback, this);
 	balance_param_arm_sub   = ros_node.subscribe("/diana/balance_parameter_arm", 5, &ArmModule::balanceParameterArmMsgCallback, this);
+
+	desired_pose_all_sub = ros_node.subscribe("/desired_pose_all", 5, &ArmModule::desiredPoseAllMsgCallback, this);
 	ros::WallDuration duration(control_cycle_msec_ / 1000.0);
 	while(ros_node.ok())
 		callback_queue.callAvailable(duration);
@@ -175,6 +177,31 @@ void ArmModule::balanceParameterArmMsgCallback(const diana_msgs::BalanceParamArm
 	gyro_pitch_d_gain  = msg -> arm_pitch_gyro_d_gain;
 	gyro_yaw_p_gain    = msg -> arm_yaw_gyro_p_gain;
 	gyro_yaw_d_gain    = msg -> arm_yaw_gyro_d_gain;
+}
+
+void ArmModule::desiredPoseAllMsgCallback(const diana_msgs::DesiredPoseCommand::ConstPtr& msg)
+{
+	for(int var = 0; var < 3; var++)
+	{
+		l_arm_end_point_(var, 1) = msg->arm_final_position[var];
+		r_arm_end_point_(var, 1) = msg->arm_final_position[var+3];
+
+		l_arm_end_point_(var, 2) = msg->arm_init_vel[var];
+		r_arm_end_point_(var, 2) = msg->arm_init_vel[var+3];
+
+		l_arm_end_point_(var, 3) = msg->arm_final_vel[var];
+		r_arm_end_point_(var, 3) = msg->arm_final_vel[var+3];
+	}
+
+	for(int joint_num_= 0; joint_num_< 6 ; joint_num_ ++)
+	{
+		l_arm_end_point_ (joint_num_, 7) = msg->time_arm;
+		r_arm_end_point_ (joint_num_, 7) = msg->time_arm;
+	}
+
+	is_moving_l_arm_ = true;
+	is_moving_r_arm_ = true;
+
 }
 
 

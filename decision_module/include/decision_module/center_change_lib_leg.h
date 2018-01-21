@@ -48,18 +48,52 @@ public:
 	~CarvingChange();
 
 	void parseMotionData();
-	void carving_motion_generate();
+	double calculate_velocity(double first_motion,double second_motion, double interval_time);
+	double calculate_motion_velocity(double first_v1, double second_v2);
+	void calculate_init_final_velocity(int motion_number);
 
-	double motion_time[4];
-	double motion_center[12];
-	double motion_left_change[5][12];
-	double motion_right_change[5][12];
-	double motion_waist_left_change[5][2];
-	double motion_waist_right_change[5][2];
+	double motion_time[11];
 
-	double motion_arm_left_change[5][6];
-	double motion_arm_right_change[5][6];
+	double motion_center_position[12];
+	double motion_waist_center_position[12];
+	double motion_arm_center_position[12];
+
+	double motion_left_position[10][12];
+	double motion_right_position[10][12];
+
+	double motion_waist_left_position[10][2];
+	double motion_waist_right_position[10][2];
+
+	double motion_arm_left_position[10][6];
+	double motion_arm_right_position[10][6];
+
+	double motion_init_leg_left_vel[11][12];
+	double motion_final_leg_left_vel[11][12];
+
+	double motion_init_leg_right_vel[11][12];
+	double motion_final_leg_right_vel[11][12];
+
+	double motion_init_waist_left_vel[11][2];
+	double motion_final_waist_left_vel[11][2];
+
+	double motion_init_waist_right_vel[11][2];
+	double motion_final_waist_right_vel[11][2];
+
+	double motion_init_arm_left_vel[11][6];
+	double motion_final_arm_left_vel[11][6];
+
+	double motion_init_arm_right_vel[11][6];
+	double motion_final_arm_right_vel[11][6];
+
 private:
+	double motion_left_vel[11][12];
+	double motion_right_vel[11][12];
+
+	double motion_waist_left_vel[11][2];
+	double motion_waist_right_vel[11][2];
+
+	double motion_arm_left_vel[11][6];
+	double motion_arm_right_vel[11][6];
 
 };
 }

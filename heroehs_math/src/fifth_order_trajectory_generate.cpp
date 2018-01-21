@@ -99,8 +99,8 @@ double FifthOrderTrajectory::fifth_order_traj_gen(double initial_value_, double 
 		trajectory_final_value = a[0] + a[1]*current_time + a[2]*(pow(current_time,2)) + a[3]*(pow(current_time,3)) + a[4]*(pow(current_time,4)) + a[5]*(pow(current_time,5));
 
 		current_pose = trajectory_final_value;
-		current_velocity = a[1] + 2*a[2]*current_time + 3*a[3]*(pow(current_time,2)) + 4*a[4]*(pow(current_time,3)) + 5*a[5]*(pow(current_time,4));
-		current_acc = 2*a[2] + 6*a[3]*current_time + 12*a[4]*pow(current_time,2) + 20*a[5]*pow(current_time,4);
+		//current_velocity = a[1] + 2*a[2]*current_time + 3*a[3]*(pow(current_time,2)) + 4*a[4]*(pow(current_time,3)) + 5*a[5]*(pow(current_time,4));
+		//current_acc = 2*a[2] + 6*a[3]*current_time + 12*a[4]*pow(current_time,2) + 20*a[5]*pow(current_time,4);
 
 		is_moving_traj = true;
 		return trajectory_final_value;

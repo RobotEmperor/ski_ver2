@@ -265,18 +265,6 @@ void UpperBodyModule::stop()
 	return;
 }
 
-void UpperBodyModule::motion()
-{
-
-/*	time_count_center_change = time_count_center_change + 0.008;
-
-	if(time_count_center_change > temp_time_change_waist_roll)
-	{
-		waist_end_point_(3,1) = center_change_->step_end_point_value[1];  // waist yaw
-		waist_end_point_(3,7) = temp_time_change_waist_yaw;
-		is_moving_waist_ = true;
-	}*/
-}
 
 
 
