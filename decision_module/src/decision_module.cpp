@@ -58,7 +58,7 @@ void initialize()
 	//motion
 	motion_seq = 0;
 	entire_motion_number_pflug = 4;
-	entire_motion_number_carving = 6;
+	entire_motion_number_carving = 4;
 }
 
 void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
@@ -73,6 +73,9 @@ void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& ms
 	change_value_center = msg->center_change;
 	time_center_change  = msg->time_change;
 	time_edge_change    = msg->time_change_edge;
+
+	motion_seq = 0;
+	motion_time_count_carving = 0;
 }
 void updateMsgCallback(const std_msgs::Bool::ConstPtr& msg)
 {
