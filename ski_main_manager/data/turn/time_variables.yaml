@@ -1,0 +1,8 @@
+left_x: 5
+left_y_min: 2
+left_y_max: 5
+
+
+right_x: 5
+right_y_min: -5
+right_y_max: -2

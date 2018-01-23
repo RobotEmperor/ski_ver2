@@ -171,10 +171,8 @@ private:
 	Eigen::MatrixXd tf_gyro_value;
 
 	//flag position
-	double flag1_x, flag1_y, flag1_z;
-	double flag2_x, flag2_y, flag2_z;
-	double flag3_x, flag3_y, flag3_z;
-	double flag4_x, flag4_y, flag4_z;
+	double flag[4][3];
+
 	geometry_msgs::Vector3 current_flag_position1_msg;
 	geometry_msgs::Vector3 current_flag_position2_msg;
 	geometry_msgs::Vector3 current_flag_position3_msg;

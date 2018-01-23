@@ -9,9 +9,8 @@
 
 void initialize()
 {
-	center_change_leg = new CenterChangeLeg;
-	center_change_waist = new CenterChangeWaist;
 	motion      = new MotionChange;
+	decision_algorithm = new DecisionModule;
 
 	turn_type = "basic";
 	change_type = "basic";
@@ -29,36 +28,12 @@ void initialize()
 	motion_time_count = 0;
 	motion_time_count_carving = 0;
 
-	leg_trj_time = 0;
-
-	for(int i=0;i<6;i++)
-	{
-		leg_xyz_ypr_l[i] = 0;
-		leg_xyz_ypr_r[i] = 0;
-	}
-	leg_trj_time = 0;
-
-	waist_roll = 0;
-	waist_yaw  = 0;
-	waist_roll_time = 0;
-	waist_yaw_time  = 0;
-
-	for(int i=0;i<6;i++)
-	{
-		pre_leg_xyz_ypr_l[i] = 0;
-		pre_leg_xyz_ypr_r[i] = 0;
-	}
-	pre_leg_trj_time = 0;
-
-	pre_waist_roll = 0;
-	pre_waist_yaw  = 0;
-	pre_waist_roll_time = 0;
-	pre_waist_yaw_time  = 0;
-
 	//motion
 	motion_seq = 0;
 	entire_motion_number_pflug = 4;
 	entire_motion_number_carving = 4;
+
+	pre_command = "center";
 }
 
 void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
@@ -77,16 +52,40 @@ void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& ms
 	motion_seq = 0;
 	motion_time_count_carving = 0;
 }
+void currentFlagPosition1MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg)
+{
+	decision_algorithm->temp_flag0[0] = msg->x;
+	decision_algorithm->temp_flag0[1] = msg->y;
+	decision_algorithm->temp_flag0[2] = msg->z; // flag 에서 로봇을 본 xyz
+}
+void currentFlagPosition2MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg)
+{
+	decision_algorithm->temp_flag1[0] = msg->x;
+	decision_algorithm->temp_flag1[1] = msg->y;
+	decision_algorithm->temp_flag1[2] = msg->z; // flag 에서 로봇을 본 xyz
+}
+void currentFlagPosition3MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg)
+{
+	decision_algorithm->temp_flag2[0] = msg->x;
+	decision_algorithm->temp_flag2[1] = msg->y;
+	decision_algorithm->temp_flag2[2] = msg->z; // flag 에서 로봇을 본 xyz
+}
+void currentFlagPosition4MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg)
+{
+	decision_algorithm->temp_flag3[0] = msg->x;
+	decision_algorithm->temp_flag3[1] = msg->y;
+	decision_algorithm->temp_flag3[2] = msg->z; // flag 에서 로봇을 본 xyz
+}
 void updateMsgCallback(const std_msgs::Bool::ConstPtr& msg)
 {
 	if(!turn_type.compare("carving_turn"))
 		motion->parseMotionData("carving_ver2");
 	if(!turn_type.compare("pflug_bogen"))
 		motion->parseMotionData("pflug_bogen_ver2");
-	else
-		return;
 
 	change_value_center = 0;
+	decision_algorithm->parseMotionData();
+
 }
 
 int main(int argc, char **argv)
@@ -107,6 +106,10 @@ int main(int argc, char **argv)
 	ros::Subscriber center_change_msg_sub = ros_node.subscribe("/diana/center_change", 5, desiredCenterChangeMsgCallback);
 	ros::Subscriber update_sub = ros_node.subscribe("/update", 5, updateMsgCallback);
 
+	ros::Subscriber current_flag_position_1 = ros_node.subscribe("/current_flag_position1", 5, currentFlagPosition1MsgCallback);
+	ros::Subscriber current_flag_position_2 = ros_node.subscribe("/current_flag_position2", 5, currentFlagPosition2MsgCallback);
+	ros::Subscriber current_flag_position_3 = ros_node.subscribe("/current_flag_position3", 5, currentFlagPosition3MsgCallback);
+	ros::Subscriber current_flag_position_4 = ros_node.subscribe("/current_flag_position4", 5, currentFlagPosition4MsgCallback);
 
 	ros::Timer timer = ros_node.createTimer(ros::Duration(0.008), control_loop);
 
@@ -128,19 +131,45 @@ void control_loop(const ros::TimerEvent&)
 {
 	if(ready_check)
 	{
-		if(!turn_type.compare("carving_turn") && change_value_center == -1)
-			motion_left(entire_motion_number_carving);
-		if(!turn_type.compare("carving_turn") && change_value_center == 1)
-			motion_right(entire_motion_number_carving);
-		if(!turn_type.compare("carving_turn") && change_value_center == 0)
-			motion_center(entire_motion_number_carving);
+		decision_algorithm->process();
 
-		if(!turn_type.compare("pflug_bogen") && change_value_center == -1)
+		if(pre_command.compare(decision_algorithm->turn_direction) != 0)
+		{
+			motion_seq = 0;
+			motion_time_count_carving = 0;
+			//printf("%c\n",decision_algorithm->turn_direction.c_str());
+		}
+/*		if(!turn_type.compare("pflug_bogen") && change_value_center == -1)
 			motion_left(entire_motion_number_pflug);
 		if(!turn_type.compare("pflug_bogen") && change_value_center == 1)
 			motion_right(entire_motion_number_pflug);
 		if(!turn_type.compare("pflug_bogen") && change_value_center == 0)
-			motion_center(entire_motion_number_pflug);
+			motion_center(entire_motion_number_pflug);*/
+
+		if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("left_turn"))
+		{
+			motion_left(entire_motion_number_carving);
+		}
+		if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("right_turn"))
+		{
+			motion_right(entire_motion_number_carving);
+		}
+		if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("center"))
+		{
+			motion_center(entire_motion_number_carving);
+		}
+
+		pre_command = decision_algorithm->turn_direction;
+
+		/*if(!turn_type.compare("carving_turn") && change_value_center == -1)
+			motion_left(entire_motion_number_carving);
+		if(!turn_type.compare("carving_turn") && change_value_center == 1)
+			motion_right(entire_motion_number_carving);
+		if(!turn_type.compare("carving_turn") && change_value_center == 0)
+			motion_center(entire_motion_number_carving); //remote control*/
+
+		if(!turn_type.compare("carving_turn") && change_value_center == -1)
+			motion_center(entire_motion_number_carving); //remote control
 	}
 	else
 		return;
@@ -149,6 +178,7 @@ void motion_left(int motion_number)
 {
 	motion->calculate_init_final_velocity(motion_number);
 	motion_time_count_carving = motion_time_count_carving + 0.008;
+
 	if(motion_seq == 0)
 	{
 		for(int var = 0; var < 12 ; var++)
@@ -207,13 +237,16 @@ void motion_left(int motion_number)
 			motion_seq ++;
 			motion_time_count_carving = 0;
 			desired_pose_all_pub.publish(desired_pose_all_msg);
+			decision_algorithm->is_moving_check = true;
 		}
 	}
 
 	if(motion_time_count_carving > motion->motion_time[motion_number-1] && motion_seq == motion_number)
 	{
 		motion_seq ++;
+		decision_algorithm->is_moving_check = false;
 	}
+
 
 }
 
@@ -280,12 +313,14 @@ void motion_right(int motion_number)
 			motion_seq ++;
 			motion_time_count_carving = 0;
 			desired_pose_all_pub.publish(desired_pose_all_msg);
+			decision_algorithm->is_moving_check = true;
 		}
 	}
 
 	if(motion_time_count_carving > motion->motion_time[motion_number-1] && motion_seq == motion_number)
 	{
 		motion_seq ++;
+		decision_algorithm->is_moving_check = false;
 	}
 
 }
@@ -316,8 +351,6 @@ void motion_center(int motion_number)
 	desired_pose_all_msg.time_waist = motion->motion_time[motion_number];
 	desired_pose_all_msg.time_arm = motion->motion_time[motion_number];
 	desired_pose_all_pub.publish(desired_pose_all_msg);
-	motion_seq = 0;
-	motion_time_count_carving = 0;
 }
 
 

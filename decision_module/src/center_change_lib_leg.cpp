@@ -583,13 +583,13 @@ void MotionChange::calculate_init_final_velocity(int motion_number)
 
 		for(int var = 0; var <2 ; var++)
 		{
-			motion_waist_left_vel[motion_num][var]  = calculate_velocity(motion_waist_center_position[var],motion_waist_left_position[motion_num][var], motion_time[motion_num]); // 처음
-			motion_waist_right_vel[motion_num][var] = calculate_velocity(motion_waist_center_position[var],motion_waist_right_position[motion_num][var], motion_time[motion_num]); // 처음
+			motion_waist_left_vel[motion_num][var]  = calculate_velocity(motion_waist_left_position[motion_num-1][var],motion_waist_left_position[motion_num][var], motion_time[motion_num]); // 처음
+			motion_waist_right_vel[motion_num][var] = calculate_velocity(motion_waist_right_position[motion_num-1][var],motion_waist_right_position[motion_num][var], motion_time[motion_num]); // 처음
 		}
 		for(int var = 0; var <6 ; var++)
 		{
-			motion_arm_left_vel[motion_num][var]  = calculate_velocity(motion_arm_center_position[var],motion_arm_left_position[motion_num][var], motion_time[motion_num]); // 처음
-			motion_arm_right_vel[motion_num][var] = calculate_velocity(motion_arm_center_position[var],motion_arm_right_position[motion_num][var], motion_time[motion_num]); // 처음
+			motion_arm_left_vel[motion_num][var]  = calculate_velocity(motion_arm_left_position[motion_num-1][var],motion_arm_left_position[motion_num][var], motion_time[motion_num]); // 처음
+			motion_arm_right_vel[motion_num][var] = calculate_velocity(motion_arm_right_position[motion_num-1][var],motion_arm_right_position[motion_num][var], motion_time[motion_num]); // 처음
 		}
 	}
 	for(int var = 0; var<12 ; var++)
@@ -599,13 +599,13 @@ void MotionChange::calculate_init_final_velocity(int motion_number)
 	}
 	for(int var = 0; var <2 ; var++)
 	{
-		motion_waist_left_vel[motion_number][var]  = calculate_velocity(motion_waist_center_position[var],motion_waist_center_position[var], motion_time[motion_number]); // 처음
-		motion_waist_right_vel[motion_number][var] = calculate_velocity(motion_waist_center_position[var],motion_waist_center_position[var], motion_time[motion_number]); // 처음
+		motion_waist_left_vel[motion_number][var]  = calculate_velocity(motion_waist_left_position[motion_number-1][var],motion_waist_center_position[var], motion_time[motion_number]); // 처음
+		motion_waist_right_vel[motion_number][var] = calculate_velocity(motion_waist_right_position[motion_number-1][var],motion_waist_center_position[var], motion_time[motion_number]); // 처음
 	}
 	for(int var = 0; var <6 ; var++)
 	{
-		motion_arm_left_vel[motion_number][var]  = calculate_velocity(motion_arm_center_position[var],motion_waist_center_position[var], motion_time[motion_number]); // 처음
-		motion_arm_right_vel[motion_number][var] = calculate_velocity(motion_arm_center_position[var],motion_waist_center_position[var], motion_time[motion_number]); // 처음
+		motion_arm_left_vel[motion_number][var]  = calculate_velocity(motion_arm_left_position[motion_number-1][var],motion_arm_center_position[var], motion_time[motion_number]); // 처음
+		motion_arm_right_vel[motion_number][var] = calculate_velocity(motion_arm_right_position[motion_number-1][var],motion_arm_center_position[var], motion_time[motion_number]); // 처음
 	}
 
 	///////////////////////////////////////////////////////////////////////////////// 초기
@@ -658,7 +658,6 @@ void MotionChange::calculate_init_final_velocity(int motion_number)
 				motion_final_leg_left_vel[motion_num][var] = 0;
 			else
 				motion_final_leg_left_vel[motion_num][var] = calculate_motion_velocity(motion_left_vel[motion_num][var], motion_left_vel[motion_num+1][var]);
-
 			if(motion_right_position[motion_num-1][var] == motion_right_position[motion_num][var])
 				motion_final_leg_right_vel[motion_num][var] = 0;
 			else
@@ -675,6 +674,7 @@ void MotionChange::calculate_init_final_velocity(int motion_number)
 				motion_final_waist_right_vel[motion_num][var] = 0;
 			else
 				motion_final_waist_right_vel[motion_num][var] = calculate_motion_velocity(motion_waist_right_vel[motion_num][var], motion_waist_right_vel[motion_num+1][var]);
+
 		}
 		for(int var = 0; var<6 ; var++)
 		{

@@ -214,24 +214,24 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	current_waist_pose_msg.data.clear();
 
 	//flag publisher
-	current_flag_position1_msg.x = flag1_x;
-	current_flag_position1_msg.y = flag1_y;
-	current_flag_position1_msg.z = flag1_z;
+	current_flag_position1_msg.x = flag[0][0];
+	current_flag_position1_msg.y = flag[0][1];
+	current_flag_position1_msg.z = flag[0][2];
 	current_flag_position1_pub.publish(current_flag_position1_msg);
 
-	current_flag_position2_msg.x = flag2_x;
-	current_flag_position2_msg.y = flag2_y;
-	current_flag_position2_msg.z = flag2_z;
+	current_flag_position2_msg.x = flag[1][0];
+	current_flag_position2_msg.y = flag[1][1];
+	current_flag_position2_msg.z = flag[1][2];
 	current_flag_position2_pub.publish(current_flag_position2_msg);
 
-	current_flag_position3_msg.x = flag3_x;
-	current_flag_position3_msg.y = flag3_y;
-	current_flag_position3_msg.z = flag3_z;
+	current_flag_position3_msg.x = flag[2][0];
+	current_flag_position3_msg.y = flag[2][1];
+	current_flag_position3_msg.z = flag[2][2];
 	current_flag_position3_pub.publish(current_flag_position3_msg);
 
-	current_flag_position4_msg.x = flag4_x;
-	current_flag_position4_msg.y = flag4_y;
-	current_flag_position4_msg.z = flag4_z;
+	current_flag_position4_msg.x = flag[3][0];
+	current_flag_position4_msg.y = flag[3][1];
+	current_flag_position4_msg.z = flag[3][2];
 	current_flag_position4_pub.publish(current_flag_position4_msg);
 
 

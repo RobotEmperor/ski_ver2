@@ -100,18 +100,12 @@ UpperBodyModule::UpperBodyModule()
 	copFz_p_gain = 0;
 	copFz_d_gain = 0;
 
-	flag1_x = 0;
-	flag1_y = 0;
-	flag1_z = 0;
-	flag2_x = 0;
-	flag2_y = 0;
-	flag2_z = 0;
-	flag3_x = 0;
-	flag3_y = 0;
-	flag3_z = 0;
-	flag4_x = 0;
-	flag4_y = 0;
-	flag4_z = 0;
+    for(int i = 0; i<4 ;i++)
+    {
+    	flag[i][0] = 0;
+    	flag[i][1] = 0;
+    	flag[i][2] = 0;
+    }
 
 	filter_head = new control_function::Filter;
 	temp_head_roll  = 0;
@@ -195,24 +189,15 @@ void UpperBodyModule::desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64Mult
 void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray& msg)
 {
 	// head point get
-	if(msg.length >= 2)
+	if(msg.length >= 1)
 	{
-		currentFlagPositionFunction(msg.data[0].position.x, msg.data[0].position.y, msg.data[0].position.z);// 천유 좌표를 넣어야함
-		flag1_x = head_point_kinematics_->head_point_on_origin_x*0.01;
-		flag1_y = head_point_kinematics_->head_point_on_origin_y*0.01;
-		flag1_z = head_point_kinematics_->head_point_on_origin_z*0.01;
-		currentFlagPositionFunction(msg.data[1].position.x, msg.data[1].position.y, msg.data[1].position.z);
-		flag2_x = head_point_kinematics_->head_point_on_origin_x*0.01;
-		flag2_y = head_point_kinematics_->head_point_on_origin_y*0.01;
-		flag2_z = head_point_kinematics_->head_point_on_origin_z*0.01;
-		currentFlagPositionFunction(msg.data[2].position.x, msg.data[2].position.y, msg.data[2].position.z);
-		flag3_x = head_point_kinematics_->head_point_on_origin_x*0.01;
-		flag3_y = head_point_kinematics_->head_point_on_origin_y*0.01;
-		flag3_z = head_point_kinematics_->head_point_on_origin_z*0.01;
-		currentFlagPositionFunction(msg.data[3].position.x, msg.data[3].position.y, msg.data[3].position.z);
-		flag4_x = head_point_kinematics_->head_point_on_origin_x*0.01;
-		flag4_y = head_point_kinematics_->head_point_on_origin_y*0.01;
-		flag4_z = head_point_kinematics_->head_point_on_origin_z*0.01;
+		for(int num = 0; num < msg.length; num++)
+		{
+			currentFlagPositionFunction(msg.data[num].position.x, msg.data[num].position.y, msg.data[num].position.z);// 천유 좌표를 넣어야함
+			flag[num][0] = head_point_kinematics_->head_point_on_origin_x*0.01;  // x
+			flag[num][1]  = head_point_kinematics_->head_point_on_origin_y*0.01; // y
+			flag[num][2]  = head_point_kinematics_->head_point_on_origin_z*0.01; // z
+		}
 	}
 	else
 	{

@@ -40,7 +40,6 @@ using namespace decision_module;
 
 bool ready_check;
 
-DecisionModule decision_process;
 
 // publisher
 ros::Publisher desired_pose_leg_pub;
@@ -71,33 +70,17 @@ void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
 void updateMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
 void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg);
 
+void currentFlagPosition1MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg);
+void currentFlagPosition2MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg);
+void currentFlagPosition3MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg);
+void currentFlagPosition4MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg);
+
 
 void control_loop(const ros::TimerEvent&);
 void motion_left(int motion_number);
 void motion_right(int motion_number);
 void motion_center(int motion_number);
 
-double leg_xyz_ypr_l[6];
-double leg_xyz_ypr_r[6];
-double leg_trj_time;
-
-double waist_roll;
-double waist_yaw;
-double waist_roll_time, waist_yaw_time;
-
-double pre_leg_xyz_ypr_l[6];
-double pre_leg_xyz_ypr_r[6];
-double pre_leg_trj_time;
-
-double pre_waist_roll;
-double pre_waist_yaw;
-double pre_waist_roll_time, pre_waist_yaw_time;
-
-
-
-
-CenterChangeLeg *center_change_leg;
-CenterChangeWaist *center_change_waist;
 
 std::string turn_type;
 std::string change_type;
@@ -122,6 +105,11 @@ int motion_seq;
 int entire_motion_number_pflug;
 int entire_motion_number_carving;
 MotionChange *motion;
+
+//decision module
+DecisionModule *decision_algorithm;
+std::string pre_command;
+
 
 
 
