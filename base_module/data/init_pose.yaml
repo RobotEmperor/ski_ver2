@@ -5,12 +5,12 @@ mov_time : 4.0		# movement time
 # target pose [deg] 프레임  기준  11 자
 
 tar_pose :
-  1  : 0.000048                       # l_shoulder_pitch
-  2  : 0.000048                       # r_shoulder_pitch
-  3  : 45.00085007                    # l_shoulder_roll
-  4  : -45.00085007                   # r_shoulder_roll
-  5  : -45.00085007                   # l_elbow_pitch
-  6  : -45.00085007                   # r_elbow_pitch
+  1  : 8.049827838                    # l_shoulder_pitch
+  2  : 8.049827838                    # r_shoulder_pitch
+  3  : 23.51172419                    # l_shoulder_roll
+  4  : -23.51172419                    # r_shoulder_roll
+  5  : -63.65784557                   # l_elbow_pitch
+  6  : -63.65784557                   # r_elbow_pitch
 
   9  : 0.0 		        # waist_yaw
   10 : 0.0 		        # waist_roll

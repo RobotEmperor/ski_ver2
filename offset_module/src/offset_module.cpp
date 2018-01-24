@@ -204,6 +204,8 @@ void OffsetModule::change_joint_value_sub_function(const std_msgs::Int16MultiArr
 	}
 	if(joint_select_< 7)
 		temp_ratio = 0.088/2.5;
+	if(joint_select_ == 3 || joint_select_ == 4)
+		temp_ratio = 0.088/2.25;
 
 	change_joint_value_[joint_select_] = static_cast<double>(msg->data[0]*(temp_ratio)*DEGREE2RADIAN); // GUI에서 변경할 조인트의 값을 받아옴.
 	offset_start_ = true;

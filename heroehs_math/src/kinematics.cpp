@@ -669,7 +669,7 @@ KinematicsArm::KinematicsArm()
 
 	dh_link_arm[0] = 0;
 	dh_link_arm[1] = 0;
-	dh_link_arm[2] = 0.22;  // must modify
+	dh_link_arm[2] = 0.24;  // must modify
 	dh_link_arm[3] = 0.25; // must modify
 
 	dh_link_d_arm[0] = 0;
