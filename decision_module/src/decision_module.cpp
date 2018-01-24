@@ -131,14 +131,14 @@ void control_loop(const ros::TimerEvent&)
 {
 	if(ready_check)
 	{
-		decision_algorithm->process();
+		/*decision_algorithm->process();
 
 		if(pre_command.compare(decision_algorithm->turn_direction) != 0)
 		{
 			motion_seq = 0;
 			motion_time_count_carving = 0;
 			//printf("%c\n",decision_algorithm->turn_direction.c_str());
-		}
+		}*/
 /*		if(!turn_type.compare("pflug_bogen") && change_value_center == -1)
 			motion_left(entire_motion_number_pflug);
 		if(!turn_type.compare("pflug_bogen") && change_value_center == 1)
@@ -146,7 +146,7 @@ void control_loop(const ros::TimerEvent&)
 		if(!turn_type.compare("pflug_bogen") && change_value_center == 0)
 			motion_center(entire_motion_number_pflug);*/
 
-		if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("left_turn"))
+	/*	if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("left_turn"))
 		{
 			motion_left(entire_motion_number_carving);
 		}
@@ -159,17 +159,17 @@ void control_loop(const ros::TimerEvent&)
 			motion_center(entire_motion_number_carving);
 		}
 
-		pre_command = decision_algorithm->turn_direction;
+		pre_command = decision_algorithm->turn_direction;*/
 
-		/*if(!turn_type.compare("carving_turn") && change_value_center == -1)
+		if(!turn_type.compare("carving_turn") && change_value_center == -1)
 			motion_left(entire_motion_number_carving);
 		if(!turn_type.compare("carving_turn") && change_value_center == 1)
 			motion_right(entire_motion_number_carving);
 		if(!turn_type.compare("carving_turn") && change_value_center == 0)
-			motion_center(entire_motion_number_carving); //remote control*/
-
-		if(!turn_type.compare("carving_turn") && change_value_center == -1)
 			motion_center(entire_motion_number_carving); //remote control
+
+		//if(!turn_type.compare("carving_turn") && change_value_center == -1)
+		//	motion_center(entire_motion_number_carving); //remote control
 	}
 	else
 		return;
