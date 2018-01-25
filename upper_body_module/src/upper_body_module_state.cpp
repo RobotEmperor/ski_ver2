@@ -211,7 +211,7 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 
 	headFollowFlag(flag[0][0] , flag[0][1]);
 	is_moving_head_ = true;
-	head_end_point_(3,1) =  head_end_point_(3,1) + head_follow_flag_yaw_compensation;
+	head_end_point_(3,1) =  head_end_point_(3,1) + result_head_enable*head_follow_flag_yaw_compensation;
 }
 /////////////////////////////////////////////////////
 
