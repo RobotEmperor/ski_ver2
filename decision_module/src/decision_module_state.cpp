@@ -79,7 +79,6 @@ void DecisionModule::decision_function(double flag[3])
 			turn_direction = "center";
 			return;
 		}
-		printf("!!!!!!!!!1");
 	}
 	else
 	{

@@ -139,6 +139,8 @@ void UpperBodyModule::queueThread()
 	current_flag_position3_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position3",100);
 	current_flag_position4_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position4",100);
 
+	current_flag_position_pub = ros_node.advertise<diana_msgs::FlagDataArray>("/current_flag_position",100);
+
 	// subscribe topics
 	flag_position_get_sub = ros_node.subscribe("/gate_watcher/flag_data", 100, &UpperBodyModule::flagPositionGetMsgCallback, this);
 	get_imu_data_sub_ = ros_node.subscribe("/imu/data", 100, &UpperBodyModule::imuDataMsgCallback, this);

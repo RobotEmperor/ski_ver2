@@ -233,32 +233,6 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	current_flag_position4_msg.y = flag[3][1];
 	current_flag_position4_msg.z = flag[3][2];
 	current_flag_position4_pub.publish(current_flag_position4_msg);
-
-
-	/*	// display cop to rviz
-		cop_point_Fz_msg_.header.stamp = ros::Time();
-		cop_point_Fy_msg_.header.stamp = ros::Time();
-		cop_point_Fx_msg_.header.stamp = ros::Time();
-
-		std::string frame = "/pelvis";
-		cop_point_Fz_msg_.header.frame_id = frame.c_str();
-		cop_point_Fy_msg_.header.frame_id = frame.c_str();
-		cop_point_Fx_msg_.header.frame_id = frame.c_str();
-
-		cop_point_Fz_msg_.point.x = cop_cal_waist -> cop_fz_point_x;
-		cop_point_Fz_msg_.point.y = cop_cal_waist -> cop_fz_point_y;
-		cop_point_Fz_msg_.point.z = 0;
-		cop_point_Fz_pub.publish(cop_point_Fz_msg_);
-
-		cop_point_Fy_msg_.point.x = cop_cal_waist -> cop_fy_point_x;
-		cop_point_Fy_msg_.point.y = 0;
-		cop_point_Fy_msg_.point.z = cop_cal_waist -> cop_fy_point_z;
-		cop_point_Fy_pub.publish(cop_point_Fy_msg_);
-
-		cop_point_Fx_msg_.point.x = 0;
-		cop_point_Fx_msg_.point.y = cop_cal_waist -> cop_fx_point_y;
-		cop_point_Fx_msg_.point.z = cop_cal_waist -> cop_fx_point_z;
-		cop_point_Fx_pub.publish(cop_point_Fx_msg_);*/
 }
 void UpperBodyModule::stop()
 {

@@ -72,6 +72,8 @@ public:
 	ros::Publisher  current_flag_position3_pub;
 	ros::Publisher  current_flag_position4_pub;
 
+	ros::Publisher  current_flag_position_pub;
+
 	// Subscriber
 	ros::Subscriber head_test;
 	ros::Subscriber waist_test;
@@ -177,6 +179,8 @@ private:
 	geometry_msgs::Vector3 current_flag_position2_msg;
 	geometry_msgs::Vector3 current_flag_position3_msg;
 	geometry_msgs::Vector3 current_flag_position4_msg;
+
+	diana_msgs::FlagDataArray current_flag_position_msg;
 
 	//head low pass filter variables
 	control_function::Filter *filter_head;

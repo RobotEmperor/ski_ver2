@@ -40,6 +40,7 @@ void initialize()
 void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 {
 	ready_check = msg->data;
+	change_value_center = 0;
 }
 void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg) // GUI 에서 motion_num topic을 sub 받아 실행 모션 번호 디텍트
 {
@@ -150,29 +151,32 @@ void control_loop(const ros::TimerEvent&)
 	{
 		if(!mode.compare("auto"))
 		{
+
+			if(!turn_type.compare("carving_turn") && change_value_center == 5)
+			{
+				decision_algorithm->turn_direction = "center";
+				motion_center(entire_motion_number_carving); //remote control
+				pre_command = decision_algorithm->turn_direction;
+				return;
+			}
+
 			decision_algorithm->process();
 
 			if(pre_command.compare(decision_algorithm->turn_direction) != 0 && decision_algorithm->turn_direction.compare("center"))
 			{
-				motion_seq = 0;
-				motion_time_count_carving = 0;
+				if(decision_algorithm->is_moving_check == false)
+				{
+					motion_seq = 0;
+					motion_time_count_carving = 0;
+				}
 			}
+
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("left_turn"))
 				motion_left(entire_motion_number_carving);
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("right_turn"))
 				motion_right(entire_motion_number_carving);
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("center"))
 				motion_center(entire_motion_number_carving);
-
-
-			printf("%s \n", decision_algorithm->turn_direction.c_str());
-
-			if(!turn_type.compare("carving_turn") && change_value_center == 6)
-			{
-				decision_algorithm->turn_direction = "center";
-				motion_center(entire_motion_number_carving); //remote control
-				change_value_center = 0;
-			}
 		}
 		if(!mode.compare("remote"))
 		{
@@ -375,10 +379,14 @@ void motion_center(int motion_number)
 	desired_pose_all_msg.time_arm = motion->motion_time[motion_number];
 	desired_pose_all_pub.publish(desired_pose_all_msg);
 
+	if(motion_time_count_carving < motion->motion_time[motion_number-1])
+	{
+		decision_algorithm->is_moving_check = true;
+	}
 	if(motion_time_count_carving > motion->motion_time[motion_number-1])
-		{
-			decision_algorithm->is_moving_check = false;
-		}
+	{
+		decision_algorithm->is_moving_check = false;
+	}
 }
 
 
