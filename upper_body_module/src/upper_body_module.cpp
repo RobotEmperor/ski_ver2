@@ -240,7 +240,7 @@ void UpperBodyModule::headFollowFlag(double x , double y)
 
 	flag_length = sqrt(pow(x,2) + pow(y,2));
 
-	if(flag_length > 3)
+	if(flag_length > 1)
 		head_follow_flag_yaw_compensation = acos(x/pow(x,2) + pow(y,2));
 	else
 		head_follow_flag_yaw_compensation = 0;
