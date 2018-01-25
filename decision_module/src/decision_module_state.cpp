@@ -49,8 +49,6 @@ void DecisionModule::initialize()
 void DecisionModule::process()
 {
 	decision_function(temp_flag0);
-
-	//printf("RUN! \n");
 }
 
 void DecisionModule::decision_function(double flag[3])
@@ -63,6 +61,9 @@ void DecisionModule::decision_function(double flag[3])
 			{
 				turn_direction = "right_turn";
 			}
+			else
+				turn_direction = "center";
+
 		}
 		else if(flag[0]*flag[1] > 0) // left turn
 		{
@@ -70,12 +71,15 @@ void DecisionModule::decision_function(double flag[3])
 			{
 				turn_direction = "left_turn";
 			}
+			else
+				turn_direction = "center";
 		}
 		else
 		{
 			turn_direction = "center";
 			return;
 		}
+		printf("!!!!!!!!!1");
 	}
 	else
 	{
@@ -103,13 +107,6 @@ void DecisionModule::parseMotionData()
 	right_x_detect_margin = doc["right_x"].as<double>();
 	right_y_detect_margin_min = doc["right_y_min"].as<double>();
 	right_y_detect_margin_max = doc["right_y_max"].as<double>();
-
-	printf("left_x :: %f\n", left_x_detect_margin);
-	printf("left_y 1:: %f\n", left_y_detect_margin_min);
-	printf("left_y 2:: %f\n", left_y_detect_margin_max);
-	printf("right_x :: %f\n", right_x_detect_margin);
-	printf("right_y 1:: %f\n", right_y_detect_margin_min);
-	printf("right_y 2:: %f\n", right_y_detect_margin_max);
 }
 
 

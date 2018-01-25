@@ -75,6 +75,8 @@ void currentFlagPosition2MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg
 void currentFlagPosition3MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg);
 void currentFlagPosition4MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg);
 
+void modeChangeMsgCallback(const std_msgs::Bool::ConstPtr& msg);
+
 
 void control_loop(const ros::TimerEvent&);
 void motion_left(int motion_number);
@@ -109,6 +111,9 @@ MotionChange *motion;
 //decision module
 DecisionModule *decision_algorithm;
 std::string pre_command;
+
+//remote or control
+std::string mode;
 
 
 

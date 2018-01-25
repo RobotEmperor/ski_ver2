@@ -34,6 +34,7 @@ void initialize()
 	entire_motion_number_carving = 4;
 
 	pre_command = "center";
+	mode = "auto";
 }
 
 void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
@@ -49,8 +50,14 @@ void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& ms
 	time_center_change  = msg->time_change;
 	time_edge_change    = msg->time_change_edge;
 
-	motion_seq = 0;
-	motion_time_count_carving = 0;
+	if(!mode.compare("remote"))
+	{
+		motion_seq = 0;
+		motion_time_count_carving = 0;
+	}
+	else
+		return;
+
 }
 void currentFlagPosition1MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg)
 {
@@ -85,7 +92,16 @@ void updateMsgCallback(const std_msgs::Bool::ConstPtr& msg)
 
 	change_value_center = 0;
 	decision_algorithm->parseMotionData();
-
+}
+void modeChangeMsgCallback(const std_msgs::Bool::ConstPtr& msg)
+{
+	if(msg->data == 0)
+	{
+		mode = "remote";
+		change_value_center = 0;
+	}
+	else
+		mode = "auto";
 }
 
 int main(int argc, char **argv)
@@ -111,7 +127,8 @@ int main(int argc, char **argv)
 	ros::Subscriber current_flag_position_3 = ros_node.subscribe("/current_flag_position3", 5, currentFlagPosition3MsgCallback);
 	ros::Subscriber current_flag_position_4 = ros_node.subscribe("/current_flag_position4", 5, currentFlagPosition4MsgCallback);
 
-	ros::Timer timer = ros_node.createTimer(ros::Duration(0.008), control_loop);
+	ros::Subscriber mode_change_sub = ros_node.subscribe("/mode_change", 5, modeChangeMsgCallback);
+	ros::Timer timer = ros_node.createTimer(ros::Duration(0.004), control_loop);
 
 	ros::Rate loop_rate(1000);
 
@@ -131,44 +148,50 @@ void control_loop(const ros::TimerEvent&)
 {
 	if(ready_check)
 	{
-		decision_algorithm->process();
+		if(!mode.compare("auto"))
+		{
+			decision_algorithm->process();
 
-		if(pre_command.compare(decision_algorithm->turn_direction) != 0)
-		{
-			motion_seq = 0;
-			motion_time_count_carving = 0;
-		}
-		if(!turn_type.compare("pflug_bogen") && change_value_center == -1)
-			motion_left(entire_motion_number_pflug);
-		if(!turn_type.compare("pflug_bogen") && change_value_center == 1)
-			motion_right(entire_motion_number_pflug);
-		if(!turn_type.compare("pflug_bogen") && change_value_center == 0)
-			motion_center(entire_motion_number_pflug);
+			if(pre_command.compare(decision_algorithm->turn_direction) != 0 && decision_algorithm->turn_direction.compare("center"))
+			{
+				motion_seq = 0;
+				motion_time_count_carving = 0;
+			}
+			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("left_turn"))
+				motion_left(entire_motion_number_carving);
+			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("right_turn"))
+				motion_right(entire_motion_number_carving);
+			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("center"))
+				motion_center(entire_motion_number_carving);
 
-		if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("left_turn"))
-		{
-			motion_left(entire_motion_number_carving);
+
+			printf("%s \n", decision_algorithm->turn_direction.c_str());
+
+			if(!turn_type.compare("carving_turn") && change_value_center == 6)
+			{
+				decision_algorithm->turn_direction = "center";
+				motion_center(entire_motion_number_carving); //remote control
+				change_value_center = 0;
+			}
 		}
-		if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("right_turn"))
+		if(!mode.compare("remote"))
 		{
-			motion_right(entire_motion_number_carving);
-		}
-		if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("center"))
-		{
-			motion_center(entire_motion_number_carving);
+			if(!turn_type.compare("pflug_bogen") && change_value_center == -1)
+				motion_left(entire_motion_number_pflug);
+			if(!turn_type.compare("pflug_bogen") && change_value_center == 1)
+				motion_right(entire_motion_number_pflug);
+			if(!turn_type.compare("pflug_bogen") && change_value_center == 0)
+				motion_center(entire_motion_number_pflug);
+
+			if(!turn_type.compare("carving_turn") && change_value_center == 1)
+				motion_left(entire_motion_number_carving);
+			if(!turn_type.compare("carving_turn") && change_value_center == -1)
+				motion_right(entire_motion_number_carving);
+			if(!turn_type.compare("carving_turn") && change_value_center == 0)
+				motion_center(entire_motion_number_carving); //remote control
 		}
 
 		pre_command = decision_algorithm->turn_direction;
-
-		/*if(!turn_type.compare("carving_turn") && change_value_center == -1)
-			motion_left(entire_motion_number_carving);
-		if(!turn_type.compare("carving_turn") && change_value_center == 1)
-			motion_right(entire_motion_number_carving);
-		if(!turn_type.compare("carving_turn") && change_value_center == 0)
-			motion_center(entire_motion_number_carving); //remote control*/
-
-		if(!turn_type.compare("carving_turn") && change_value_center == -1)
-			motion_center(entire_motion_number_carving); //remote control
 	}
 	else
 		return;
@@ -326,6 +349,7 @@ void motion_right(int motion_number)
 void motion_center(int motion_number)
 {
 	motion->calculate_init_final_velocity(motion_number);
+	motion_time_count_carving = motion_time_count_carving + 0.008;
 
 	for(int var = 0; var <12 ; var++)
 	{
@@ -350,6 +374,11 @@ void motion_center(int motion_number)
 	desired_pose_all_msg.time_waist = motion->motion_time[motion_number];
 	desired_pose_all_msg.time_arm = motion->motion_time[motion_number];
 	desired_pose_all_pub.publish(desired_pose_all_msg);
+
+	if(motion_time_count_carving > motion->motion_time[motion_number-1])
+		{
+			decision_algorithm->is_moving_check = false;
+		}
 }
 
 
