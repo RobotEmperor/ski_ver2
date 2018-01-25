@@ -155,6 +155,7 @@ private:
 	void gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x);
 	void quaternionToAngle(double q_w, double q_x, double q_y, double q_z);
 	void updateBalanceGyroParameter();
+	void headFollowFlag(double x , double y);
 	double currentGyroX,currentGyroY,currentGyroZ;
 	double currentGyroOrientationW, currentGyroOrientationX,currentGyroOrientationY,currentGyroOrientationZ;
 	double tf_current_gyro_x, tf_current_gyro_y, tf_current_gyro_z;
@@ -192,6 +193,10 @@ private:
 	double head_enable;
 	double result_head_enable;
 	double head_enable_time;
+
+	//head follow flag
+	double head_follow_flag_yaw_compensation;
+	double pre_head_follow_flag_yaw_compensation;
 
 
 

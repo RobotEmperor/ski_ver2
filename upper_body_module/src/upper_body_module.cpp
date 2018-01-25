@@ -172,7 +172,7 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 		//ROS_INFO("Upper Module head!!!!");
 
 		// limit must be calculated 23 24 25
-		head_end_point_(3,1) = limitCheckHead(head_end_point_(3,1),60,-60);
+		head_end_point_(3,1) = limitCheckHead(head_end_point_(3,1) +  head_follow_flag_yaw_compensation,60,-60);
 		head_end_point_(4,1) = limitCheckHead(head_end_point_(4,1),20,-20);
 		head_end_point_(5,1) = limitCheckHead(head_end_point_(5,1),20,-20);
 
@@ -233,6 +233,21 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	current_flag_position4_msg.y = flag[3][1];
 	current_flag_position4_msg.z = flag[3][2];
 	current_flag_position4_pub.publish(current_flag_position4_msg);
+}
+void UpperBodyModule::headFollowFlag(double x , double y)
+{
+	double flag_length = 0;
+
+	flag_length = sqrt(pow(x,2) + pow(y,2));
+
+	if(flag_length > 3)
+		head_follow_flag_yaw_compensation = acos(x/pow(x,2) + pow(y,2));
+	else
+		head_follow_flag_yaw_compensation = 0;
+
+	 head_follow_flag_yaw_compensation = filter_head->lowPassFilter(head_follow_flag_yaw_compensation, pre_head_follow_flag_yaw_compensation , 0.9, 0.008);
+
+	 pre_head_follow_flag_yaw_compensation = head_follow_flag_yaw_compensation;
 }
 void UpperBodyModule::stop()
 {

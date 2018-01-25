@@ -100,12 +100,12 @@ UpperBodyModule::UpperBodyModule()
 	copFz_p_gain = 0;
 	copFz_d_gain = 0;
 
-    for(int i = 0; i<4 ;i++)
-    {
-    	flag[i][0] = 0;
-    	flag[i][1] = 0;
-    	flag[i][2] = 0;
-    }
+	for(int i = 0; i<4 ;i++)
+	{
+		flag[i][0] = 0;
+		flag[i][1] = 0;
+		flag[i][2] = 0;
+	}
 
 	filter_head = new control_function::Filter;
 	temp_head_roll  = 0;
@@ -119,6 +119,9 @@ UpperBodyModule::UpperBodyModule()
 	head_enable = 0;
 	result_head_enable = 0;
 	head_enable_time = 2.0;
+
+	head_follow_flag_yaw_compensation = 0;
+	pre_head_follow_flag_yaw_compensation = 0;
 
 
 }
@@ -205,6 +208,8 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 	{
 		printf("No data!!!!");
 	}
+
+	headFollowFlag(flag[0][0] , flag[0][1]);
 }
 /////////////////////////////////////////////////////
 
