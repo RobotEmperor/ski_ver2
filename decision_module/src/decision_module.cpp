@@ -42,6 +42,16 @@ void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 	ready_check = msg->data;
 	change_value_center = 0;
 }
+void currentflagPositionMsgCallback(const diana_msgs::FlagDataArray& msg)
+{
+	// head point get
+	if(msg.length > 0)
+	{
+		decision_algorithm ->temp_flag0[0]  = msg.data[0].position.x;
+		decision_algorithm ->temp_flag0[1]  = msg.data[0].position.y;
+		decision_algorithm ->temp_flag0[2]  = msg.data[0].position.z;
+	}
+}
 void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg) // GUI 에서 motion_num topic을 sub 받아 실행 모션 번호 디텍트
 {
 	turn_type   = msg->turn_type;
@@ -59,30 +69,6 @@ void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& ms
 	else
 		return;
 
-}
-void currentFlagPosition1MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg)
-{
-	decision_algorithm->temp_flag0[0] = msg->x;
-	decision_algorithm->temp_flag0[1] = msg->y;
-	decision_algorithm->temp_flag0[2] = msg->z; // flag 에서 로봇을 본 xyz
-}
-void currentFlagPosition2MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg)
-{
-	decision_algorithm->temp_flag1[0] = msg->x;
-	decision_algorithm->temp_flag1[1] = msg->y;
-	decision_algorithm->temp_flag1[2] = msg->z; // flag 에서 로봇을 본 xyz
-}
-void currentFlagPosition3MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg)
-{
-	decision_algorithm->temp_flag2[0] = msg->x;
-	decision_algorithm->temp_flag2[1] = msg->y;
-	decision_algorithm->temp_flag2[2] = msg->z; // flag 에서 로봇을 본 xyz
-}
-void currentFlagPosition4MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg)
-{
-	decision_algorithm->temp_flag3[0] = msg->x;
-	decision_algorithm->temp_flag3[1] = msg->y;
-	decision_algorithm->temp_flag3[2] = msg->z; // flag 에서 로봇을 본 xyz
 }
 void updateMsgCallback(const std_msgs::Bool::ConstPtr& msg)
 {
@@ -124,10 +110,8 @@ int main(int argc, char **argv)
 	ros::Subscriber center_change_msg_sub = ros_node.subscribe("/diana/center_change", 5, desiredCenterChangeMsgCallback);
 	ros::Subscriber update_sub = ros_node.subscribe("/update", 5, updateMsgCallback);
 
-	ros::Subscriber current_flag_position_1 = ros_node.subscribe("/current_flag_position1", 5, currentFlagPosition1MsgCallback);
-	ros::Subscriber current_flag_position_2 = ros_node.subscribe("/current_flag_position2", 5, currentFlagPosition2MsgCallback);
-	ros::Subscriber current_flag_position_3 = ros_node.subscribe("/current_flag_position3", 5, currentFlagPosition3MsgCallback);
-	ros::Subscriber current_flag_position_4 = ros_node.subscribe("/current_flag_position4", 5, currentFlagPosition4MsgCallback);
+	ros::Subscriber current_flag_position_sub = ros_node.subscribe("/current_flag_position", 5, currentflagPositionMsgCallback);
+
 
 	ros::Subscriber mode_change_sub = ros_node.subscribe("/mode_change", 5, modeChangeMsgCallback);
 	ros::Timer timer = ros_node.createTimer(ros::Duration(0.006), control_loop);
@@ -202,6 +186,8 @@ void control_loop(const ros::TimerEvent&)
 		desired_pose_head_msg.data.push_back(0);
 		desired_pose_head_msg.data.push_back(2);
 		desired_pose_head_pub.publish(desired_pose_head_msg);
+		desired_pose_head_msg.data.clear();
+
 	}
 	else
 		return;
@@ -238,7 +224,7 @@ void motion_left(int motion_number)
 		desired_pose_all_msg.time_arm = motion->motion_time[0];
 		desired_pose_all_pub.publish(desired_pose_all_msg);
 		motion_seq ++;
-		//motion_time_count_carving = 0;
+		motion_time_count_carving = 0;
 	}
 
 	for(int motion_num = 1; motion_num < motion_number; motion_num++)
@@ -280,10 +266,6 @@ void motion_left(int motion_number)
 		motion_seq ++;
 		decision_algorithm->is_moving_check = false;
 	}
-
-	ROS_INFO("%d  \n",motion_seq);
-
-
 }
 
 void motion_right(int motion_number)
@@ -317,7 +299,7 @@ void motion_right(int motion_number)
 		desired_pose_all_msg.time_arm = motion->motion_time[0];
 		desired_pose_all_pub.publish(desired_pose_all_msg);
 		motion_seq ++;
-		//motion_time_count_carving = 0;
+		motion_time_count_carving = 0;
 	}
 
 	for(int motion_num = 1; motion_num < motion_number; motion_num++)
@@ -360,9 +342,6 @@ void motion_right(int motion_number)
 		motion_seq ++;
 		decision_algorithm->is_moving_check = false;
 	}
-
-	ROS_INFO("%d \n ",motion_seq);
-
 }
 void motion_center(int motion_number)
 {

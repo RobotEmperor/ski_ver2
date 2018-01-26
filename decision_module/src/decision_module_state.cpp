@@ -124,9 +124,9 @@ void DecisionModule::headFollowFlag(double x , double y)
 		if(y > 0)
 			head_follow_flag_yaw_compensation = acos(x/flag_length);
 		if(y < 0)
-			head_follow_flag_yaw_compensation = acos(x/flag_length);
+			head_follow_flag_yaw_compensation = -acos(x/flag_length);
 	}
-	else
+	if(flag_length < 1 && x < 0)
 		head_follow_flag_yaw_compensation = 0;
 
 	//head_follow_flag_yaw_compensation = filter_head->lowPassFilter(head_follow_flag_yaw_compensation, pre_head_follow_flag_yaw_compensation , 0, 0.008);

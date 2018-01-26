@@ -176,6 +176,9 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
 		is_moving_head_  = end_to_rad_head_  -> is_moving_check;
 	}
+
+
+
 	head_kinematics_ -> ZYXEulerAnglesSolution(result_rad_head_(3,0),result_rad_head_(4,0),result_rad_head_(5,0));
 
 	/*temp_head_yaw   = limitCheckHead(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z)),60,-60);
@@ -189,11 +192,9 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	result_[joint_id_to_name_[9]] -> goal_position_  = -(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z)); // waist yaw
 	result_[joint_id_to_name_[10]]-> goal_position_  = -(waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y); // waist roll
 
-	result_[joint_id_to_name_[23]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_yaw, temp_pre_yaw, 0.8, 0.008);
+	result_[joint_id_to_name_[23]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_yaw, temp_pre_yaw, 0, 0.008);
 	result_[joint_id_to_name_[24]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_pitch, temp_pre_pitch, 0.8, 0.008);
 	result_[joint_id_to_name_[25]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_roll, temp_pre_roll, 0.8, 0.008);
-
-
 
 	temp_pre_roll  = temp_head_roll;
 	temp_pre_pitch = temp_head_pitch;
@@ -210,28 +211,7 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	current_waist_pose_msg.data.clear();
 
 	//flag publisher
-	current_flag_position1_msg.x = flag[0][0];
-	current_flag_position1_msg.y = flag[0][1];
-	current_flag_position1_msg.z = flag[0][2];
-	current_flag_position1_pub.publish(current_flag_position1_msg);
-
-	current_flag_position2_msg.x = flag[1][0];
-	current_flag_position2_msg.y = flag[1][1];
-	current_flag_position2_msg.z = flag[1][2];
-	current_flag_position2_pub.publish(current_flag_position2_msg);
-
-	current_flag_position3_msg.x = flag[2][0];
-	current_flag_position3_msg.y = flag[2][1];
-	current_flag_position3_msg.z = flag[2][2];
-	current_flag_position3_pub.publish(current_flag_position3_msg);
-
-	current_flag_position4_msg.x = flag[3][0];
-	current_flag_position4_msg.y = flag[3][1];
-	current_flag_position4_msg.z = flag[3][2];
-	current_flag_position4_pub.publish(current_flag_position4_msg);
-
-	//current_flag_position_msg.data
-
+    current_flag_position_pub.publish(current_flag_position_msg);
 }
 void UpperBodyModule::stop()
 {

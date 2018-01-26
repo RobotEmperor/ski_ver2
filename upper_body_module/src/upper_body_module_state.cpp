@@ -112,15 +112,6 @@ UpperBodyModule::UpperBodyModule()
 	head_enable = 0;
 	result_head_enable = 0;
 	head_enable_time = 2.0;
-
-	flag_length = 0;
-
-	for(int i = 0; i<4 ;i++)
-	{
-		flag[i][0] = 0;
-		flag[i][1] = 0;
-		flag[i][2] = 0;
-	}
 }
 UpperBodyModule::~UpperBodyModule()
 {
@@ -134,11 +125,6 @@ void UpperBodyModule::queueThread()
 	ros_node.setCallbackQueue(&callback_queue);
 	// publish topics
 	current_waist_pose_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/current_waist_pose",100);
-	current_flag_position1_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position1",100);
-	current_flag_position2_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position2",100);
-	current_flag_position3_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position3",100);
-	current_flag_position4_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position4",100);
-
 	current_flag_position_pub = ros_node.advertise<diana_msgs::FlagDataArray>("/current_flag_position",100);
 
 	// subscribe topics
@@ -184,23 +170,22 @@ void UpperBodyModule::desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64Mult
 	}
 
 	is_moving_head_ = true;
-
 }
 /////////////////////////////////////////////////////
 // flag position data get////////////////////////////
 void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray& msg)
 {
-	flag_length = msg.length;
-	//flag_position = malloc(sizeof(int *) * flag_length);
+	current_flag_position_msg = msg;
+
 	// head point get
 	if(msg.length >= 1)
 	{
 		for(int num = 0; num < msg.length; num++)
 		{
 			currentFlagPositionFunction(msg.data[num].position.x, msg.data[num].position.y, msg.data[num].position.z);// 천유 좌표를 넣어야함
-			flag[num][0] = head_point_kinematics_->head_point_on_origin_x*0.01;  // x
-			flag[num][1]  = head_point_kinematics_->head_point_on_origin_y*0.01; // y
-			flag[num][2]  = head_point_kinematics_->head_point_on_origin_z*0.01; // z
+			current_flag_position_msg.data[num].position.x  = head_point_kinematics_->head_point_on_origin_x*0.01;  // x
+			current_flag_position_msg.data[num].position.y  = head_point_kinematics_->head_point_on_origin_y*0.01; // y
+			current_flag_position_msg.data[num].position.z  = head_point_kinematics_->head_point_on_origin_z*0.01; // z
 		}
 	}
 	else

@@ -34,6 +34,7 @@
 //m - personal
 #include "diana_msgs/CenterChange.h"
 #include "diana_msgs/DesiredPoseCommand.h"
+#include "diana_msgs/FlagDataArray.h"
 
 
 using namespace decision_module;
@@ -70,10 +71,7 @@ void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
 void updateMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
 void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg);
 
-void currentFlagPosition1MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg);
-void currentFlagPosition2MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg);
-void currentFlagPosition3MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg);
-void currentFlagPosition4MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg);
+void currentFlagPositionMsgCallback(const geometry_msgs::Vector3::ConstPtr& msg);
 
 void modeChangeMsgCallback(const std_msgs::Bool::ConstPtr& msg);
 

@@ -67,10 +67,6 @@ public:
 	double traj_time_test;
 	// publisher
 	ros::Publisher  current_waist_pose_pub;
-	ros::Publisher  current_flag_position1_pub;
-	ros::Publisher  current_flag_position2_pub;
-	ros::Publisher  current_flag_position3_pub;
-	ros::Publisher  current_flag_position4_pub;
 
 	ros::Publisher  current_flag_position_pub;
 
@@ -173,20 +169,9 @@ private:
 	double gyro_yaw_d_gain;
 	Eigen::MatrixXd tf_gyro_value;
 
-	//flag position
-	double flag[4][3];
-
-	//
-	double **flag_position;
-
-	geometry_msgs::Vector3 current_flag_position1_msg;
-	geometry_msgs::Vector3 current_flag_position2_msg;
-	geometry_msgs::Vector3 current_flag_position3_msg;
-	geometry_msgs::Vector3 current_flag_position4_msg;
+	//flag
 
 	diana_msgs::FlagDataArray current_flag_position_msg;
-
-	int flag_length;
 
 	//head low pass filter variables
 	control_function::Filter *filter_head;
