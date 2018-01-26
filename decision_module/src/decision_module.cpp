@@ -31,7 +31,7 @@ void initialize()
 	//motion
 	motion_seq = 0;
 	entire_motion_number_pflug = 4;
-	entire_motion_number_carving = 3;
+	entire_motion_number_carving = 4;
 
 	pre_command = "center";
 	mode = "auto";
@@ -130,7 +130,7 @@ int main(int argc, char **argv)
 	ros::Subscriber current_flag_position_4 = ros_node.subscribe("/current_flag_position4", 5, currentFlagPosition4MsgCallback);
 
 	ros::Subscriber mode_change_sub = ros_node.subscribe("/mode_change", 5, modeChangeMsgCallback);
-	ros::Timer timer = ros_node.createTimer(ros::Duration(0.004), control_loop);
+	ros::Timer timer = ros_node.createTimer(ros::Duration(0.006), control_loop);
 
 	ros::Rate loop_rate(1000);
 
@@ -210,7 +210,7 @@ void control_loop(const ros::TimerEvent&)
 void motion_left(int motion_number)
 {
 	motion->calculate_init_final_velocity(motion_number);
-	motion_time_count_carving = motion_time_count_carving + 0.004;
+	motion_time_count_carving = motion_time_count_carving + 0.006;
 
 	if(motion_seq == 0)
 	{
@@ -238,7 +238,7 @@ void motion_left(int motion_number)
 		desired_pose_all_msg.time_arm = motion->motion_time[0];
 		desired_pose_all_pub.publish(desired_pose_all_msg);
 		motion_seq ++;
-		motion_time_count_carving = 0;
+		//motion_time_count_carving = 0;
 	}
 
 	for(int motion_num = 1; motion_num < motion_number; motion_num++)
@@ -289,7 +289,7 @@ void motion_left(int motion_number)
 void motion_right(int motion_number)
 {
 	motion->calculate_init_final_velocity(motion_number);
-	motion_time_count_carving = motion_time_count_carving + 0.004;
+	motion_time_count_carving = motion_time_count_carving + 0.006;
 
 	if(motion_seq == 0)
 	{
@@ -317,7 +317,7 @@ void motion_right(int motion_number)
 		desired_pose_all_msg.time_arm = motion->motion_time[0];
 		desired_pose_all_pub.publish(desired_pose_all_msg);
 		motion_seq ++;
-		motion_time_count_carving = 0;
+		//motion_time_count_carving = 0;
 	}
 
 	for(int motion_num = 1; motion_num < motion_number; motion_num++)
@@ -367,7 +367,7 @@ void motion_right(int motion_number)
 void motion_center(int motion_number)
 {
 	motion->calculate_init_final_velocity(motion_number);
-	motion_time_count_carving = motion_time_count_carving + 0.004;
+	motion_time_count_carving = motion_time_count_carving + 0.006;
 
 	for(int var = 0; var <12 ; var++)
 	{
