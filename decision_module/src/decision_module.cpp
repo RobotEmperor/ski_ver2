@@ -31,7 +31,7 @@ void initialize()
 	//motion
 	motion_seq = 0;
 	entire_motion_number_pflug = 4;
-	entire_motion_number_carving = 4;
+	entire_motion_number_carving = 3;
 
 	pre_command = "center";
 	mode = "auto";
@@ -114,6 +114,7 @@ int main(int argc, char **argv)
 	// publisher
 	desired_pose_leg_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/desired_pose_leg",1);
 	desired_pose_waist_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/desired_pose_waist",1);
+	desired_pose_head_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/desired_pose_head",1);
 
 	desired_pose_all_pub  = ros_node.advertise<diana_msgs::DesiredPoseCommand>("/desired_pose_all",1);
 
@@ -196,14 +197,20 @@ void control_loop(const ros::TimerEvent&)
 		}
 
 		pre_command = decision_algorithm->turn_direction;
+		desired_pose_head_msg.data.push_back(decision_algorithm->head_follow_flag_yaw_compensation);
+		desired_pose_head_msg.data.push_back(-10*DEGREE2RADIAN);
+		desired_pose_head_msg.data.push_back(0);
+		desired_pose_head_msg.data.push_back(2);
+		desired_pose_head_pub.publish(desired_pose_head_msg);
 	}
 	else
 		return;
+
 }
 void motion_left(int motion_number)
 {
 	motion->calculate_init_final_velocity(motion_number);
-	motion_time_count_carving = motion_time_count_carving + 0.008;
+	motion_time_count_carving = motion_time_count_carving + 0.004;
 
 	if(motion_seq == 0)
 	{
@@ -231,6 +238,7 @@ void motion_left(int motion_number)
 		desired_pose_all_msg.time_arm = motion->motion_time[0];
 		desired_pose_all_pub.publish(desired_pose_all_msg);
 		motion_seq ++;
+		motion_time_count_carving = 0;
 	}
 
 	for(int motion_num = 1; motion_num < motion_number; motion_num++)
@@ -273,13 +281,15 @@ void motion_left(int motion_number)
 		decision_algorithm->is_moving_check = false;
 	}
 
+	ROS_INFO("%d  \n",motion_seq);
+
 
 }
 
 void motion_right(int motion_number)
 {
 	motion->calculate_init_final_velocity(motion_number);
-	motion_time_count_carving = motion_time_count_carving + 0.008;
+	motion_time_count_carving = motion_time_count_carving + 0.004;
 
 	if(motion_seq == 0)
 	{
@@ -307,6 +317,7 @@ void motion_right(int motion_number)
 		desired_pose_all_msg.time_arm = motion->motion_time[0];
 		desired_pose_all_pub.publish(desired_pose_all_msg);
 		motion_seq ++;
+		motion_time_count_carving = 0;
 	}
 
 	for(int motion_num = 1; motion_num < motion_number; motion_num++)
@@ -340,6 +351,7 @@ void motion_right(int motion_number)
 			motion_time_count_carving = 0;
 			desired_pose_all_pub.publish(desired_pose_all_msg);
 			decision_algorithm->is_moving_check = true;
+
 		}
 	}
 
@@ -349,11 +361,13 @@ void motion_right(int motion_number)
 		decision_algorithm->is_moving_check = false;
 	}
 
+	ROS_INFO("%d \n ",motion_seq);
+
 }
 void motion_center(int motion_number)
 {
 	motion->calculate_init_final_velocity(motion_number);
-	motion_time_count_carving = motion_time_count_carving + 0.008;
+	motion_time_count_carving = motion_time_count_carving + 0.004;
 
 	for(int var = 0; var <12 ; var++)
 	{

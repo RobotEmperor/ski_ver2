@@ -34,7 +34,11 @@ DecisionModule::DecisionModule()
 	right_y_detect_margin_min = 0;
 	right_y_detect_margin_max = 0;
 
+	//head
+	head_follow_flag_yaw_compensation = 0;
+	pre_head_follow_flag_yaw_compensation = 0;
 
+	filter_head = new control_function::Filter;
 }
 DecisionModule::~DecisionModule()
 {
@@ -49,6 +53,7 @@ void DecisionModule::initialize()
 void DecisionModule::process()
 {
 	decision_function(temp_flag0);
+	headFollowFlag(temp_flag0[0] , temp_flag0[1]);
 }
 
 void DecisionModule::decision_function(double flag[3])
@@ -106,6 +111,27 @@ void DecisionModule::parseMotionData()
 	right_x_detect_margin = doc["right_x"].as<double>();
 	right_y_detect_margin_min = doc["right_y_min"].as<double>();
 	right_y_detect_margin_max = doc["right_y_max"].as<double>();
+}
+// head
+void DecisionModule::headFollowFlag(double x , double y)
+{
+	double flag_length = 0;
+
+	flag_length = sqrt(pow(x,2) + pow(y,2));
+
+	if(flag_length > 1 && x > 0)
+	{
+		if(y > 0)
+			head_follow_flag_yaw_compensation = acos(x/flag_length);
+		if(y < 0)
+			head_follow_flag_yaw_compensation = acos(x/flag_length);
+	}
+	else
+		head_follow_flag_yaw_compensation = 0;
+
+	//head_follow_flag_yaw_compensation = filter_head->lowPassFilter(head_follow_flag_yaw_compensation, pre_head_follow_flag_yaw_compensation , 0, 0.008);
+
+	pre_head_follow_flag_yaw_compensation = head_follow_flag_yaw_compensation;
 }
 
 

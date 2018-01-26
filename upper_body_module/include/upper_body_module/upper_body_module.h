@@ -176,12 +176,17 @@ private:
 	//flag position
 	double flag[4][3];
 
+	//
+	double **flag_position;
+
 	geometry_msgs::Vector3 current_flag_position1_msg;
 	geometry_msgs::Vector3 current_flag_position2_msg;
 	geometry_msgs::Vector3 current_flag_position3_msg;
 	geometry_msgs::Vector3 current_flag_position4_msg;
 
 	diana_msgs::FlagDataArray current_flag_position_msg;
+
+	int flag_length;
 
 	//head low pass filter variables
 	control_function::Filter *filter_head;
@@ -193,10 +198,6 @@ private:
 	double head_enable;
 	double result_head_enable;
 	double head_enable_time;
-
-	//head follow flag
-	double head_follow_flag_yaw_compensation;
-	double pre_head_follow_flag_yaw_compensation;
 
 
 

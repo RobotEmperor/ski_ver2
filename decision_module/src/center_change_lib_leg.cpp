@@ -541,10 +541,10 @@ void MotionChange::calculate_init_final_velocity(int motion_number)
 		motion_right_vel[0][var] = calculate_velocity(motion_center_position[var],motion_right_position[0][var], motion_time[0]); // 처음
 
 		motion_init_leg_left_vel[0][var] = 0;
-		motion_final_leg_left_vel[motion_number][var] = 0;
+		motion_final_leg_left_vel[motion_number-1][var] = 0;
 
 		motion_init_leg_right_vel[0][var] = 0;
-		motion_final_leg_right_vel[motion_number][var] = 0;
+		motion_final_leg_right_vel[motion_number-1][var] = 0;
 	}
 
 	for(int var = 0; var <2 ; var++)
@@ -553,10 +553,10 @@ void MotionChange::calculate_init_final_velocity(int motion_number)
 		motion_waist_right_vel[0][var] = calculate_velocity(motion_waist_center_position[var],motion_waist_right_position[0][var], motion_time[0]); // 처음
 
 		motion_init_waist_left_vel[0][var] = 0;
-		motion_final_waist_left_vel[motion_number][var] = 0;
+		motion_final_waist_left_vel[motion_number-1][var] = 0;
 
 		motion_init_waist_right_vel[0][var] = 0;
-		motion_final_waist_right_vel[motion_number][var] = 0;
+		motion_final_waist_right_vel[motion_number-1][var] = 0;
 
 	}
 
@@ -566,10 +566,10 @@ void MotionChange::calculate_init_final_velocity(int motion_number)
 		motion_arm_right_vel[0][var] = calculate_velocity(motion_arm_center_position[var],motion_arm_right_position[0][var], motion_time[0]); // 처음
 
 		motion_init_arm_left_vel[0][var] = 0;
-		motion_final_arm_left_vel[motion_number][var] = 0;
+		motion_final_arm_left_vel[motion_number-1][var] = 0;
 
 		motion_init_arm_right_vel[0][var] = 0;
-		motion_final_arm_right_vel[motion_number][var] = 0;
+		motion_final_arm_right_vel[motion_number-1][var] = 0;
 
 	}
 	// 속도 계산
@@ -655,7 +655,9 @@ void MotionChange::calculate_init_final_velocity(int motion_number)
 		for(int var = 0; var<12 ; var++)
 		{
 			if(motion_left_position[motion_num-1][var] == motion_left_position[motion_num][var])
+			{
 				motion_final_leg_left_vel[motion_num][var] = 0;
+			}
 			else
 				motion_final_leg_left_vel[motion_num][var] = calculate_motion_velocity(motion_left_vel[motion_num][var], motion_left_vel[motion_num+1][var]);
 			if(motion_right_position[motion_num-1][var] == motion_right_position[motion_num][var])

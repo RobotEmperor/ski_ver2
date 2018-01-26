@@ -159,7 +159,6 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	cop_compensation_waist->reference_point_Fz_x = reference_cop_fz_x;
 	cop_compensation_waist->reference_point_Fz_y = reference_cop_fz_y;
 	cop_compensation_waist->centerOfPressureCompensationFz(current_cop_fz_x, current_cop_fz_y);
-
 	// flag 에 따른 머리 제어 추가
 	if(is_moving_head_ == false)
 	{
@@ -230,26 +229,9 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	current_flag_position4_msg.y = flag[3][1];
 	current_flag_position4_msg.z = flag[3][2];
 	current_flag_position4_pub.publish(current_flag_position4_msg);
-}
-void UpperBodyModule::headFollowFlag(double x , double y)
-{
-	double flag_length = 0;
 
-	flag_length = sqrt(pow(x,2) + pow(y,2));
+	//current_flag_position_msg.data
 
-	if(flag_length > 1 && x > 0)
-	{
-		if(y > 0)
-			head_follow_flag_yaw_compensation = acos(x/flag_length);
-		if(y < 0)
-			head_follow_flag_yaw_compensation = acos(x/flag_length);
-	}
-	else
-		head_follow_flag_yaw_compensation = 0;
-
-	head_follow_flag_yaw_compensation = filter_head->lowPassFilter(head_follow_flag_yaw_compensation, pre_head_follow_flag_yaw_compensation , 0.8, 0.008);
-
-	pre_head_follow_flag_yaw_compensation = head_follow_flag_yaw_compensation;
 }
 void UpperBodyModule::stop()
 {

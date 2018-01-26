@@ -21,6 +21,7 @@
 
 #include "decision_module/center_change_lib_leg.h"
 #include "decision_module/center_change_lib_waist.h"
+#include "diana_balance_control/control_function.h"
 
 
 
@@ -81,6 +82,13 @@ public:
 
 	void parseMotionData();// update command
 
+	void headFollowFlag(double x , double y);
+	//head follow flag
+	double head_follow_flag_yaw_compensation;
+	double pre_head_follow_flag_yaw_compensation;
+
+	control_function::Filter *filter_head;
+
 private:
 	void point_on_graph(double first_flag[3], double second_flag[3]);
 	void decision_function(double flag[3]);
@@ -88,6 +96,8 @@ private:
 	double left_x_detect_margin, left_y_detect_margin_min, left_y_detect_margin_max;
 	double right_x_detect_margin, right_y_detect_margin_min, right_y_detect_margin_max;
 
+
+	//head
 
 
 
