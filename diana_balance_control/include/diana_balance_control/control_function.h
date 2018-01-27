@@ -38,6 +38,11 @@ public:
 	Filter();
 	~Filter();
 	double lowPassFilter(double value, double pre_value, double weight_factor, double sampling_time);
+	double averageFilter(double value, double number, double min, double max);
+
+private:
+	double number_count;
+	double average_value;
 };
 }
 

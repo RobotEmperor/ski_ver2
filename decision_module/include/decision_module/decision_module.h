@@ -66,16 +66,14 @@ diana_msgs::DesiredPoseCommand desired_pose_all_msg;
 
 void initialize();
 
-
+// subscriber
 void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
 void updateMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
 void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg);
-
 void currentFlagPositionMsgCallback(const geometry_msgs::Vector3::ConstPtr& msg);
-
 void modeChangeMsgCallback(const std_msgs::Bool::ConstPtr& msg);
 
-
+//control
 void control_loop(const ros::TimerEvent&);
 void motion_left(int motion_number);
 void motion_right(int motion_number);

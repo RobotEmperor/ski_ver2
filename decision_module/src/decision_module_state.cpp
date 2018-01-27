@@ -19,9 +19,7 @@ DecisionModule::DecisionModule()
 	for(int i = 0; i <3 ; i++)
 	{
 		temp_flag0[i] = 0; // 0 :x 1 : y 2 : z;
-		temp_flag1[i] = 0; // 0 :x 1 : y 2 : z;
-		temp_flag2[i] = 0; // 0 :x 1 : y 2 : z;
-		temp_flag3[i] = 0; // 0 :x 1 : y 2 : z;
+
 	}
 
 	is_moving_check = false;
@@ -54,6 +52,7 @@ void DecisionModule::process()
 {
 	decision_function(temp_flag0);
 	headFollowFlag(temp_flag0[0] , temp_flag0[1]);
+	top_view(temp_flag0);
 }
 
 void DecisionModule::decision_function(double flag[3])
@@ -126,12 +125,21 @@ void DecisionModule::headFollowFlag(double x , double y)
 		if(y < 0)
 			head_follow_flag_yaw_compensation = -acos(x/flag_length);
 	}
-	if(flag_length < 1 && x < 0)
+	else
 		head_follow_flag_yaw_compensation = 0;
 
 	//head_follow_flag_yaw_compensation = filter_head->lowPassFilter(head_follow_flag_yaw_compensation, pre_head_follow_flag_yaw_compensation , 0, 0.008);
 
 	pre_head_follow_flag_yaw_compensation = head_follow_flag_yaw_compensation;
+}
+void DecisionModule::top_view(double flag_position[3])
+{
+	top_view_position.x = filter_head->average_value(flag_position[0],50,-5,20);
+	top_view_position.y = filter_head->average_value(flag_position[1],50,-20,20);
+	printf("X:: %f    Y :: %f \n", top_view_position.x, top_view_position.y);
+
+	pre_top_view_position.x = top_view_position.x;
+	pre_top_view_position.y = top_view_position.y;
 }
 
 

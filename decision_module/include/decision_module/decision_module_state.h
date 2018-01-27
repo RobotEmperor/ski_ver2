@@ -57,41 +57,32 @@ public:
 	bool gazebo_check;
 
 	double temp_flag0[3]; // 0 :x 1 : y 2 : z;
-	double temp_flag1[3]; // 0 :x 1 : y 2 : z;
-	double temp_flag2[3]; // 0 :x 1 : y 2 : z;
-	double temp_flag3[3]; // 0 :x 1 : y 2 : z;
+
 
 	double robot_position_on_flag_x;
 	double robot_position_on_flag_y;
 
-/*	double flag_0_x;
-	double flag_0_y;
-
-	double flag_1_x;
-	double flag_1_y;
-
-	double flag_2_x;
-	double flag_2_y;
-
-	double flag_3_x;
-	double flag_3_y;*/
 
 	bool is_moving_check;
 
 	std::string turn_direction;
 
 	void parseMotionData();// update command
-
 	void headFollowFlag(double x , double y);
+
 	//head follow flag
 	double head_follow_flag_yaw_compensation;
 	double pre_head_follow_flag_yaw_compensation;
-
 	control_function::Filter *filter_head;
 
+	geometry_msgs::Vector3 top_view_position;
+	geometry_msgs::Vector3 pre_top_view_position;
+
 private:
-	void point_on_graph(double first_flag[3], double second_flag[3]);
 	void decision_function(double flag[3]);
+
+	//map
+	void top_view(double flag_position[3]);
 
 	double left_x_detect_margin, left_y_detect_margin_min, left_y_detect_margin_max;
 	double right_x_detect_margin, right_y_detect_margin_min, right_y_detect_margin_max;

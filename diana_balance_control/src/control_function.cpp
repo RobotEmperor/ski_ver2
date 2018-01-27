@@ -60,6 +60,8 @@ PID_function::~PID_function()
 //////////////////////////////////////////////////////////////////////////////////////////////////
 Filter::Filter()
 {
+	number_count = 0;
+	average_value = 0;
 
 }
 Filter::~Filter()
@@ -69,4 +71,25 @@ Filter::~Filter()
 double Filter::lowPassFilter(double value, double pre_value, double weight_factor, double sampling_time)
 {
 	return (weight_factor*pre_value + sampling_time*value)/(weight_factor + sampling_time);
+}
+double Filter::averageFilter(double value, double number, double min, double max)
+{
+	double result = 0;
+
+	if(min > value || max < value)
+		return 0;
+
+	if(number_count < number)
+	{
+		number_count ++ ;
+		average_value = value + average_value;
+	}
+	else
+	{
+
+	  number_count = 0;
+	  result = average_value/number;
+	  average_value = 0;
+	}
+	return result;
 }
