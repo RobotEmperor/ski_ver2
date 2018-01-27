@@ -134,8 +134,8 @@ void DecisionModule::headFollowFlag(double x , double y)
 }
 void DecisionModule::top_view(double flag_position[3])
 {
-	top_view_position.x = filter_head->average_value(flag_position[0],50,-5,20);
-	top_view_position.y = filter_head->average_value(flag_position[1],50,-20,20);
+	top_view_position.x = filter_head->averageFilter(flag_position[0],50,-5,20);
+	top_view_position.y = filter_head->averageFilter(flag_position[1],50,-20,20);
 	printf("X:: %f    Y :: %f \n", top_view_position.x, top_view_position.y);
 
 	pre_top_view_position.x = top_view_position.x;
