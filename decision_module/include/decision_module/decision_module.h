@@ -48,6 +48,8 @@ ros::Publisher desired_pose_waist_pub;
 ros::Publisher desired_pose_head_pub;
 ros::Publisher desired_pose_arm_pub;
 
+ros::Publisher top_view_pub;
+
 //pose publisher
 ros::Publisher desired_pose_all_pub;
 
@@ -62,6 +64,9 @@ std_msgs::Float64MultiArray desired_pose_arm_msg; // desired_pose command msg
 
 //msg
 diana_msgs::DesiredPoseCommand desired_pose_all_msg;
+
+//msg
+diana_msgs::FlagDataArray top_view_msg;
 
 
 void initialize();

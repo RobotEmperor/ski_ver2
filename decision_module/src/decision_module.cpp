@@ -102,6 +102,8 @@ int main(int argc, char **argv)
 	desired_pose_waist_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/desired_pose_waist",1);
 	desired_pose_head_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/desired_pose_head",1);
 
+	//top_view_pub = ros_node.advertise<diana_msgs::FlagDataArray>("/top_view",1);
+
 	desired_pose_all_pub  = ros_node.advertise<diana_msgs::DesiredPoseCommand>("/desired_pose_all",1);
 
 
@@ -187,6 +189,11 @@ void control_loop(const ros::TimerEvent&)
 		desired_pose_head_msg.data.push_back(0.5);
 		desired_pose_head_pub.publish(desired_pose_head_msg);
 		desired_pose_head_msg.data.clear();
+
+
+		top_view_msg.data[decision_algorithm->flag_sequence].position.x = decision_algorithm->top_view_position.x;
+		top_view_msg.data[decision_algorithm->flag_sequence].position.y = decision_algorithm->top_view_position.y;
+		top_view_pub.publish(top_view_msg);
 
 	}
 	else

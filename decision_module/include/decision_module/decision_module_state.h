@@ -78,11 +78,15 @@ public:
 	geometry_msgs::Vector3 top_view_position;
 	geometry_msgs::Vector3 pre_top_view_position;
 
+	bool flag_check;
+	int flag_sequence;
+
 private:
 	void decision_function(double flag[3]);
 
 	//map
 	void top_view(double flag_position[3]);
+	int pre_flag_sequence;
 
 	double left_x_detect_margin, left_y_detect_margin_min, left_y_detect_margin_max;
 	double right_x_detect_margin, right_y_detect_margin_min, right_y_detect_margin_max;
