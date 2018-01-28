@@ -200,15 +200,17 @@ void control_loop(const ros::TimerEvent&)
 		desired_pose_head_pub.publish(desired_pose_head_msg);
 		desired_pose_head_msg.data.clear();
 
+		printf("value ::  %f \n", decision_algorithm->head_follow_flag_yaw_compensation);
 
-		if(decision_algorithm->flag_sequence > 5)
+
+		/*if(decision_algorithm->flag_sequence > 5)
 		{
 			ROS_INFO("Error algorithmn!!!!\n");
 			return;
-		}
+		}*/
 
 
-		flag_position[decision_algorithm->flag_sequence][0] = decision_algorithm->top_view_flag_position.x;
+/*		flag_position[decision_algorithm->flag_sequence][0] = decision_algorithm->top_view_flag_position.x;
 		flag_position[decision_algorithm->flag_sequence][1] = decision_algorithm->top_view_flag_position.y;
 
 
@@ -227,7 +229,8 @@ void control_loop(const ros::TimerEvent&)
 
 		top_view_robot_msg.x =  decision_algorithm->top_view_robot_position.x;
 		top_view_robot_msg.y =  decision_algorithm->top_view_robot_position.y;
-		top_view_robot_pub.publish(top_view_robot_msg);
+		top_view_robot_pub.publish(top_view_robot_msg);*/
+
 	}
 	else
 		return;

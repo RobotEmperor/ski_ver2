@@ -70,7 +70,7 @@ void DecisionModule::process()
 {
 	decision_function(temp_flag0);
 	headFollowFlag(temp_flag0[0] , temp_flag0[1]);
-	top_view(temp_flag0);
+	//top_view(temp_flag0);
 }
 
 void DecisionModule::decision_function(double flag[3])
