@@ -178,7 +178,7 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 	current_flag_position_msg = msg;
 
 	// head point get
-	if(msg.length >= 1)
+	if(msg.length > 0)
 	{
 		for(int num = 0; num < msg.length; num++)
 		{
@@ -190,6 +190,7 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 	}
 	else
 	{
+		current_flag_position_msg.length = 0;
 		printf("No data!!!!");
 	}
 }
