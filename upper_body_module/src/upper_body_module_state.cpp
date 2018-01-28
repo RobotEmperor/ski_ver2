@@ -174,8 +174,6 @@ void UpperBodyModule::desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64Mult
 // flag position data get////////////////////////////
 void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray& msg)
 {
-	current_flag_position_msg = msg;
-
 	printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 	// head point get
 	if(msg.length > 0)
