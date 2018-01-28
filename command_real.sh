@@ -11,5 +11,5 @@ roslaunch ski_main_manager ski_main_manager.launch &
 
 sleep 4 
 
-rosbag record -o /media/ski/sd64/bagfile/ /l_compensation_xyz /l_compensation_rpy /r_compensation_xyz /r_compensation_rpy /l_leg_point_xyz /r_leg_point_xyz /cop_fz /imu/data /diana/force_torque_data /current_flag_position1 /current_flag_position2 /current_flag_position3 /current_flag_position4 
+rosbag record -o /media/ski/sd64/bagfile/ /l_compensation_xyz /l_compensation_rpy /r_compensation_xyz /r_compensation_rpy /l_leg_point_xyz /r_leg_point_xyz /cop_fz /imu/data /diana/force_torque_data
 
