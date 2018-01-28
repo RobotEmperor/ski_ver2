@@ -12,8 +12,6 @@ using namespace decision_module;
 DecisionModule::DecisionModule()
 {
 	gazebo_check = false;
-	robot_position_on_flag_x = 0;
-	robot_position_on_flag_y = 0;
 
 
 	for(int i = 0; i <3 ; i++)
@@ -39,8 +37,24 @@ DecisionModule::DecisionModule()
 	filter_head = new control_function::Filter;
 
 	pre_flag_sequence = 0;
-	flag_sequence = 0;
-	 flag_check = false;
+	flag_sequence = -1;
+	flag_check = false;
+
+	top_view_flag_position.x = 0;
+	top_view_flag_position.y = 0;
+	top_view_flag_position.z = 0;
+
+	temp_top_view_flag_position.x = 0;
+	temp_top_view_flag_position.y = 0;
+	temp_top_view_flag_position.z = 0;
+
+	pre_top_view_flag_position.x = 0;
+	pre_top_view_flag_position.y = 0;
+	pre_top_view_flag_position.z = 0;
+
+	top_view_robot_position.x = 0;
+	top_view_robot_position.y = 0;
+	top_view_robot_position.z = 0;
 }
 DecisionModule::~DecisionModule()
 {
@@ -138,29 +152,52 @@ void DecisionModule::headFollowFlag(double x , double y)
 }
 void DecisionModule::top_view(double flag_position[3])
 {
-	if(filter_head->averageFilter(flag_position[0],50,-5,20) != 0 && filter_head->averageFilter(flag_position[1],50,-20,20) !=0)
+	if(flag_sequence > -1)
 	{
-		top_view_position.x = filter_head->averageFilter(flag_position[0],50,-5,20);
-		top_view_position.y = filter_head->averageFilter(flag_position[1],50,-20,20);
-
-		if(fabs(sqrt(pow(pre_top_view_position.x,2) + pow(pre_top_view_position.y,2)) - sqrt(pow(top_view_position.x,2) + pow(top_view_position.y,2))) > 8)
-		{
-			flag_sequence ++;
-		}
-		else
-		{
-			flag_check = 0; // flag change
-		}
-		if(pre_flag_sequence != flag_sequence)
-			flag_check = 1; // flag change
+		temp_top_view_flag_position.x = flag_position[0];
+		temp_top_view_flag_position.y = flag_position[1];
 	}
 
+	if(filter_head->averageFilter(flag_position[0],50,-5,20) != 0 && filter_head->averageFilter(flag_position[1],50,-20,20) !=0 && flag_sequence == -1)
+	{
+		top_view_flag_position.x = filter_head->averageFilter(flag_position[0],50,-5,20);
+		top_view_flag_position.y = filter_head->averageFilter(flag_position[1],50,-20,20);
+		pre_top_view_flag_position = top_view_flag_position;
+
+		flag_sequence ++;
+	}
+
+	if(fabs(sqrt(pow(pre_top_view_flag_position.x,2) + pow(pre_top_view_flag_position.y,2)) - sqrt(pow(temp_top_view_flag_position.x,2) + pow(temp_top_view_flag_position.y,2))) > 8)
+	{
+		flag_sequence ++;
+	}
+	else
+	{
+		flag_check = 0; // flag change
+	}
+
+	if(pre_flag_sequence != flag_sequence && flag_sequence != 0)
+	{
+		top_view_flag_position.x = pre_top_view_robot_position.x + temp_top_view_flag_position.x; // 고정된값
+		top_view_flag_position.y = pre_top_view_robot_position.y + temp_top_view_flag_position.y; // 고정된값
+		flag_check = 1; // flag change
+	}
+
+
+	top_view_robot_position.x = -flag_position[0] + top_view_flag_position.x;
+	top_view_robot_position.y = -flag_position[1] + top_view_flag_position.y;
+
+
+
 	pre_flag_sequence = flag_sequence;
+	pre_top_view_flag_position.x = top_view_flag_position.x;
+	pre_top_view_flag_position.y = top_view_flag_position.y;
 
-	pre_top_view_position.x = top_view_position.x;
-	pre_top_view_position.y = top_view_position.y;
+	pre_top_view_robot_position.x = top_view_robot_position.x;
+	pre_top_view_robot_position.y = top_view_robot_position.y;
 
-	printf("X:: %f    Y :: %f \n", top_view_position.x, top_view_position.y);
+	printf("flag  ::  X:: %f    Y :: %f \n", top_view_flag_position.x, top_view_flag_position.y);
+	printf("flag  ::  X:: %f    Y :: %f \n", top_view_robot_position.x, top_view_robot_position.y);
 	printf("flag_sequence ::  %d \n", flag_sequence);
 }
 

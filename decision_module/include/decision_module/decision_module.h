@@ -49,6 +49,7 @@ ros::Publisher desired_pose_head_pub;
 ros::Publisher desired_pose_arm_pub;
 
 ros::Publisher top_view_pub;
+ros::Publisher top_view_robot_pub;
 
 //pose publisher
 ros::Publisher desired_pose_all_pub;
@@ -67,6 +68,7 @@ diana_msgs::DesiredPoseCommand desired_pose_all_msg;
 
 //msg
 diana_msgs::FlagDataArray top_view_msg;
+geometry_msgs::Vector3 top_view_robot_msg;
 
 
 void initialize();
@@ -115,6 +117,10 @@ std::string pre_command;
 
 //remote or control
 std::string mode;
+
+//top_view_variables
+double flag_position[5][2];
+double robot_position[5][2];
 
 
 

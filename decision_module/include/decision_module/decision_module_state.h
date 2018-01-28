@@ -59,10 +59,6 @@ public:
 	double temp_flag0[3]; // 0 :x 1 : y 2 : z;
 
 
-	double robot_position_on_flag_x;
-	double robot_position_on_flag_y;
-
-
 	bool is_moving_check;
 
 	std::string turn_direction;
@@ -75,8 +71,11 @@ public:
 	double pre_head_follow_flag_yaw_compensation;
 	control_function::Filter *filter_head;
 
-	geometry_msgs::Vector3 top_view_position;
-	geometry_msgs::Vector3 pre_top_view_position;
+	geometry_msgs::Vector3 temp_top_view_flag_position;
+	geometry_msgs::Vector3 top_view_flag_position;
+	geometry_msgs::Vector3 pre_top_view_flag_position;
+	geometry_msgs::Vector3 top_view_robot_position;
+	geometry_msgs::Vector3 pre_top_view_robot_position;
 
 	bool flag_check;
 	int flag_sequence;
