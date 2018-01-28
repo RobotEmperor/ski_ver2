@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 	desired_pose_waist_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/desired_pose_waist",1);
 	desired_pose_head_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/desired_pose_head",1);
 
-	top_view_pub = ros_node.advertise<diana_msgs::FlagDataArray>("/top_view",1);
+	top_view_pub = ros_node.advertise<geometry_msgs::Vector3>("/top_view",1);
 
 	top_view_robot_pub = ros_node.advertise<geometry_msgs::Vector3>("/top_view_robot",1);
 	desired_pose_all_pub  = ros_node.advertise<diana_msgs::DesiredPoseCommand>("/desired_pose_all",1);
@@ -144,6 +144,7 @@ int main(int argc, char **argv)
 
 void control_loop(const ros::TimerEvent&)
 {
+	printf("mode ::  %s  \n", mode.c_str());
 	if(ready_check)
 	{
 		if(!mode.compare("auto"))
@@ -200,20 +201,23 @@ void control_loop(const ros::TimerEvent&)
 		desired_pose_head_pub.publish(desired_pose_head_msg);
 		desired_pose_head_msg.data.clear();
 
-		printf("value ::  %f \n", decision_algorithm->head_follow_flag_yaw_compensation);
+		//printf("value ::  %f \n", decision_algorithm->head_follow_flag_yaw_compensation);
+		//printf("mode ::  %s  \n", mode.c_str());
 
 
-		/*if(decision_algorithm->flag_sequence > 5)
+
+		if(decision_algorithm->flag_sequence > -1 && decision_algorithm->flag_sequence < 5)
 		{
-			ROS_INFO("Error algorithmn!!!!\n");
+			flag_position[decision_algorithm->flag_sequence][0] = decision_algorithm->top_view_flag_position.x;
+			flag_position[decision_algorithm->flag_sequence][1] = decision_algorithm->top_view_flag_position.y;
+		}
+		else
+		{
+			ROS_INFO("Error algorithm!!!!\n");
 			return;
-		}*/
-
-
-/*		flag_position[decision_algorithm->flag_sequence][0] = decision_algorithm->top_view_flag_position.x;
-		flag_position[decision_algorithm->flag_sequence][1] = decision_algorithm->top_view_flag_position.y;
-
-
+		}
+		/*
+		 * top_view_msg vector3
 		top_view_msg.length = 5;
 		for(int i = 0; i < 5; i++)
 		{

@@ -70,7 +70,7 @@ void DecisionModule::process()
 {
 	decision_function(temp_flag0);
 	headFollowFlag(temp_flag0[0] , temp_flag0[1]);
-	//top_view(temp_flag0);
+	top_view(temp_flag0);
 }
 
 void DecisionModule::decision_function(double flag[3])
@@ -136,7 +136,7 @@ void DecisionModule::headFollowFlag(double x , double y)
 
 	flag_length = sqrt(pow(x,2) + pow(y,2));
 
-	if(flag_length > 1 && x > 0)
+	if(flag_length > 2 && x > 0)
 	{
 		if(y > 0)
 			head_follow_flag_yaw_compensation = acos(x/flag_length);
@@ -146,7 +146,7 @@ void DecisionModule::headFollowFlag(double x , double y)
 	else
 		head_follow_flag_yaw_compensation = 0;
 
-	//head_follow_flag_yaw_compensation = filter_head->lowPassFilter(head_follow_flag_yaw_compensation, pre_head_follow_flag_yaw_compensation , 0, 0.008);
+	//head_follow_flag_yaw_compensation = filter_head->lowPassFilter(head_follow_flag_yaw_compensation, pre_head_follow_flag_yaw_compensation , 0.5, 0.008);
 
 	pre_head_follow_flag_yaw_compensation = head_follow_flag_yaw_compensation;
 }
@@ -186,8 +186,6 @@ void DecisionModule::top_view(double flag_position[3])
 
 	top_view_robot_position.x = -flag_position[0] + top_view_flag_position.x;
 	top_view_robot_position.y = -flag_position[1] + top_view_flag_position.y;
-
-
 
 	pre_flag_sequence = flag_sequence;
 	pre_top_view_flag_position.x = top_view_flag_position.x;

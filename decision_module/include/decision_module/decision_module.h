@@ -67,7 +67,7 @@ std_msgs::Float64MultiArray desired_pose_arm_msg; // desired_pose command msg
 diana_msgs::DesiredPoseCommand desired_pose_all_msg;
 
 //msg
-diana_msgs::FlagDataArray top_view_msg;
+geometry_msgs::Vector3 top_view_msg;
 geometry_msgs::Vector3 top_view_robot_msg;
 
 
