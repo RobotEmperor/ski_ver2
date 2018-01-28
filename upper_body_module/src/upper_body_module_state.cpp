@@ -174,7 +174,7 @@ void UpperBodyModule::desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64Mult
 // flag position data get////////////////////////////
 void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray& msg)
 {
-	/*current_flag_position_msg.data.clear();
+	current_flag_position_msg.data.clear();
 	current_flag_position_msg.length = 0;
 	current_flag_position_msg = msg;
 
@@ -184,16 +184,16 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 		for(int num = 0; num < msg.length; num++)
 		{
 			currentFlagPositionFunction(msg.data[num].position.x, msg.data[num].position.y, msg.data[num].position.z);// 천유 좌표를 넣어야함
-			current_flag_position_msg.data[num].position.x  = head_point_kinematics_->head_point_on_origin_x*0.01;  // x
-			current_flag_position_msg.data[num].position.y  = head_point_kinematics_->head_point_on_origin_y*0.01; // y
-			current_flag_position_msg.data[num].position.z  = head_point_kinematics_->head_point_on_origin_z*0.01; // z
+			current_flag_position_msg.data[num].position.x  = head_point_kinematics_->head_point_on_origin_x*0.01f;  // x
+			current_flag_position_msg.data[num].position.y  = head_point_kinematics_->head_point_on_origin_y*0.01f;  // y
+			current_flag_position_msg.data[num].position.z  = head_point_kinematics_->head_point_on_origin_z*0.01f;  // z
 		}
 	}
 	else
 	{
 		current_flag_position_msg.length = 0;
 		//printf("No data!!!!");
-	}*/
+	}
 }
 /////////////////////////////////////////////////////
 
