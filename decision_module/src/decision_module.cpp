@@ -154,6 +154,7 @@ void control_loop(const ros::TimerEvent&)
 	{
 		if(!mode.compare("auto"))
 		{
+			printf("mode ::  %s \n ", decision_algorithm->turn_direction.c_str());
 
 			if(!turn_type.compare("carving_turn") && change_value_center == 5)
 			{
@@ -181,12 +182,13 @@ void control_loop(const ros::TimerEvent&)
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("center"))
 				motion_center(entire_motion_number_carving);
 
-			desired_pose_head_msg.data.clear();
+
 			desired_pose_head_msg.data.push_back(decision_algorithm->head_follow_flag_yaw_compensation);
 			desired_pose_head_msg.data.push_back(-10*DEGREE2RADIAN);
 			desired_pose_head_msg.data.push_back(0);
 			desired_pose_head_msg.data.push_back(0.5);
 			desired_pose_head_pub.publish(desired_pose_head_msg);
+			desired_pose_head_msg.data.clear();
 		}
 		if(!mode.compare("remote"))
 		{

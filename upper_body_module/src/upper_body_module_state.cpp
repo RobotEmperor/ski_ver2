@@ -174,10 +174,7 @@ void UpperBodyModule::desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64Mult
 // flag position data get////////////////////////////
 void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray& msg)
 {
-	current_flag_position_msg.data.clear();
-	current_flag_position_msg.length = 0;
 	current_flag_position_msg = msg;
-
 	// head point get
 	if(msg.length > 0)
 	{
@@ -189,11 +186,10 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 			current_flag_position_msg.data[num].position.z  = head_point_kinematics_->head_point_on_origin_z*0.01f;  // z
 		}
 	}
-	else
-	{
-		current_flag_position_msg.length = 0;
-		//printf("No data!!!!");
-	}
+
+	//flag publisher
+	current_flag_position_pub.publish(current_flag_position_msg);
+	current_flag_position_msg.data.clear();
 }
 /////////////////////////////////////////////////////
 
