@@ -174,7 +174,6 @@ void UpperBodyModule::desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64Mult
 // flag position data get////////////////////////////
 void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray& msg)
 {
-	printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 	current_flag_position_msg.data.clear();
 	current_flag_position_msg.length = 0;
 	current_flag_position_msg = msg;
@@ -193,7 +192,7 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 	else
 	{
 		current_flag_position_msg.length = 0;
-		printf("No data!!!!");
+		//printf("No data!!!!");
 	}
 }
 /////////////////////////////////////////////////////

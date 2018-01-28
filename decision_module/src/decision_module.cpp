@@ -152,6 +152,7 @@ void control_loop(const ros::TimerEvent&)
 {
 	if(ready_check)
 	{
+		printf("command ::  %s \n", decision_algorithm->turn_direction.c_str());
 		if(!mode.compare("auto"))
 		{
 
@@ -199,6 +200,7 @@ void control_loop(const ros::TimerEvent&)
 		}
 
 		pre_command = decision_algorithm->turn_direction;
+
 		desired_pose_head_msg.data.push_back(decision_algorithm->head_follow_flag_yaw_compensation);
 		desired_pose_head_msg.data.push_back(-10*DEGREE2RADIAN);
 		desired_pose_head_msg.data.push_back(0);
@@ -207,7 +209,6 @@ void control_loop(const ros::TimerEvent&)
 		desired_pose_head_msg.data.clear();
 
 		printf("value ::  %f \n", decision_algorithm->head_follow_flag_yaw_compensation);
-		printf("mode ::  %s  \n", mode.c_str());
 
 
 

@@ -136,7 +136,7 @@ void DecisionModule::headFollowFlag(double x , double y)
 
 	flag_length = sqrt(pow(x,2) + pow(y,2));
 
-	if(flag_length > 2 && x > 2)
+	if(flag_length > 2 && x > 1)
 	{
 		if(y > 0)
 		{
