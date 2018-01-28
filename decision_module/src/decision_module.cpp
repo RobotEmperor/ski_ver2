@@ -43,6 +43,7 @@ void initialize()
 		flag_position[i][1] = 0;
 		flag_position[i][2] = 0;
 	}
+
 }
 
 void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
@@ -210,13 +211,19 @@ void control_loop(const ros::TimerEvent&)
 		flag_position[decision_algorithm->flag_sequence][0] = decision_algorithm->top_view_flag_position.x;
 		flag_position[decision_algorithm->flag_sequence][1] = decision_algorithm->top_view_flag_position.y;
 
+
+		top_view_msg.length = 5;
 		for(int i = 0; i < 5; i++)
 		{
-			top_view_msg.length = i;
-			top_view_msg.data[i].position.x = flag_position[i][0];
-			top_view_msg.data[i].position.y = flag_position[i][1];
+			diana_msgs::FlagData temp;
+			temp.position.x = flag_position[i][0];
+			temp.position.y = flag_position[i][1];
+
+			top_view_msg.data.push_back(temp);
 		}
 		top_view_pub.publish(top_view_msg);
+		top_view_msg.data.clear();
+
 
 		top_view_robot_msg.x =  decision_algorithm->top_view_robot_position.x;
 		top_view_robot_msg.y =  decision_algorithm->top_view_robot_position.y;
