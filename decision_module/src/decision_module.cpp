@@ -215,12 +215,21 @@ void control_loop(const ros::TimerEvent&)
 		{
 			flag_position[decision_algorithm->flag_sequence][0] = decision_algorithm->top_view_flag_position.x;
 			flag_position[decision_algorithm->flag_sequence][1] = decision_algorithm->top_view_flag_position.y;
+
+			top_view_msg.x = flag_position[decision_algorithm->flag_sequence][0];
+			top_view_msg.y = flag_position[decision_algorithm->flag_sequence][1];
+			top_view_msg.z = decision_algorithm->flag_sequence;
 		}
 		else
 		{
 			//ROS_INFO("Error algorithm!!!!\n");
 			return;
 		}
+		top_view_pub.publish(top_view_msg);
+
+		top_view_robot_msg.x =  decision_algorithm->top_view_robot_position.x;
+		top_view_robot_msg.y =  decision_algorithm->top_view_robot_position.y;
+		top_view_robot_pub.publish(top_view_robot_msg);
 		/*
 		 * top_view_msg vector3
 		top_view_msg.length = 5;

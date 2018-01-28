@@ -143,9 +143,6 @@ void UpperBodyModule::queueThread()
 
 	desired_pose_all_sub = ros_node.subscribe("/desired_pose_all", 5, &UpperBodyModule::desiredPoseAllMsgCallback, this);
 
-	current_flag_position_test_pub =  ros_node.advertise<geometry_msgs::Vector3>("/test_flag_position",100);
-
-
 	ros::WallDuration duration(control_cycle_msec_ / 1000.0);
 	while(ros_node.ok())
 		callback_queue.callAvailable(duration);
@@ -179,6 +176,7 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 {
 	current_flag_position_msg = msg;
 
+	printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 	// head point get
 	if(msg.length > 0)
 	{
@@ -188,10 +186,6 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 			current_flag_position_msg.data[num].position.x  = head_point_kinematics_->head_point_on_origin_x*0.01;  // x
 			current_flag_position_msg.data[num].position.y  = head_point_kinematics_->head_point_on_origin_y*0.01; // y
 			current_flag_position_msg.data[num].position.z  = head_point_kinematics_->head_point_on_origin_z*0.01; // z
-
-			flag_postion_test_msg.x = msg.data[num].position.x;
-			flag_postion_test_msg.y = msg.data[num].position.y;
-			flag_postion_test_msg.z = msg.data[num].position.z;
 		}
 	}
 	else

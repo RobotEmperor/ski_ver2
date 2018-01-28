@@ -70,8 +70,6 @@ public:
 
 	ros::Publisher  current_flag_position_pub;
 
-	ros::Publisher  current_flag_position_test_pub;
-
 	// Subscriber
 	ros::Subscriber head_test;
 	ros::Subscriber waist_test;
@@ -187,8 +185,7 @@ private:
 	double head_enable_time;
 
 
-	//test
-	geometry_msgs::Vector3 flag_postion_test_msg;
+
 
 
 
