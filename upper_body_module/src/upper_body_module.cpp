@@ -209,6 +209,7 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
 	//flag publisher
     current_flag_position_pub.publish(current_flag_position_msg);
+    current_flag_position_test_pub.publish(flag_postion_test_msg);
 }
 void UpperBodyModule::stop()
 {

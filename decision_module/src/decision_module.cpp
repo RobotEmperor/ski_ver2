@@ -206,7 +206,7 @@ void control_loop(const ros::TimerEvent&)
 		desired_pose_head_pub.publish(desired_pose_head_msg);
 		desired_pose_head_msg.data.clear();
 
-		printf("value ::  %f \n", decision_algorithm->head_follow_flag_yaw_compensation);
+		//printf("value ::  %f \n", decision_algorithm->head_follow_flag_yaw_compensation);
 		//printf("mode ::  %s  \n", mode.c_str());
 
 
@@ -218,7 +218,7 @@ void control_loop(const ros::TimerEvent&)
 		}
 		else
 		{
-			ROS_INFO("Error algorithm!!!!\n");
+			//ROS_INFO("Error algorithm!!!!\n");
 			return;
 		}
 		/*

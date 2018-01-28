@@ -194,7 +194,7 @@ void DecisionModule::top_view(double flag_position[3])
 	pre_top_view_robot_position.x = top_view_robot_position.x;
 	pre_top_view_robot_position.y = top_view_robot_position.y;
 
-	printf("flag  ::  X:: %f    Y :: %f \n", top_view_flag_position.x, top_view_flag_position.y);
+	//printf("flag  ::  X:: %f    Y :: %f \n", top_view_flag_position.x, top_view_flag_position.y);
 	//printf("flag  ::  X:: %f    Y :: %f \n", top_view_robot_position.x, top_view_robot_position.y);
 	//printf("flag_sequence ::  %d \n", flag_sequence);
 }
