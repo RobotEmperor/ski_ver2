@@ -136,12 +136,25 @@ void DecisionModule::headFollowFlag(double x , double y)
 
 	flag_length = sqrt(pow(x,2) + pow(y,2));
 
-	if(flag_length > 2 && x > 0)
+	if(flag_length > 2 && x > 2)
 	{
 		if(y > 0)
+		{
+			if(acos(x/flag_length) > 60*DEGREE2RADIAN)
+			head_follow_flag_yaw_compensation = 60*DEGREE2RADIAN;
+			else
 			head_follow_flag_yaw_compensation = acos(x/flag_length);
+
+		}
+
 		if(y < 0)
-			head_follow_flag_yaw_compensation = -acos(x/flag_length);
+		{
+			if(acos(x/flag_length) < -60*DEGREE2RADIAN)
+				head_follow_flag_yaw_compensation = -60*DEGREE2RADIAN;
+			else
+				head_follow_flag_yaw_compensation = -acos(x/flag_length);
+
+		}
 	}
 	else
 		head_follow_flag_yaw_compensation = 0;
