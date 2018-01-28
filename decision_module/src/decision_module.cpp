@@ -212,6 +212,7 @@ void control_loop(const ros::TimerEvent&)
 
 		for(int i = 0; i < 5; i++)
 		{
+			top_view_msg.length = i;
 			top_view_msg.data[i].position.x = flag_position[i][0];
 			top_view_msg.data[i].position.y = flag_position[i][1];
 		}
