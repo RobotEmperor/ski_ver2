@@ -60,6 +60,12 @@ void currentflagPositionMsgCallback(const diana_msgs::FlagDataArray& msg)
 		decision_algorithm ->temp_flag0[1]  = msg.data[0].position.y;
 		decision_algorithm ->temp_flag0[2]  = msg.data[0].position.z;
 	}
+	else
+	{
+		decision_algorithm ->temp_flag0[0]  = 0;
+		decision_algorithm ->temp_flag0[1]  = 0;
+		decision_algorithm ->temp_flag0[2]  = 0;
+	}
 }
 void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg) // GUI 에서 motion_num topic을 sub 받아 실행 모션 번호 디텍트
 {
