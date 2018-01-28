@@ -148,7 +148,7 @@ void DecisionModule::headFollowFlag(double x , double y)
 
 	//head_follow_flag_yaw_compensation = filter_head->lowPassFilter(head_follow_flag_yaw_compensation, pre_head_follow_flag_yaw_compensation , 0.5, 0.008);
 
-	pre_head_follow_flag_yaw_compensation = head_follow_flag_yaw_compensation;
+	//pre_head_follow_flag_yaw_compensation = head_follow_flag_yaw_compensation;
 }
 void DecisionModule::top_view(double flag_position[3])
 {
@@ -195,8 +195,8 @@ void DecisionModule::top_view(double flag_position[3])
 	pre_top_view_robot_position.y = top_view_robot_position.y;
 
 	printf("flag  ::  X:: %f    Y :: %f \n", top_view_flag_position.x, top_view_flag_position.y);
-	printf("flag  ::  X:: %f    Y :: %f \n", top_view_robot_position.x, top_view_robot_position.y);
-	printf("flag_sequence ::  %d \n", flag_sequence);
+	//printf("flag  ::  X:: %f    Y :: %f \n", top_view_robot_position.x, top_view_robot_position.y);
+	//printf("flag_sequence ::  %d \n", flag_sequence);
 }
 
 
