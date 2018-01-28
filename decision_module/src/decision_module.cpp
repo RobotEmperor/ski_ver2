@@ -152,7 +152,6 @@ void control_loop(const ros::TimerEvent&)
 {
 	if(ready_check)
 	{
-		printf("command ::  %s \n", decision_algorithm->turn_direction.c_str());
 		if(!mode.compare("auto"))
 		{
 
@@ -186,7 +185,7 @@ void control_loop(const ros::TimerEvent&)
 			desired_pose_head_msg.data.push_back(decision_algorithm->head_follow_flag_yaw_compensation);
 			desired_pose_head_msg.data.push_back(-10*DEGREE2RADIAN);
 			desired_pose_head_msg.data.push_back(0);
-			desired_pose_head_msg.data.push_back(1);
+			desired_pose_head_msg.data.push_back(0.5);
 			desired_pose_head_pub.publish(desired_pose_head_msg);
 		}
 		if(!mode.compare("remote"))
@@ -207,6 +206,7 @@ void control_loop(const ros::TimerEvent&)
 		}
 
 		pre_command = decision_algorithm->turn_direction;
+
 		if(decision_algorithm->flag_sequence > -1 && decision_algorithm->flag_sequence < 5)
 		{
 			flag_position[decision_algorithm->flag_sequence][0] = decision_algorithm->top_view_flag_position.x;
@@ -215,13 +215,13 @@ void control_loop(const ros::TimerEvent&)
 			top_view_msg.x = flag_position[decision_algorithm->flag_sequence][0];
 			top_view_msg.y = flag_position[decision_algorithm->flag_sequence][1];
 			top_view_msg.z = decision_algorithm->flag_sequence;
+			top_view_pub.publish(top_view_msg);
 		}
 		else
 		{
 			//ROS_INFO("Error algorithm!!!!\n");
 			return;
 		}
-		top_view_pub.publish(top_view_msg);
 
 		top_view_robot_msg.x =  decision_algorithm->top_view_robot_position.x;
 		top_view_robot_msg.y =  decision_algorithm->top_view_robot_position.y;
