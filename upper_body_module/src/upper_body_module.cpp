@@ -85,7 +85,7 @@ void UpperBodyModule::updateBalanceGyroParameter()
 	result_head_enable = head_balance_enable->fifth_order_traj_gen_one_value(value);
 
 }
-double UpperBodyModule::limitCheckHead(double calculated_value, double max, double min)
+double UpperBodyModule::limitCheck(double calculated_value, double max, double min)
 {
 	if(calculated_value > (max*DEGREE2RADIAN))
 		return (max*DEGREE2RADIAN);
@@ -143,7 +143,6 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	else
 	{
 		//ROS_INFO("Upper Module waist!!!!");
-
 		result_rad_waist_ = end_to_rad_waist_ -> cal_end_point_to_rad(waist_end_point_);
 		is_moving_waist_ = end_to_rad_waist_ -> is_moving_check;
 	}
@@ -168,9 +167,9 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	{
 		//ROS_INFO("Upper Module head!!!!");
 		// limit must be calculated 23 24 25
-		head_end_point_(3,1) = limitCheckHead(head_end_point_(3,1),60,-60);
-		head_end_point_(4,1) = limitCheckHead(head_end_point_(4,1),20,-20);
-		head_end_point_(5,1) = limitCheckHead(head_end_point_(5,1),20,-20);
+		head_end_point_(3,1) = limitCheck(head_end_point_(3,1),60,-60);
+		head_end_point_(4,1) = limitCheck(head_end_point_(4,1),20,-20);
+		head_end_point_(5,1) = limitCheck(head_end_point_(5,1),20,-20);
 
 		result_rad_head_  = end_to_rad_head_  -> cal_end_point_to_rad(head_end_point_);
 
@@ -184,12 +183,12 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
 
 
-	temp_head_yaw   = limitCheckHead(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*(waist_kinematics_ -> xyz_euler_angle_z),60,-60);
-	temp_head_pitch = limitCheckHead(head_kinematics_ -> zyx_euler_angle_y - result_head_enable*0,20,-20);
-	temp_head_roll  = limitCheckHead(head_kinematics_ -> zyx_euler_angle_x - result_head_enable*(0 + waist_kinematics_ -> xyz_euler_angle_x),20,-20);
+	temp_head_yaw   = limitCheck(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*(waist_kinematics_ -> xyz_euler_angle_z),60,-60);
+	temp_head_pitch = limitCheck(head_kinematics_ -> zyx_euler_angle_y - result_head_enable*0,20,-20);
+	temp_head_roll  = limitCheck(head_kinematics_ -> zyx_euler_angle_x - result_head_enable*(0 + waist_kinematics_ -> xyz_euler_angle_x),20,-20);
 	//gazebo
-	result_[joint_id_to_name_[9]] -> goal_position_  = -(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z)); // waist yaw
-	result_[joint_id_to_name_[10]]-> goal_position_  = -(waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y); // waist roll
+	result_[joint_id_to_name_[9]] -> goal_position_  = -(limitCheck(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z),50,-50)); // waist yaw
+	result_[joint_id_to_name_[10]]-> goal_position_  = -(limitCheck(waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y,40,-40)); // waist roll
 
 	result_[joint_id_to_name_[23]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_yaw, temp_pre_yaw, 0.5, 0.008);
 	result_[joint_id_to_name_[24]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_pitch, temp_pre_pitch, 0.8, 0.008);

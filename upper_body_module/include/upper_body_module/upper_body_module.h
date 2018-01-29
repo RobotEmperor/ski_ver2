@@ -119,7 +119,7 @@ private:
 	bool is_moving_head_;
 	bool is_moving_waist_;
 
-	double limitCheckHead(double calculated_value, double max, double min);
+	double limitCheck(double calculated_value, double max, double min);
 	//waist kinematics
 	heroehs_math::KinematicsEulerAngle *waist_kinematics_;
 	heroehs_math::CalRad *end_to_rad_waist_;     //
