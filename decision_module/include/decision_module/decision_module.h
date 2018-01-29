@@ -79,6 +79,7 @@ void updateMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
 void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg);
 void currentFlagPositionMsgCallback(const geometry_msgs::Vector3::ConstPtr& msg);
 void modeChangeMsgCallback(const std_msgs::Bool::ConstPtr& msg);
+void remoteTimeMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
 
 //control
 void control_loop(const ros::TimerEvent&);
@@ -121,6 +122,13 @@ std::string mode;
 //top_view_variables
 double flag_position[5][2];
 double robot_position[5][2];
+
+
+//remote time cal
+double remote_count_time;
+int remote_count;
+bool remote_update;
+double remote_command[20][2];
 
 
 

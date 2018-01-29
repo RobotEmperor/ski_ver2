@@ -44,28 +44,59 @@ void initialize()
 		flag_position[i][2] = 0;
 	}
 
-}
+	remote_update = 0;
 
+	for(int i = 0; i<10 ; i++)
+	{
+		remote_command[i][0] = 0; // 시간
+		remote_command[i][1] = 0; // right turn -1  netural 0  left turn 1
+	}
+
+	remote_count_time = 0;
+	remote_count = 0;
+
+}
+void remoteTimeMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
+{
+	remote_update = msg->data;
+
+	if(remote_update == 1)
+	{
+		remote_count = 0;
+	}
+	if(remote_update == 0)
+	{
+		// YAML SAVE
+		ROS_INFO("YAML_time_SAVE");
+		YAML::Emitter yaml_out;
+		std::map<double, double> offset;
+		//std::map<std::string, double> init_pose;
+
+		for(int i=0; i<10 ; i++)
+		{
+			offset[remote_command[i][0]] = remote_command[i][1];
+		}
+
+		yaml_out << YAML::BeginMap;
+		yaml_out << YAML::Key << "remote_time" << YAML::Value << offset;
+		yaml_out << YAML::EndMap;
+
+		std::string offset_file_path = ros::package::getPath("ski_main_manager") + "/data/remote_time.yaml";
+		std::ofstream fout(offset_file_path.c_str());
+		fout << yaml_out.c_str();  // dump it back into the file
+	}
+
+}
 void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 {
 	ready_check = msg->data;
 	change_value_center = 0;
 }
-void currentflagPositionMsgCallback(const diana_msgs::FlagDataArray& msg)
+void currentflagPositionMsgCallback(const geometry_msgs::Vector3& msg)
 {
-	// head point get
-	if(msg.length > 0)
-	{
-		decision_algorithm ->temp_flag0[0]  = msg.data[0].position.x;
-		decision_algorithm ->temp_flag0[1]  = msg.data[0].position.y;
-		decision_algorithm ->temp_flag0[2]  = msg.data[0].position.z;
-	}
-	else
-	{
-		decision_algorithm ->temp_flag0[0]  = 0;
-		decision_algorithm ->temp_flag0[1]  = 0;
-		decision_algorithm ->temp_flag0[2]  = 0;
-	}
+	decision_algorithm ->temp_flag0[0]  = msg.x;
+	decision_algorithm ->temp_flag0[1]  = msg.y;
+	decision_algorithm ->temp_flag0[2]  = msg.z;
 }
 void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg) // GUI 에서 motion_num topic을 sub 받아 실행 모션 번호 디텍트
 {
@@ -75,6 +106,13 @@ void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& ms
 	change_value_center = msg->center_change;
 	time_center_change  = msg->time_change;
 	time_edge_change    = msg->time_change_edge;
+
+	if(change_value_center == 0)
+	{
+		remote_count ++;
+		remote_command[remote_count][0] = remote_count_time;
+		remote_command[remote_count][1] = 0;
+	}
 
 	if(!mode.compare("remote"))
 	{
@@ -130,6 +168,7 @@ int main(int argc, char **argv)
 
 	ros::Subscriber current_flag_position_sub = ros_node.subscribe("/current_flag_position", 5, currentflagPositionMsgCallback);
 
+	ros::Subscriber remote_time_sub = ros_node.subscribe("/remote_time", 5, remoteTimeMsgCallBack);
 
 	ros::Subscriber mode_change_sub = ros_node.subscribe("/mode_change", 5, modeChangeMsgCallback);
 	ros::Timer timer = ros_node.createTimer(ros::Duration(0.006), control_loop);
@@ -163,7 +202,6 @@ void control_loop(const ros::TimerEvent&)
 				pre_command = decision_algorithm->turn_direction;
 				return;
 			}
-
 			decision_algorithm->process();
 
 			if(pre_command.compare(decision_algorithm->turn_direction) != 0 && decision_algorithm->turn_direction.compare("center"))
@@ -191,6 +229,7 @@ void control_loop(const ros::TimerEvent&)
 		}
 		if(!mode.compare("remote"))
 		{
+			remote_count_time = remote_count_time + 0.006;
 			if(!turn_type.compare("pflug_bogen") && change_value_center == -1)
 				motion_left(entire_motion_number_pflug);
 			if(!turn_type.compare("pflug_bogen") && change_value_center == 1)
@@ -249,7 +288,6 @@ void control_loop(const ros::TimerEvent&)
 	}
 	else
 		return;
-
 }
 void motion_left(int motion_number)
 {
@@ -258,6 +296,10 @@ void motion_left(int motion_number)
 
 	if(motion_seq == 0)
 	{
+		remote_count ++;
+		remote_command[remote_count][0] = remote_count_time;
+		remote_command[remote_count][1] = 1;
+
 		for(int var = 0; var < 12 ; var++)
 		{
 			desired_pose_all_msg.leg_final_position[var] = motion->motion_left_position[0][var];
@@ -333,6 +375,10 @@ void motion_right(int motion_number)
 
 	if(motion_seq == 0)
 	{
+		remote_count ++;
+		remote_command[remote_count][0] = remote_count_time;
+		remote_command[remote_count][1] = -1;
+
 		for(int var = 0; var < 12 ; var++)
 		{
 			desired_pose_all_msg.leg_final_position[var] = motion->motion_right_position[0][var];

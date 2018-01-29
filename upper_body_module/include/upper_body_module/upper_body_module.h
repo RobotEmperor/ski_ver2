@@ -171,7 +171,7 @@ private:
 
 	//flag
 
-	diana_msgs::FlagDataArray current_flag_position_msg;
+	geometry_msgs::Vector3 current_flag_position_msg;
 
 	//head low pass filter variables
 	control_function::Filter *filter_head;

@@ -125,7 +125,7 @@ void UpperBodyModule::queueThread()
 	ros_node.setCallbackQueue(&callback_queue);
 	// publish topics
 	current_waist_pose_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/current_waist_pose",100);
-	current_flag_position_pub = ros_node.advertise<diana_msgs::FlagDataArray>("/current_flag_position",100);
+	current_flag_position_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position",100);
 
 	// subscribe topics
 	flag_position_get_sub = ros_node.subscribe("/gate_watcher/flag_data", 100, &UpperBodyModule::flagPositionGetMsgCallback, this);
@@ -174,22 +174,15 @@ void UpperBodyModule::desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64Mult
 // flag position data get////////////////////////////
 void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray& msg)
 {
-	current_flag_position_msg = msg;
+
 	// head point get
 	if(msg.length > 0)
 	{
-		for(int num = 0; num < msg.length; num++)
-		{
-			currentFlagPositionFunction(msg.data[num].position.x, msg.data[num].position.y, msg.data[num].position.z);// 천유 좌표를 넣어야함
-			current_flag_position_msg.data[num].position.x  = head_point_kinematics_->head_point_on_origin_x*0.01f;  // x
-			current_flag_position_msg.data[num].position.y  = head_point_kinematics_->head_point_on_origin_y*0.01f;  // y
-			current_flag_position_msg.data[num].position.z  = head_point_kinematics_->head_point_on_origin_z*0.01f;  // z
-		}
+			currentFlagPositionFunction(msg.data[0].position.x, msg.data[0].position.y, msg.data[0].position.z);// 천유 좌표를 넣어야함
+			current_flag_position_msg.x  = head_point_kinematics_->head_point_on_origin_x*0.01;  // x
+			current_flag_position_msg.y  = head_point_kinematics_->head_point_on_origin_y*0.01;  // y
+			current_flag_position_msg.z  = head_point_kinematics_->head_point_on_origin_z*0.01;  // z
 	}
-
-	//flag publisher
-	current_flag_position_pub.publish(current_flag_position_msg);
-	current_flag_position_msg.data.clear();
 }
 /////////////////////////////////////////////////////
 
