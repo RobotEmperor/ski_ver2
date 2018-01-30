@@ -45,7 +45,7 @@ void initialize()
 		flag_position[i][2] = 0;
 	}
 
-/*	remote_update = 0;
+	remote_update = 0;
 
 	for(int i = 0; i<10 ; i++)
 	{
@@ -54,7 +54,7 @@ void initialize()
 	}
 
 	remote_count_time = 0;
-	remote_count = 0;*/
+	remote_count = 0;
 
 
 }
@@ -114,9 +114,12 @@ void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& ms
 
 	if(change_value_center == 0)
 	{
-/*		remote_count ++;
-		remote_command[remote_count][0] = remote_count_time;
-		remote_command[remote_count][1] = 0;*/
+		if(remote_count > 0 && remote_count < 10)
+		{
+			remote_count ++;
+			remote_command[remote_count][0] = remote_count_time;
+			remote_command[remote_count][1] = 0;
+		}
 	}
 
 	if(!mode.compare("remote"))
@@ -264,7 +267,7 @@ void control_loop(const ros::TimerEvent&)
 		}
 		else
 		{
-			ROS_INFO("Error algorithm!!!!\n");
+			//ROS_INFO("Error algorithm!!!!\n");
 			return;
 		}
 
@@ -301,9 +304,13 @@ void motion_left(int motion_number)
 
 	if(motion_seq == 0)
 	{
-/*		remote_count ++;
-		remote_command[remote_count][0] = remote_count_time;
-		remote_command[remote_count][1] = 1;*/
+
+		if(remote_count > 0 && remote_count < 10)
+		{
+			remote_count ++;
+			remote_command[remote_count][0] = remote_count_time;
+			remote_command[remote_count][1] = 1;
+		}
 
 		for(int var = 0; var < 12 ; var++)
 		{
@@ -383,9 +390,12 @@ void motion_right(int motion_number)
 
 	if(motion_seq == 0)
 	{
-/*		remote_count ++;
-		remote_command[remote_count][0] = remote_count_time;
-		remote_command[remote_count][1] = -1;*/
+		if(remote_count > 0 && remote_count < 10)
+		{
+			remote_count ++;
+			remote_command[remote_count][0] = remote_count_time;
+			remote_command[remote_count][1] = -1;
+		}
 
 		for(int var = 0; var < 12 ; var++)
 		{
