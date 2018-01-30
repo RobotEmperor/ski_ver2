@@ -14,7 +14,7 @@
 
      <!-- ski_robot decision -->
 
-    <node name="decision_module" pkg="decision_module" type="decision_module" output="screen"/>
+    <!--<node name="decision_module" pkg="decision_module" type="decision_module" output="screen"/>-->
     
 </launch>
 
