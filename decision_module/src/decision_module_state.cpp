@@ -55,6 +55,8 @@ DecisionModule::DecisionModule()
 	top_view_robot_position.x = 0;
 	top_view_robot_position.y = 0;
 	top_view_robot_position.z = 0;
+
+	direction_command = 0;
 }
 DecisionModule::~DecisionModule()
 {
@@ -82,6 +84,7 @@ void DecisionModule::decision_function(double flag[3])
 		{
 			if(flag[0] < right_x_detect_margin  && right_y_detect_margin_min < flag[1] && right_y_detect_margin_max > flag[1])
 			{
+				direction_command = -1;
 				turn_direction = "right_turn";
 			}
 			else
@@ -92,6 +95,7 @@ void DecisionModule::decision_function(double flag[3])
 		{
 			if(flag[0] < left_x_detect_margin  && left_y_detect_margin_min < flag[1] && left_y_detect_margin_max > flag[1])
 			{
+				direction_command = 1;
 				turn_direction = "left_turn";
 			}
 			else

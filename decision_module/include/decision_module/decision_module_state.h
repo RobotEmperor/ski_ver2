@@ -79,6 +79,7 @@ public:
 
 	bool flag_check;
 	int flag_sequence;
+	int direction_command;
 
 private:
 	void decision_function(double flag[3]);

@@ -34,6 +34,7 @@ void initialize()
 	entire_motion_number_carving = 4;
 
 	pre_command = "center";
+	pre_direction_command = "center";
 	mode = "auto";
 
 	//motion
@@ -54,6 +55,7 @@ void initialize()
 
 	remote_count_time = 0;
 	remote_count = 0;
+
 
 }
 void remoteTimeMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
@@ -207,13 +209,15 @@ void control_loop(const ros::TimerEvent&)
 			}
 			decision_algorithm->process();
 
-			if(pre_command.compare(decision_algorithm->turn_direction) != 0 && !decision_algorithm->turn_direction.compare("center"))
+			if(pre_command.compare(decision_algorithm->turn_direction) != 0 && decision_algorithm->turn_direction.compare("center") != 0)
 			{
-				if(decision_algorithm->is_moving_check == false)
+				if(decision_algorithm->is_moving_check == false && pre_direction_command.compare(decision_algorithm->turn_direction) != 0)
 				{
 					motion_seq = 0;
 					motion_time_count_carving = 0;
 				}
+
+				pre_direction_command = decision_algorithm->turn_direction; // left right
 			}
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("left_turn"))
 				motion_left(entire_motion_number_carving);

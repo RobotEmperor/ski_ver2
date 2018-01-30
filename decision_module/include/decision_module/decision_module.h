@@ -130,6 +130,7 @@ int remote_count;
 bool remote_update;
 double remote_command[20][2];
 
+std::string pre_direction_command;
 
 
 
