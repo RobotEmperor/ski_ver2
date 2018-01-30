@@ -45,7 +45,7 @@ void initialize()
 		flag_position[i][2] = 0;
 	}
 
-	remote_update = 0;
+/*	remote_update = 0;
 
 	for(int i = 0; i<10 ; i++)
 	{
@@ -54,7 +54,7 @@ void initialize()
 	}
 
 	remote_count_time = 0;
-	remote_count = 0;
+	remote_count = 0;*/
 
 
 }
