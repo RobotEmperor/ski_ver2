@@ -172,6 +172,7 @@ private:
 	//flag
 
 	geometry_msgs::Vector3 current_flag_position_msg;
+	double current_flag_position_x, current_flag_position_y, current_flag_position_z;
 
 	//head low pass filter variables
 	control_function::Filter *filter_head;
@@ -183,6 +184,7 @@ private:
 	double head_enable;
 	double result_head_enable;
 	double head_enable_time;
+
 
 
 

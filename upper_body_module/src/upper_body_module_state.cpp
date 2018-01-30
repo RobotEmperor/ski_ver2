@@ -112,6 +112,10 @@ UpperBodyModule::UpperBodyModule()
 	head_enable = 0;
 	result_head_enable = 0;
 	head_enable_time = 2.0;
+
+	current_flag_position_x = 0;
+	current_flag_position_y = 0;
+	current_flag_position_z = 0;
 }
 UpperBodyModule::~UpperBodyModule()
 {
@@ -174,15 +178,18 @@ void UpperBodyModule::desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64Mult
 // flag position data get////////////////////////////
 void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray& msg)
 {
-
 	// head point get
 	if(msg.length > 0)
 	{
 			currentFlagPositionFunction(msg.data[0].position.x, msg.data[0].position.y, msg.data[0].position.z);// 천유 좌표를 넣어야함
-			current_flag_position_msg.x  = head_point_kinematics_->head_point_on_origin_x*0.01;  // x
-			current_flag_position_msg.y  = head_point_kinematics_->head_point_on_origin_y*0.01;  // y
-			current_flag_position_msg.z  = head_point_kinematics_->head_point_on_origin_z*0.01;  // z
+			current_flag_position_x  = head_point_kinematics_->head_point_on_origin_x*0.01;  // x
+			current_flag_position_y  = head_point_kinematics_->head_point_on_origin_y*0.01;  // y
+			current_flag_position_z  = head_point_kinematics_->head_point_on_origin_z*0.01;  // z
 	}
+
+	printf("TenU ::  X ::  %f \n", current_flag_position_x);
+	printf("TenU ::  Y ::  %f \n", current_flag_position_y);
+	printf("TenU ::  Z ::  %f \n", current_flag_position_z);
 }
 /////////////////////////////////////////////////////
 

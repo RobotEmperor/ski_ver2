@@ -208,7 +208,9 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	current_waist_pose_pub.publish(current_waist_pose_msg);
 	current_waist_pose_msg.data.clear();
 
-
+	current_flag_position_msg.x = current_flag_position_x;
+	current_flag_position_msg.y = current_flag_position_y;
+	current_flag_position_msg.z = current_flag_position_z;
 	current_flag_position_pub.publish(current_flag_position_msg);
 }
 void UpperBodyModule::stop()
