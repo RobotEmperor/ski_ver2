@@ -116,6 +116,8 @@ UpperBodyModule::UpperBodyModule()
 	current_flag_position_x = 0;
 	current_flag_position_y = 0;
 	current_flag_position_z = 0;
+
+	check_detection = false;
 }
 UpperBodyModule::~UpperBodyModule()
 {
@@ -178,6 +180,7 @@ void UpperBodyModule::desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64Mult
 // flag position data get////////////////////////////
 void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray& msg)
 {
+	check_detection = true;
 	// head point get
 	if(msg.length > 0)
 	{

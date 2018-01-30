@@ -170,9 +170,9 @@ private:
 	Eigen::MatrixXd tf_gyro_value;
 
 	//flag
-
 	geometry_msgs::Vector3 current_flag_position_msg;
 	double current_flag_position_x, current_flag_position_y, current_flag_position_z;
+	bool check_detection;
 
 	//head low pass filter variables
 	control_function::Filter *filter_head;

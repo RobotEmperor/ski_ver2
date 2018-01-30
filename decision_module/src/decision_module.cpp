@@ -94,9 +94,12 @@ void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 }
 void currentflagPositionMsgCallback(const geometry_msgs::Vector3& msg)
 {
-	decision_algorithm ->temp_flag0[0]  = msg.x;
-	decision_algorithm ->temp_flag0[1]  = msg.y;
-	decision_algorithm ->temp_flag0[2]  = msg.z;
+	if(decision_algorithm->is_moving_check == false)
+	{
+		decision_algorithm ->temp_flag0[0]  = msg.x;
+		decision_algorithm ->temp_flag0[1]  = msg.y;
+		decision_algorithm ->temp_flag0[2]  = msg.z;
+	}
 }
 void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg) // GUI 에서 motion_num topic을 sub 받아 실행 모션 번호 디텍트
 {
@@ -193,8 +196,7 @@ void control_loop(const ros::TimerEvent&)
 	{
 		if(!mode.compare("auto"))
 		{
-			printf("mode ::  %s \n ", decision_algorithm->turn_direction.c_str());
-
+			printf("mode :: %s  \n", decision_algorithm->turn_direction.c_str());
 			if(!turn_type.compare("carving_turn") && change_value_center == 5)
 			{
 				decision_algorithm->turn_direction = "center";
@@ -204,7 +206,7 @@ void control_loop(const ros::TimerEvent&)
 			}
 			decision_algorithm->process();
 
-			if(pre_command.compare(decision_algorithm->turn_direction) != 0 && decision_algorithm->turn_direction.compare("center"))
+			if(pre_command.compare(decision_algorithm->turn_direction) && decision_algorithm->turn_direction.compare("center"))
 			{
 				if(decision_algorithm->is_moving_check == false)
 				{
@@ -212,7 +214,6 @@ void control_loop(const ros::TimerEvent&)
 					motion_time_count_carving = 0;
 				}
 			}
-
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("left_turn"))
 				motion_left(entire_motion_number_carving);
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("right_turn"))
@@ -325,6 +326,8 @@ void motion_left(int motion_number)
 		desired_pose_all_pub.publish(desired_pose_all_msg);
 		motion_seq ++;
 		motion_time_count_carving = 0;
+		decision_algorithm->is_moving_check = true;
+		decision_algorithm->turn_direction = "left_turn";
 	}
 
 	for(int motion_num = 1; motion_num < motion_number; motion_num++)
@@ -358,6 +361,7 @@ void motion_left(int motion_number)
 			motion_time_count_carving = 0;
 			desired_pose_all_pub.publish(desired_pose_all_msg);
 			decision_algorithm->is_moving_check = true;
+			decision_algorithm->turn_direction = "left_turn";
 		}
 	}
 
@@ -404,6 +408,8 @@ void motion_right(int motion_number)
 		desired_pose_all_pub.publish(desired_pose_all_msg);
 		motion_seq ++;
 		motion_time_count_carving = 0;
+		decision_algorithm->is_moving_check = true;
+		decision_algorithm->turn_direction = "right_turn";
 	}
 
 	for(int motion_num = 1; motion_num < motion_number; motion_num++)
@@ -437,6 +443,7 @@ void motion_right(int motion_number)
 			motion_time_count_carving = 0;
 			desired_pose_all_pub.publish(desired_pose_all_msg);
 			decision_algorithm->is_moving_check = true;
+			decision_algorithm->turn_direction = "right_turn";
 
 		}
 	}
