@@ -186,10 +186,6 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 			current_flag_position_y  = head_point_kinematics_->head_point_on_origin_y*0.01;  // y
 			current_flag_position_z  = head_point_kinematics_->head_point_on_origin_z*0.01;  // z
 	}
-
-	printf("TenU ::  X ::  %f \n", current_flag_position_x);
-	printf("TenU ::  Y ::  %f \n", current_flag_position_y);
-	printf("TenU ::  Z ::  %f \n", current_flag_position_z);
 }
 /////////////////////////////////////////////////////
 
