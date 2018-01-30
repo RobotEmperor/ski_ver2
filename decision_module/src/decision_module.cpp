@@ -114,9 +114,9 @@ void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& ms
 
 	if(change_value_center == 0)
 	{
-		remote_count ++;
+/*		remote_count ++;
 		remote_command[remote_count][0] = remote_count_time;
-		remote_command[remote_count][1] = 0;
+		remote_command[remote_count][1] = 0;*/
 	}
 
 	if(!mode.compare("remote"))
@@ -252,7 +252,7 @@ void control_loop(const ros::TimerEvent&)
 
 		pre_command = decision_algorithm->turn_direction;
 
-		/*if(decision_algorithm->flag_sequence > -1 && decision_algorithm->flag_sequence < 5)
+		if(decision_algorithm->flag_sequence > -1 && decision_algorithm->flag_sequence < 5)
 		{
 			flag_position[decision_algorithm->flag_sequence][0] = decision_algorithm->top_view_flag_position.x;
 			flag_position[decision_algorithm->flag_sequence][1] = decision_algorithm->top_view_flag_position.y;
@@ -270,7 +270,7 @@ void control_loop(const ros::TimerEvent&)
 
 		top_view_robot_msg.x =  decision_algorithm->top_view_robot_position.x;
 		top_view_robot_msg.y =  decision_algorithm->top_view_robot_position.y;
-		top_view_robot_pub.publish(top_view_robot_msg);*/
+		top_view_robot_pub.publish(top_view_robot_msg);
 		/*
 		 * top_view_msg vector3
 		top_view_msg.length = 5;
@@ -301,9 +301,9 @@ void motion_left(int motion_number)
 
 	if(motion_seq == 0)
 	{
-		remote_count ++;
+/*		remote_count ++;
 		remote_command[remote_count][0] = remote_count_time;
-		remote_command[remote_count][1] = 1;
+		remote_command[remote_count][1] = 1;*/
 
 		for(int var = 0; var < 12 ; var++)
 		{
@@ -383,9 +383,9 @@ void motion_right(int motion_number)
 
 	if(motion_seq == 0)
 	{
-		remote_count ++;
+/*		remote_count ++;
 		remote_command[remote_count][0] = remote_count_time;
-		remote_command[remote_count][1] = -1;
+		remote_command[remote_count][1] = -1;*/
 
 		for(int var = 0; var < 12 ; var++)
 		{
