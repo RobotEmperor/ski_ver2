@@ -1,8 +1,8 @@
-left_x: 7
-left_y_min: 1
+left_x: 5
+left_y_min: 0
 left_y_max: 10
 
 
-right_x: 7
+right_x: 5
 right_y_min: -10
-right_y_max: -1
+right_y_max: 0
