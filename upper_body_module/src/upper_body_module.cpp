@@ -103,7 +103,7 @@ void UpperBodyModule::currentFlagPositionFunction(double x, double y, double z)
 	head_point_kinematics_->TransformationWaistToHead(0,0,0.352,
 			head_kinematics_ -> zyx_euler_angle_x,
 			head_kinematics_ -> zyx_euler_angle_y,
-			filter_head->lowPassFilter(temp_head_yaw, temp_pre_yaw, 0, 0.008));
+			filter_head->lowPassFilter(temp_head_yaw, temp_pre_yaw, 0.5, 0.008));
 
 	head_point_kinematics_->TransformateHeadPointOnOrigin(x,y,z);
 }
