@@ -197,6 +197,7 @@ void control_loop(const ros::TimerEvent&)
 		if(!mode.compare("auto"))
 		{
 			printf("mode :: %s  \n", decision_algorithm->turn_direction.c_str());
+
 			if(!turn_type.compare("carving_turn") && change_value_center == 5)
 			{
 				decision_algorithm->turn_direction = "center";
@@ -206,7 +207,7 @@ void control_loop(const ros::TimerEvent&)
 			}
 			decision_algorithm->process();
 
-			if(pre_command.compare(decision_algorithm->turn_direction) && decision_algorithm->turn_direction.compare("center"))
+			if(pre_command.compare(decision_algorithm->turn_direction) != 0 && !decision_algorithm->turn_direction.compare("center"))
 			{
 				if(decision_algorithm->is_moving_check == false)
 				{
