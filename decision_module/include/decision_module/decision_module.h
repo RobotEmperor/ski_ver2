@@ -120,8 +120,8 @@ std::string pre_command;
 std::string mode;
 
 //top_view_variables
-double flag_position[5][2];
-double robot_position[5][2];
+double flag_position[10][2];
+double robot_position[10][2];
 
 
 //remote time cal
