@@ -135,6 +135,7 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 			}
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
 		ROS_INFO("Upper Start");
+		initial_tf_current_gyro_orientation_z = tf_current_gyro_orientation_z;
 	}
 	if(is_moving_waist_ == false) // desired pose
 	{
@@ -183,7 +184,7 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
 
 
-	temp_head_yaw   = limitCheck(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*(waist_kinematics_ -> xyz_euler_angle_z),60,-60);
+	temp_head_yaw   = limitCheck(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*((waist_kinematics_ -> xyz_euler_angle_z) +(filter_head->signFunction(tf_current_gyro_orientation_z))*(fabs(tf_current_gyro_orientation_z) - fabs(initial_tf_current_gyro_orientation_z))) ,60,-60);
 	temp_head_pitch = limitCheck(head_kinematics_ -> zyx_euler_angle_y - result_head_enable*0,20,-20);
 	temp_head_roll  = limitCheck(head_kinematics_ -> zyx_euler_angle_x - result_head_enable*(0 + waist_kinematics_ -> xyz_euler_angle_x),20,-20);
 	//gazebo
@@ -217,6 +218,8 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	}
 
 	check_detection = false;
+
+	printf("Z :: %f  \n", tf_current_gyro_orientation_z);
 }
 void UpperBodyModule::stop()
 {

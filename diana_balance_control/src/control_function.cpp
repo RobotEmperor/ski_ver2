@@ -93,3 +93,12 @@ double Filter::averageFilter(double value, double number, double min, double max
 	}
 	return result;
 }
+int Filter::signFunction(double value)
+{
+	if(value > 0)
+		return 1;
+	else if(value < 0)
+		return -1;
+	else
+		return 0;
+}

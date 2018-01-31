@@ -87,6 +87,7 @@ UpperBodyModule::UpperBodyModule()
 	gyro_roll_d_gain  = 0;
 	gyro_yaw_p_gain   = 0;
 	gyro_yaw_d_gain   = 0;
+	initial_tf_current_gyro_orientation_z = 0;
 
 	//cop compensation variables
 	cop_compensation_waist  = new diana::CopCompensationFunc;
@@ -118,6 +119,7 @@ UpperBodyModule::UpperBodyModule()
 	current_flag_position_z = 0;
 
 	check_detection = false;
+
 }
 UpperBodyModule::~UpperBodyModule()
 {
@@ -184,10 +186,10 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 	// head point get
 	if(msg.length > 0)
 	{
-			currentFlagPositionFunction(msg.data[0].position.x, msg.data[0].position.y, msg.data[0].position.z);// 천유 좌표를 넣어야함
-			current_flag_position_x  = head_point_kinematics_->head_point_on_origin_x*0.01;  // x
-			current_flag_position_y  = head_point_kinematics_->head_point_on_origin_y*0.01;  // y
-			current_flag_position_z  = head_point_kinematics_->head_point_on_origin_z*0.01;  // z
+		currentFlagPositionFunction(msg.data[0].position.x, msg.data[0].position.y, msg.data[0].position.z);// 천유 좌표를 넣어야함
+		current_flag_position_x  = head_point_kinematics_->head_point_on_origin_x*0.01;  // x
+		current_flag_position_y  = head_point_kinematics_->head_point_on_origin_y*0.01;  // y
+		current_flag_position_z  = head_point_kinematics_->head_point_on_origin_z*0.01;  // z
 	}
 }
 /////////////////////////////////////////////////////
@@ -206,11 +208,11 @@ void UpperBodyModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) 
 	tf_current_gyro_x = tf_gyro_value(0,0);
 	tf_current_gyro_y = tf_gyro_value(1,0);
 	tf_current_gyro_z = tf_gyro_value(2,0);
-	//	quaternionToAngle(currentGyroOrientationW, currentGyroOrientationX, currentGyroOrientationY, currentGyroOrientationZ);
-	//	gyroRotationTransformation(tf_gyro_value(2,0), tf_gyro_value(1,0), tf_gyro_value(0,0));
-	//	tf_current_gyro_orientation_x = tf_gyro_value(0,0);
-	//	tf_current_gyro_orientation_y = tf_gyro_value(1,0);
-	//	tf_current_gyro_orientation_z = tf_gyro_value(2,0);
+	quaternionToAngle(currentGyroOrientationW, currentGyroOrientationX, currentGyroOrientationY, currentGyroOrientationZ);
+	gyroRotationTransformation(tf_gyro_value(2,0), tf_gyro_value(1,0), tf_gyro_value(0,0));
+	tf_current_gyro_orientation_x = tf_gyro_value(0,0);
+	tf_current_gyro_orientation_y = tf_gyro_value(1,0);
+	tf_current_gyro_orientation_z = tf_gyro_value(2,0);
 }
 void UpperBodyModule::gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x)
 {

@@ -168,6 +168,7 @@ private:
 	double gyro_yaw_p_gain;
 	double gyro_yaw_d_gain;
 	Eigen::MatrixXd tf_gyro_value;
+	double initial_tf_current_gyro_orientation_z;
 
 	//flag
 	geometry_msgs::Vector3 current_flag_position_msg;

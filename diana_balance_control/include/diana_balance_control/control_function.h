@@ -39,6 +39,7 @@ public:
 	~Filter();
 	double lowPassFilter(double value, double pre_value, double weight_factor, double sampling_time);
 	double averageFilter(double value, double number, double min, double max);
+	int signFunction(double value);
 
 private:
 	double number_count;
