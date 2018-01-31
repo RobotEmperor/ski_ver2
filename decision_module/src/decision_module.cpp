@@ -72,7 +72,6 @@ void remoteTimeMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 		ROS_INFO("YAML_time_SAVE");
 		YAML::Emitter yaml_out;
 		std::map<double, double> offset;
-		//std::map<std::string, double> init_pose;
 
 		for(int i=0; i<10 ; i++)
 		{
@@ -305,7 +304,7 @@ void motion_left(int motion_number)
 	if(motion_seq == 0)
 	{
 
-		if(remote_count > 0 && remote_count < 10)
+		if(remote_count > -1 && remote_count < 10)
 		{
 			remote_count ++;
 			remote_command[remote_count][0] = remote_count_time;
@@ -390,7 +389,7 @@ void motion_right(int motion_number)
 
 	if(motion_seq == 0)
 	{
-		if(remote_count > 0 && remote_count < 10)
+		if(remote_count > -1 && remote_count < 10)
 		{
 			remote_count ++;
 			remote_command[remote_count][0] = remote_count_time;
