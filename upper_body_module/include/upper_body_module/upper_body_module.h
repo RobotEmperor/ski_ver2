@@ -68,7 +68,8 @@ public:
 	// publisher
 	ros::Publisher  current_waist_pose_pub;
 
-	ros::Publisher  current_flag_position_pub;
+	ros::Publisher  current_flag_position1_pub;
+	ros::Publisher  current_flag_position2_pub;
 
 	// Subscriber
 	ros::Subscriber head_test;
@@ -171,8 +172,11 @@ private:
 	double initial_tf_current_gyro_orientation_z;
 
 	//flag
-	geometry_msgs::Vector3 current_flag_position_msg;
-	double current_flag_position_x, current_flag_position_y, current_flag_position_z;
+	geometry_msgs::Vector3 current_flag_position1_msg;
+	geometry_msgs::Vector3 current_flag_position2_msg;
+
+	double current_flag_position_x[2], current_flag_position_y[2], current_flag_position_z[2];
+	double flag_length;
 	bool check_detection;
 
 	//head low pass filter variables

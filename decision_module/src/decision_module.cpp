@@ -47,7 +47,7 @@ void initialize()
 
 	remote_update = 0;
 
-	for(int i = 0; i<10 ; i++)
+	for(int i = 0; i<20 ; i++)
 	{
 		remote_command[i][0] = 0; // 시간
 		remote_command[i][1] = 0; // right turn -1  netural 0  left turn 1
@@ -55,6 +55,8 @@ void initialize()
 
 	remote_count_time = 0;
 	remote_count = 0;
+
+	init_check = false;
 
 
 }
@@ -73,7 +75,7 @@ void remoteTimeMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 		YAML::Emitter yaml_out;
 		std::map<double, double> offset;
 
-		for(int i=0; i<10 ; i++)
+		for(int i=0; i<20 ; i++)
 		{
 			offset[remote_command[i][0]] = remote_command[i][1];
 		}
@@ -93,13 +95,27 @@ void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 	ready_check = msg->data;
 	change_value_center = 0;
 }
-void currentflagPositionMsgCallback(const geometry_msgs::Vector3& msg)
+void initCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
+{
+	init_check = msg->data;
+	printf("get \n");
+}
+void currentflagPosition1MsgCallback(const geometry_msgs::Vector3& msg)
 {
 	if(decision_algorithm->is_moving_check == false)
 	{
 		decision_algorithm ->temp_flag0[0]  = msg.x;
 		decision_algorithm ->temp_flag0[1]  = msg.y;
 		decision_algorithm ->temp_flag0[2]  = msg.z;
+	}
+}
+void currentflagPosition2MsgCallback(const geometry_msgs::Vector3& msg)
+{
+	if(decision_algorithm->is_moving_check == false)
+	{
+		decision_algorithm ->temp_flag1[0]  = msg.x;
+		decision_algorithm ->temp_flag1[1]  = msg.y;
+		decision_algorithm ->temp_flag1[2]  = msg.z;
 	}
 }
 void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg) // GUI 에서 motion_num topic을 sub 받아 실행 모션 번호 디텍트
@@ -113,7 +129,7 @@ void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& ms
 
 	if(change_value_center == 0)
 	{
-		if(remote_count > 0 && remote_count < 10)
+		if(remote_count > 0 && remote_count < 20)
 		{
 			remote_count ++;
 			remote_command[remote_count][0] = remote_count_time;
@@ -162,18 +178,24 @@ int main(int argc, char **argv)
 	desired_pose_waist_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/desired_pose_waist",1);
 	desired_pose_head_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/desired_pose_head",1);
 
-	top_view_pub = ros_node.advertise<geometry_msgs::Vector3>("/top_view",1);
-
+	//map top view
+	init_top_view_pub = ros_node.advertise<diana_msgs::FlagDataTop>("/init_top_view",1);
 	top_view_robot_pub = ros_node.advertise<geometry_msgs::Vector3>("/top_view_robot",1);
+
 	desired_pose_all_pub  = ros_node.advertise<diana_msgs::DesiredPoseCommand>("/desired_pose_all",1);
 
 
 	// subcriber
 	ros::Subscriber ready_check_sub = ros_node.subscribe("/ready_check", 5, readyCheckMsgCallBack);
+
+	// init map
+	ros::Subscriber init_check_sub = ros_node.subscribe("/init_check", 5, initCheckMsgCallBack);
+
 	ros::Subscriber center_change_msg_sub = ros_node.subscribe("/diana/center_change", 5, desiredCenterChangeMsgCallback);
 	ros::Subscriber update_sub = ros_node.subscribe("/update", 5, updateMsgCallback);
 
-	ros::Subscriber current_flag_position_sub = ros_node.subscribe("/current_flag_position", 5, currentflagPositionMsgCallback);
+	ros::Subscriber current_flag_position1_sub = ros_node.subscribe("/current_flag_position1", 5, currentflagPosition1MsgCallback);
+	ros::Subscriber current_flag_position2_sub = ros_node.subscribe("/current_flag_position2", 5, currentflagPosition2MsgCallback);
 
 	ros::Subscriber remote_time_sub = ros_node.subscribe("/remote_time", 5, remoteTimeMsgCallBack);
 
@@ -192,12 +214,31 @@ int main(int argc, char **argv)
 
 	return 0;
 }
-
-
 void control_loop(const ros::TimerEvent&)
 {
 	if(ready_check)
 	{
+		//////////////////// initialize function
+		if(init_check)
+		{
+			decision_algorithm->initialize(0.006, 5);
+			init_check = !decision_algorithm->init_complete_check;
+
+			if(decision_algorithm->init_complete_check)
+			{
+				for(int num = 0; num < 5; num ++)
+				{
+					init_top_view_msg.flag_in_data_m_x[num] = decision_algorithm->flag_in_data[num][0];
+					init_top_view_msg.flag_in_data_m_y[num] = decision_algorithm->flag_in_data[num][1];
+					init_top_view_msg.flag_out_data_m_x[num] = decision_algorithm->flag_out_data[num][0];
+					init_top_view_msg.flag_out_data_m_y[num] = decision_algorithm->flag_out_data[num][1];
+				}
+				init_top_view_pub.publish(init_top_view_msg);
+			}
+			return;
+		}
+		/////////////////////////////////////////
+
 		if(!mode.compare("auto"))
 		{
 			if(!turn_type.compare("carving_turn") && change_value_center == 5)
@@ -207,6 +248,7 @@ void control_loop(const ros::TimerEvent&)
 				pre_command = decision_algorithm->turn_direction;
 				return;
 			}
+
 			decision_algorithm->process();
 
 			if(pre_command.compare(decision_algorithm->turn_direction) != 0 && decision_algorithm->turn_direction.compare("center") != 0)
@@ -223,10 +265,11 @@ void control_loop(const ros::TimerEvent&)
 				motion_left(entire_motion_number_carving);
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("right_turn"))
 				motion_right(entire_motion_number_carving);
-			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("center"))
-				motion_center(entire_motion_number_carving);
 
-/*			desired_pose_head_msg.data.clear();
+			/*			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("center"))
+				motion_center(entire_motion_number_carving);*/
+
+			/*			desired_pose_head_msg.data.clear();
 			desired_pose_head_msg.data.push_back(0);
 			desired_pose_head_msg.data.push_back(-10*DEGREE2RADIAN);
 			desired_pose_head_msg.data.push_back(0);
@@ -237,6 +280,7 @@ void control_loop(const ros::TimerEvent&)
 		if(!mode.compare("remote"))
 		{
 			remote_count_time = remote_count_time + 0.006;
+
 			if(!turn_type.compare("pflug_bogen") && change_value_center == -1)
 				motion_left(entire_motion_number_pflug);
 			if(!turn_type.compare("pflug_bogen") && change_value_center == 1)
@@ -258,11 +302,6 @@ void control_loop(const ros::TimerEvent&)
 		{
 			flag_position[decision_algorithm->flag_sequence][0] = decision_algorithm->top_view_flag_position.x;
 			flag_position[decision_algorithm->flag_sequence][1] = decision_algorithm->top_view_flag_position.y;
-
-			top_view_msg.x = flag_position[decision_algorithm->flag_sequence][0];
-			top_view_msg.y = flag_position[decision_algorithm->flag_sequence][1];
-			top_view_msg.z = decision_algorithm->flag_sequence;
-			top_view_pub.publish(top_view_msg);
 		}
 		else
 		{
@@ -304,7 +343,7 @@ void motion_left(int motion_number)
 	if(motion_seq == 0)
 	{
 
-		if(remote_count > -1 && remote_count < 10)
+		if(remote_count > -1 && remote_count < 20)
 		{
 			remote_count ++;
 			remote_command[remote_count][0] = remote_count_time;
@@ -389,7 +428,7 @@ void motion_right(int motion_number)
 
 	if(motion_seq == 0)
 	{
-		if(remote_count > -1 && remote_count < 10)
+		if(remote_count > -1 && remote_count < 20)
 		{
 			remote_count ++;
 			remote_command[remote_count][0] = remote_count_time;

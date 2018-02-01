@@ -35,6 +35,7 @@
 #include "diana_msgs/CenterChange.h"
 #include "diana_msgs/DesiredPoseCommand.h"
 #include "diana_msgs/FlagDataArray.h"
+#include "diana_msgs/FlagDataTop.h"
 
 
 using namespace decision_module;
@@ -48,7 +49,7 @@ ros::Publisher desired_pose_waist_pub;
 ros::Publisher desired_pose_head_pub;
 ros::Publisher desired_pose_arm_pub;
 
-ros::Publisher top_view_pub;
+ros::Publisher init_top_view_pub;
 ros::Publisher top_view_robot_pub;
 
 //pose publisher
@@ -62,12 +63,12 @@ std_msgs::Float64MultiArray desired_pose_leg_msg; // desired_pose command msg
 std_msgs::Float64MultiArray desired_pose_waist_msg; // desired_pose command msg
 std_msgs::Float64MultiArray desired_pose_head_msg; // desired_pose command msg
 std_msgs::Float64MultiArray desired_pose_arm_msg; // desired_pose command msg
+diana_msgs::FlagDataTop init_top_view_msg; // desired_pose command msg
 
 //msg
 diana_msgs::DesiredPoseCommand desired_pose_all_msg;
 
 //msg
-geometry_msgs::Vector3 top_view_msg;
 geometry_msgs::Vector3 top_view_robot_msg;
 
 
@@ -75,9 +76,14 @@ void initialize();
 
 // subscriber
 void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
+void initCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
 void updateMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
 void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg);
-void currentFlagPositionMsgCallback(const geometry_msgs::Vector3::ConstPtr& msg);
+
+//flag
+void currentFlagPosition1MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg);
+void currentFlagPosition2MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg);
+
 void modeChangeMsgCallback(const std_msgs::Bool::ConstPtr& msg);
 void remoteTimeMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
 
@@ -86,6 +92,9 @@ void control_loop(const ros::TimerEvent&);
 void motion_left(int motion_number);
 void motion_right(int motion_number);
 void motion_center(int motion_number);
+
+//init check
+bool init_check;
 
 
 std::string turn_type;

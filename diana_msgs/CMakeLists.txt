@@ -33,6 +33,7 @@ add_message_files(
   GateData.msg
   GateDataArray.msg
   DesiredPoseCommand.msg
+  FlagDataTop.msg
 )
 
 generate_messages(

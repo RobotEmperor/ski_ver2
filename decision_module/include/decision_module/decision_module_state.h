@@ -52,11 +52,12 @@ public:
 	~DecisionModule();
 
 	/* ROS Functions */
-	void initialize();
+	void initialize(double sampling_time, double update_time);
 	void process();
 	bool gazebo_check;
 
 	double temp_flag0[3]; // 0 :x 1 : y 2 : z;
+	double temp_flag1[3]; // 0 :x 1 : y 2 : z;
 
 
 	bool is_moving_check;
@@ -81,8 +82,15 @@ public:
 	int flag_sequence;
 	int direction_command;
 
+	//initialize function
+	bool init_complete_check;
+	double flag_in_data[5][2];
+	double flag_out_data[5][2];
+	std_msgs::Float64MultiArray init_top_view_msg;
+
 private:
-	void decision_function(double flag[3]);
+	void classification_function(double flag0[3], double flag1[3]);
+	void decision_function(double flag0[3], double flag1[3]);
 
 	//map
 	void top_view(double flag_position[3]);
@@ -92,7 +100,18 @@ private:
 	double right_x_detect_margin, right_y_detect_margin_min, right_y_detect_margin_max;
 
 
-	//head
+	//initialize function
+	double initialize_time_count;
+
+	//classification function
+	int flag_count;
+	double pre_temp_flag_0[3], pre_temp_flag_1[3]; // head
+	double true_flag_0[3], true_flag_1[3];  // head
+	double final_in_flag[3];  // head
+
+	double flag0_on_robot_top[3], flag1_on_robot_top[3]; //robot
+
+
 
 
 
