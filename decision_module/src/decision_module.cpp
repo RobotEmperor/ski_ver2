@@ -98,25 +98,26 @@ void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 void initCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 {
 	init_check = msg->data;
-	printf("get \n");
 }
 void currentflagPosition1MsgCallback(const geometry_msgs::Vector3& msg)
 {
-	if(decision_algorithm->is_moving_check == false)
-	{
-		decision_algorithm ->temp_flag0[0]  = msg.x;
-		decision_algorithm ->temp_flag0[1]  = msg.y;
-		decision_algorithm ->temp_flag0[2]  = msg.z;
-	}
+
+	decision_algorithm ->temp_flag0[0]  = msg.x;
+	decision_algorithm ->temp_flag0[1]  = msg.y;
+	decision_algorithm ->temp_flag0[2]  = msg.z;
+
+	decision_algorithm -> data_in_check_1 = true;
+
+	printf("1111111111111111");
 }
 void currentflagPosition2MsgCallback(const geometry_msgs::Vector3& msg)
 {
-	if(decision_algorithm->is_moving_check == false)
-	{
-		decision_algorithm ->temp_flag1[0]  = msg.x;
-		decision_algorithm ->temp_flag1[1]  = msg.y;
-		decision_algorithm ->temp_flag1[2]  = msg.z;
-	}
+
+	decision_algorithm ->temp_flag1[0]  = msg.x;
+	decision_algorithm ->temp_flag1[1]  = msg.y;
+	decision_algorithm ->temp_flag1[2]  = msg.z;
+
+	decision_algorithm -> data_in_check_2 = true;
 }
 void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& msg) // GUI 에서 motion_num topic을 sub 받아 실행 모션 번호 디텍트
 {
@@ -249,6 +250,7 @@ void control_loop(const ros::TimerEvent&)
 				return;
 			}
 
+
 			decision_algorithm->process();
 
 			if(pre_command.compare(decision_algorithm->turn_direction) != 0 && decision_algorithm->turn_direction.compare("center") != 0)
@@ -261,13 +263,19 @@ void control_loop(const ros::TimerEvent&)
 
 				pre_direction_command = decision_algorithm->turn_direction; // left right
 			}
+			if(!decision_algorithm->turn_direction.compare("center"))
+			{
+				decision_algorithm->turn_direction = "center";
+				motion_center(entire_motion_number_carving); //remote control
+				pre_command = decision_algorithm->turn_direction;
+			}
+
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("left_turn"))
 				motion_left(entire_motion_number_carving);
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("right_turn"))
 				motion_right(entire_motion_number_carving);
-
-			/*			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("center"))
-				motion_center(entire_motion_number_carving);*/
+			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("center"))
+				motion_center(entire_motion_number_carving);
 
 			/*			desired_pose_head_msg.data.clear();
 			desired_pose_head_msg.data.push_back(0);
@@ -276,6 +284,23 @@ void control_loop(const ros::TimerEvent&)
 			desired_pose_head_msg.data.push_back(0.5);
 			desired_pose_head_pub.publish(desired_pose_head_msg);
 			desired_pose_head_msg.data.clear();*/
+
+			decision_algorithm -> data_in_check_1 = false;
+			decision_algorithm -> data_in_check_2 = false;
+
+			if(decision_algorithm -> flag_check == 1)
+			{
+				for(int num = 0; num < 5; num ++)
+				{
+					init_top_view_msg.flag_in_data_m_x[decision_algorithm ->flag_sequence] = decision_algorithm ->top_view_flag_position.x;
+					init_top_view_msg.flag_in_data_m_y[decision_algorithm ->flag_sequence] = decision_algorithm ->top_view_flag_position.y;
+					init_top_view_msg.flag_out_data_m_x[decision_algorithm ->flag_sequence] = decision_algorithm ->top_view_flag_position.x;
+					init_top_view_msg.flag_out_data_m_y[decision_algorithm ->flag_sequence] = decision_algorithm ->top_view_flag_position.y + (decision_algorithm ->flag_direction)*5;
+
+				}
+				init_top_view_pub.publish(init_top_view_msg);
+				decision_algorithm -> flag_check = 0;
+			}
 		}
 		if(!mode.compare("remote"))
 		{
@@ -298,7 +323,7 @@ void control_loop(const ros::TimerEvent&)
 
 		pre_command = decision_algorithm->turn_direction;
 
-		if(decision_algorithm->flag_sequence > -1 && decision_algorithm->flag_sequence < 5)
+		/*	if(decision_algorithm->flag_sequence > -1 && decision_algorithm->flag_sequence < 5)
 		{
 			flag_position[decision_algorithm->flag_sequence][0] = decision_algorithm->top_view_flag_position.x;
 			flag_position[decision_algorithm->flag_sequence][1] = decision_algorithm->top_view_flag_position.y;
@@ -307,7 +332,7 @@ void control_loop(const ros::TimerEvent&)
 		{
 			//ROS_INFO("Error algorithm!!!!\n");
 			return;
-		}
+		}*/
 
 		top_view_robot_msg.x =  decision_algorithm->top_view_robot_position.x;
 		top_view_robot_msg.y =  decision_algorithm->top_view_robot_position.y;

@@ -209,20 +209,24 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	current_waist_pose_pub.publish(current_waist_pose_msg);
 	current_waist_pose_msg.data.clear();
 
-	if(check_detection == true)
+	if(check_detection_1 == true)
 	{
 		current_flag_position1_msg.x = current_flag_position_x[0];
 		current_flag_position1_msg.y = current_flag_position_y[0];
 		current_flag_position1_msg.z = current_flag_position_z[0];
 		current_flag_position1_pub.publish(current_flag_position1_msg);
-
+	}
+	if(check_detection_2 == true)
+	{
 		current_flag_position2_msg.x = current_flag_position_x[1];
 		current_flag_position2_msg.y = current_flag_position_y[1];
 		current_flag_position2_msg.z = current_flag_position_z[1];
 		current_flag_position2_pub.publish(current_flag_position2_msg);
 	}
 
-	check_detection = false;
+
+	check_detection_1 = false;
+	check_detection_2 = false;
 
 	//printf("Z :: %f  \n", tf_current_gyro_orientation_z);
 }

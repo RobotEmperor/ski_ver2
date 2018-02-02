@@ -80,21 +80,24 @@ public:
 
 	bool flag_check;
 	int flag_sequence;
+	int flag_direction;
+	int pre_flag_sequence;
 	int direction_command;
 
 	//initialize function
 	bool init_complete_check;
+	bool data_in_check_1;
+	bool data_in_check_2;
 	double flag_in_data[5][2];
 	double flag_out_data[5][2];
 	std_msgs::Float64MultiArray init_top_view_msg;
 
 private:
-	void classification_function(double flag0[3], double flag1[3]);
+	void classification_function(double flag0[3], double flag1[3], bool check_1, bool check_2);
 	void decision_function(double flag0[3], double flag1[3]);
 
 	//map
 	void top_view(double flag_position[3]);
-	int pre_flag_sequence;
 
 	double left_x_detect_margin, left_y_detect_margin_min, left_y_detect_margin_max;
 	double right_x_detect_margin, right_y_detect_margin_min, right_y_detect_margin_max;
@@ -102,6 +105,7 @@ private:
 
 	//initialize function
 	double initialize_time_count;
+	bool init_flag_check;
 
 	//classification function
 	int flag_count;
@@ -110,6 +114,9 @@ private:
 	double final_in_flag[3];  // head
 
 	double flag0_on_robot_top[3], flag1_on_robot_top[3]; //robot
+
+	//top view
+	double pre_flag_top_veiw_x;
 
 
 

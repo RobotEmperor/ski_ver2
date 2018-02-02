@@ -120,7 +120,8 @@ UpperBodyModule::UpperBodyModule()
 		current_flag_position_y[i] = 0;
 		current_flag_position_z[i] = 0;
 	}
-	check_detection = false;
+	check_detection_1 = false;
+	check_detection_2 = false;
 	flag_length = 0;
 
 }
@@ -186,7 +187,6 @@ void UpperBodyModule::desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64Mult
 // flag position data get////////////////////////////
 void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray& msg)
 {
-	check_detection = true;
 	// head point get
 	if(msg.length > 0 && msg.length < 3)
 	{
@@ -197,6 +197,16 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 			current_flag_position_y[num] = head_point_kinematics_->head_point_on_origin_y*0.01;  // y
 			current_flag_position_z[num]  = head_point_kinematics_->head_point_on_origin_z*0.01;  // z
 		}
+	}
+	else
+		return;
+
+	if(msg.length == 1)
+		check_detection_1 = true;
+	if(msg.length == 2)
+	{
+		check_detection_1 = true;
+		check_detection_2 = true;
 	}
 }
 /////////////////////////////////////////////////////

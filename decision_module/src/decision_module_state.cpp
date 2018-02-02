@@ -46,6 +46,7 @@ DecisionModule::DecisionModule()
 
 	pre_flag_sequence = 0;
 	flag_sequence = 0;
+	flag_direction = 0;
 	flag_check = false;
 
 	top_view_flag_position.x = 0;
@@ -75,6 +76,10 @@ DecisionModule::DecisionModule()
 	}
 	init_complete_check = false;
 	flag_count = 0;
+	data_in_check_1 = false;
+	data_in_check_2 = false;
+	init_flag_check = false;
+	pre_flag_top_veiw_x = 0;
 
 }
 DecisionModule::~DecisionModule()
@@ -101,6 +106,7 @@ void DecisionModule::initialize(double sampling_time, double update_time)
 		if(flag_in_data[0][1] > 0) // 우턴 부터 시작
 		{
 			flag_out_data[0][1] = temp_flag0[1] - 5;
+			flag_direction = -1;
 
 			flag_out_data[1][1] = flag_in_data[1][1] + 5;
 			flag_out_data[2][1] = flag_in_data[2][1] - 5;
@@ -110,6 +116,7 @@ void DecisionModule::initialize(double sampling_time, double update_time)
 		if(flag_in_data[0][1] < 0) // 좌턴 부터 시작
 		{
 			flag_out_data[0][1] = temp_flag0[1] + 5;
+			flag_direction = 1;
 
 			flag_out_data[1][1] = flag_in_data[1][1] - 5;
 			flag_out_data[2][1] = flag_in_data[2][1] + 5;
@@ -117,9 +124,15 @@ void DecisionModule::initialize(double sampling_time, double update_time)
 			flag_out_data[4][1] = flag_in_data[4][1] + 5;
 		}
 		init_complete_check = false;
+
+		pre_temp_flag_0[0] = temp_flag0[0];
+		pre_temp_flag_0[1] = temp_flag0[1];
+		pre_temp_flag_1[0] = temp_flag1[0];
+		pre_temp_flag_1[1] = temp_flag1[1];
 	}
 	else
 	{
+		init_flag_check = true;
 		init_complete_check = true;
 		initialize_time_count = 0;
 		return;
@@ -130,73 +143,136 @@ void DecisionModule::initialize(double sampling_time, double update_time)
 
 void DecisionModule::process()
 {
-	classification_function(temp_flag0, temp_flag1);
-	//top_view(true_flag_0);
+	classification_function(temp_flag0, temp_flag1, data_in_check_1, data_in_check_2);
+	top_view(true_flag_0);
 
 	decision_function(true_flag_0, true_flag_1);
 
 	//headFollowFlag(temp_flag0[0] , temp_flag0[1]);
 	//top_view(temp_flag0);
 }
-void DecisionModule::classification_function(double flag0[3], double flag1[3])
+void DecisionModule::classification_function(double flag0[3], double flag1[3], bool check_1, bool check_2)
 {
-	if(pre_temp_flag_0[0] == flag0[0] && pre_temp_flag_1[0] == flag1[0] && pre_temp_flag_0[1] == flag0[1] && pre_temp_flag_1[1] == flag1[1]) // 기문 둘다 안들어올 경우
+	//if(pre_temp_flag_0[0] == flag0[0] && pre_temp_flag_1[0] == flag1[0] && pre_temp_flag_0[1] == flag0[1] && pre_temp_flag_1[1] == flag1[1] && check == false) // 기문 둘다 안들어올 경우
+	if(check_1 == false &&  check_2 == false)
 	{
-		true_flag_0[0] = flag_in_data[flag_sequence][0] - top_view_robot_position.x;
-		true_flag_0[1] = flag_in_data[flag_sequence][1] - top_view_robot_position.y;
-		true_flag_1[0] = flag_out_data[flag_sequence][0] - top_view_robot_position.x;
-		true_flag_1[1] = flag_out_data[flag_sequence][1] - top_view_robot_position.y;
+		true_flag_0[0] = flag_in_data[flag_sequence][0];
+		true_flag_0[1] = flag_in_data[flag_sequence][1];
+		true_flag_1[0] = flag_out_data[flag_sequence][0];
+		true_flag_1[1] = flag_out_data[flag_sequence][1];
 
-		printf("11111111111  X :: %f , Y :: %f \n", true_flag_0[0], true_flag_0[1]);
+		printf("%d ::  %f \n\n", flag_sequence, flag_in_data[flag_sequence][0]);
 	}
-	if(pre_temp_flag_0[0] != flag0[0] && pre_temp_flag_1[0] != flag1[0] && pre_temp_flag_0[1] != flag0[1] && pre_temp_flag_1[1] != flag1[1]) // 기문 둘다 들어올 경우
+	if(check_1 == true &&  check_2 == true) // 기문 둘다 들어올 경우
 	{
 		true_flag_0[0] = flag0[0];
 		true_flag_0[1] = flag0[1];
 		true_flag_1[0] = flag1[0];
 		true_flag_1[1] = flag1[1];
 
-		printf("2222222222222  X :: %f , Y :: %f \n", true_flag_0[0], true_flag_0[1]);
+		printf("Two Flag Data  X :: %f , Y :: %f \n", true_flag_0[0], true_flag_0[1]);
 	}
-	if(pre_temp_flag_0[0] != flag0[0] && pre_temp_flag_0[1] != flag0[1] && pre_temp_flag_1[0] == flag1[0] && pre_temp_flag_1[1] == flag1[1])// 한개의 기문만 들어올때
+	if(check_1 == true  ||  check_2 == true)// 한개의 기문만 들어올때
 	{
-		if(fabs(pre_temp_flag_1[1] - flag0[1] + top_view_robot_position.y) > 4 || fabs(pre_temp_flag_1[1] - flag0[1] + top_view_robot_position.y) < -4)// 바깥 기문 인식.
-		{
-			true_flag_1[0] = flag0[0];
-			true_flag_1[1] = flag0[1];
-			// assume
-			true_flag_0[0] = flag0[0];
-			if(flag_in_data[0][1] > 0)
-			{
-				if(flag_sequence/2 == 0) // 우턴 시작
-					true_flag_0[1] = flag0[1] - 5; //y 값 추정
-				else
-					true_flag_0[1] = flag0[1] + 5;
-			}
-			if(flag_in_data[0][1] < 0)
-			{
-				if(flag_sequence/2 == 0) // 좌턴 시작
-					true_flag_0[1] = flag0[1] + 5;
-				else
-					true_flag_0[1] = flag0[1] - 5;
-			}
-		}
-		else //안쪽 기문
-		{
-			true_flag_0[0] = flag0[0];
-			true_flag_0[1] = flag0[1];
-			true_flag_1[0] = flag1[0];
-			true_flag_1[1] = flag1[1];
-		}
+		/*if(flag_sequence == 0) //안쪽 기문
+		{*/
+		true_flag_0[0] = flag0[0];
+		true_flag_0[1] = flag0[1];
 
-		printf("333333333333   X :: %f , Y :: %f \n", true_flag_0[0], true_flag_0[1]);
+		true_flag_1[0] = flag0[0];
+
+		if(flag_in_data[0][1] > 0)
+		{
+			if(flag_sequence/2 == 0) // 우턴 시작
+				true_flag_1[1] = flag0[1] - 5; //y 값 추정
+			else
+				true_flag_1[1] = flag0[1] + 5;
+		}
+		if(flag_in_data[0][1] < 0)
+		{
+			if(flag_sequence/2 == 0) // 좌턴 시작
+				true_flag_1[1] = flag0[1] + 5;
+			else
+				true_flag_1[1] = flag0[1] - 5;
+		}
+		printf("in! flag!!! \n ");
+		//}
+		/*if(flag_sequence > 0)
+		{
+			if(fabs(flag_in_data[flag_sequence-1][1] - (flag0[1] + top_view_robot_position.y)) > 4)// 바깥 기문 인식.
+			{
+				true_flag_1[0] = flag0[0];
+				true_flag_1[1] = flag0[1];
+				// assume
+				true_flag_0[0] = flag0[0];
+				if(flag_in_data[0][1] > 0)
+				{
+					if(flag_sequence/2 == 0) // 우턴 시작
+						true_flag_0[1] = flag0[1] - 5; //y 값 추정
+					else
+						true_flag_0[1] = flag0[1] + 5;
+				}
+				if(flag_in_data[0][1] < 0)
+				{
+					if(flag_sequence/2 == 0) // 좌턴 시작
+						true_flag_0[1] = flag0[1] + 5;
+					else
+						true_flag_0[1] = flag0[1] - 5;
+				}
+				printf("out! flag!!! \n ");
+			}
+			else
+			{
+				true_flag_0[0] = flag0[0];
+				true_flag_0[1] = flag0[1];
+
+				true_flag_1[0] = flag0[0];
+
+				if(flag_in_data[0][1] > 0)
+				{
+					if(flag_sequence/2 == 0) // 우턴 시작
+						true_flag_1[1] = flag0[1] - 5; //y 값 추정
+					else
+						true_flag_1[1] = flag0[1] + 5;
+				}
+				if(flag_in_data[0][1] < 0)
+				{
+					if(flag_sequence/2 == 0) // 좌턴 시작
+						true_flag_1[1] = flag0[1] + 5;
+					else
+						true_flag_1[1] = flag0[1] - 5;
+				}
+				printf("in! flag!!! \n ");
+			}
+		}*/
+
+		flag_in_data[flag_sequence][0]  =  true_flag_0[0];
+		flag_in_data[flag_sequence][1]  =  true_flag_0[1];
+		flag_out_data[flag_sequence][0] =  true_flag_1[0];
+		flag_out_data[flag_sequence][1] =  true_flag_1[1];
+
+		printf("One Flag Data   X :: %f , Y :: %f \n", true_flag_0[0], true_flag_0[1]);
 	}
 
+	if(fabs(pre_temp_flag_0[0] - true_flag_0[0]) > 6)
+	{
+		flag_sequence ++;
+		flag_direction = -flag_direction;
+		flag_in_data[flag_sequence][0]  = true_flag_0[0];
+		flag_in_data[flag_sequence][1]  = true_flag_0[1];
+		flag_out_data[flag_sequence][0] = true_flag_1[0];
+		flag_out_data[flag_sequence][1] = true_flag_1[1];
 
-	pre_temp_flag_0[0] = flag0[0];
-	pre_temp_flag_0[1] = flag0[1];
-	pre_temp_flag_1[0] = flag1[0];
-	pre_temp_flag_1[1] = flag1[1];
+		printf("Flag Changed");
+	}
+
+	//	printf("2222222   final   X :: %f , Y :: %f \n \n", true_flag_0[0], true_flag_0[1]);
+	//	printf("11111111  final   X :: %f , Y :: %f \n \n", true_flag_1[0], true_flag_1[1]);
+
+	pre_temp_flag_0[0] = true_flag_0[0];
+	pre_temp_flag_0[1] = true_flag_0[1];
+	pre_temp_flag_1[0] = true_flag_1[0];
+	pre_temp_flag_1[1] = true_flag_1[1];
 
 }
 void DecisionModule::decision_function(double flag0[3], double flag1[3])
@@ -230,10 +306,9 @@ void DecisionModule::decision_function(double flag0[3], double flag1[3])
 			return;
 		}
 	}
-	else
-	{
-		return;
-	}
+	if(flag_check == 1)
+		turn_direction = "center";
+
 }
 void DecisionModule::parseMotionData()
 {
@@ -293,13 +368,18 @@ void DecisionModule::headFollowFlag(double x , double y)
 }
 void DecisionModule::top_view(double flag_position[3])
 {
-	if(fabs(sqrt(pow(pre_top_view_flag_position.x,2) + pow(pre_top_view_flag_position.y,2)) - sqrt(pow(flag_position[0],2) + pow(flag_position[1],2))) > 8)
+	if(flag_sequence == 0 && init_flag_check == true)
 	{
-		flag_sequence ++;
+		top_view_flag_position.x = flag_position[0]; // 고정된값
+		top_view_flag_position.y = flag_position[1]; // 고정된값
+		init_flag_check = false;
+
+		pre_top_view_robot_position.x = top_view_flag_position.x;
+		pre_top_view_robot_position.y = top_view_flag_position.y;
 	}
 	else
 	{
-		flag_check = 0; // flag change
+		//flag_check = 0; // flag change
 	}
 
 	if(pre_flag_sequence != flag_sequence && flag_sequence != 0)
@@ -307,11 +387,16 @@ void DecisionModule::top_view(double flag_position[3])
 		top_view_flag_position.x = pre_top_view_robot_position.x + flag_position[0]; // 고정된값
 		top_view_flag_position.y = pre_top_view_robot_position.y + flag_position[1]; // 고정된값
 		flag_check = 1; // flag change
+
+		printf("Flag update :: X :: %f , X :: %f \n", top_view_flag_position.x, top_view_flag_position.y);
 	}
 
 
 	top_view_robot_position.x = -flag_position[0] + top_view_flag_position.x;
 	top_view_robot_position.y = -flag_position[1] + top_view_flag_position.y;
+
+	//	printf("ROBOT     :: X :: %f , Y :: %f \n", top_view_robot_position.x , top_view_robot_position.y);
+	//	printf("Top View  :: X :: %f , Y :: %f \n", top_view_flag_position.x , top_view_flag_position.y);
 
 	pre_flag_sequence = flag_sequence;
 	pre_top_view_flag_position.x = top_view_flag_position.x;

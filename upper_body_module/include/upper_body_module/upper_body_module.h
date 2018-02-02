@@ -177,7 +177,8 @@ private:
 
 	double current_flag_position_x[2], current_flag_position_y[2], current_flag_position_z[2];
 	double flag_length;
-	bool check_detection;
+	bool check_detection_1;
+	bool check_detection_2;
 
 	//head low pass filter variables
 	control_function::Filter *filter_head;
