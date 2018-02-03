@@ -136,6 +136,8 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
 		ROS_INFO("Upper Start");
 		initial_tf_current_gyro_orientation_z = tf_current_gyro_orientation_z;
+		initial_tf_current_position_x = tf_current_position_x;
+		initial_tf_current_position_y = tf_current_position_y;
 	}
 	if(is_moving_waist_ == false) // desired pose
 	{
@@ -223,9 +225,9 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 		current_flag_position2_msg.z = current_flag_position_z[1];
 		current_flag_position2_pub.publish(current_flag_position2_msg);
 	}
-/*	top_view_robot_msg.x =  tf_current_position_x;
-	top_view_robot_msg.y =  tf_current_position_y;
-	top_view_robot_pub.publish(top_view_robot_msg);*/
+	top_view_robot_msg.x =  (filter_head->signFunction(tf_current_position_x))*(fabs(tf_current_position_x) - fabs(initial_tf_current_position_x));
+	top_view_robot_msg.y =  (filter_head->signFunction(tf_current_position_y))*(fabs(tf_current_position_y) - fabs(initial_tf_current_position_y));
+	top_view_robot_pub.publish(top_view_robot_msg);
 
 
 	check_detection_1 = false;

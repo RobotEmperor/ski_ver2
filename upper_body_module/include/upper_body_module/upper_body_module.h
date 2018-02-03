@@ -178,6 +178,8 @@ private:
 	Eigen::MatrixXd tf_gyro_value;
 	Eigen::MatrixXd tf_position_value;
 	double initial_tf_current_gyro_orientation_z;
+	double initial_tf_current_position_x;
+	double initial_tf_current_position_y;
 
 	//flag
 	geometry_msgs::Vector3 current_flag_position1_msg;
