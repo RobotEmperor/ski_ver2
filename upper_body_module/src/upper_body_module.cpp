@@ -223,6 +223,9 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 		current_flag_position2_msg.z = current_flag_position_z[1];
 		current_flag_position2_pub.publish(current_flag_position2_msg);
 	}
+	top_view_robot_msg.x =  tf_current_position_x;
+	top_view_robot_msg.y =  tf_current_position_y;
+	top_view_robot_pub.publish(top_view_robot_msg);
 
 
 	check_detection_1 = false;

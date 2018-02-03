@@ -64,6 +64,9 @@ UpperBodyModule::UpperBodyModule()
 	currentGyroX = 0;
 	currentGyroY = 0;
 	currentGyroZ = 0;
+	currentPositionX = 0;
+	currentPositionY = 0;
+	currentPositionZ = 0;
 	currentGyroOrientationW = 0;
 	currentGyroOrientationX = 0;
 	currentGyroOrientationY = 0;
@@ -74,8 +77,13 @@ UpperBodyModule::UpperBodyModule()
 	tf_current_gyro_orientation_x = 0;
 	tf_current_gyro_orientation_y = 0;
 	tf_current_gyro_orientation_z = 0;
+	tf_current_position_x = 0;
+	tf_current_position_y = 0;
+	tf_current_position_z = 0;
 	tf_gyro_value.resize(3,1);
 	tf_gyro_value.fill(0);
+	tf_position_value.resize(3,1);
+	tf_position_value.fill(0);
 	gyro_roll_function = new control_function::PID_function(0.008,5*DEGREE2RADIAN,-5*DEGREE2RADIAN,0,0,0);
 	gyro_yaw_function  = new control_function::PID_function(0.008,5*DEGREE2RADIAN,-5*DEGREE2RADIAN,0,0,0);
 	gain_roll_p_adjustment = new heroehs_math::FifthOrderTrajectory;
@@ -139,10 +147,12 @@ void UpperBodyModule::queueThread()
 	current_waist_pose_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/current_waist_pose",100);
 	current_flag_position1_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position1",100);
 	current_flag_position2_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position2",100);
+	top_view_robot_pub = ros_node.advertise<geometry_msgs::Vector3>("/top_view_robot",1);
 
 	// subscribe topics
 	flag_position_get_sub = ros_node.subscribe("/gate_watcher/flag_data", 100, &UpperBodyModule::flagPositionGetMsgCallback, this);
 	get_imu_data_sub_ = ros_node.subscribe("/imu/data", 100, &UpperBodyModule::imuDataMsgCallback, this);
+	get_nav_data_sub_ = ros_node.subscribe("/nav/odom", 100, &UpperBodyModule::navDataMsgCallback, this);
 
 	balance_param_waist_sub = ros_node.subscribe("/diana/balance_parameter_waist", 5, &UpperBodyModule::balanceParameterWaistMsgCallback, this);
 	head_balance_sub = ros_node.subscribe("/head_balance", 5, &UpperBodyModule::headBalanceMsgCallback, this);
@@ -210,8 +220,17 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 	}
 }
 /////////////////////////////////////////////////////
-
 // sensor data get///////////////////////////////////
+void UpperBodyModule::navDataMsgCallback(const nav_msgs::Odometry::ConstPtr& msg) // gyro data get
+{
+	currentPositionX = (double) msg->pose.pose.position.x;
+	currentPositionY = (double) msg->pose.pose.position.y;
+	currentPositionZ = (double) msg->pose.pose.position.z;
+	navRotationTransformation(currentPositionZ, currentPositionY, currentPositionX);
+	tf_current_position_x = tf_position_value(0,0);
+	tf_current_position_y = tf_position_value(1,0);
+    tf_current_position_z = tf_position_value(2,0);
+}
 void UpperBodyModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) // gyro data get
 {
 	currentGyroX = (double) msg->angular_velocity.x;
@@ -236,8 +255,14 @@ void UpperBodyModule::gyroRotationTransformation(double gyro_z, double gyro_y, d
 	tf_gyro_value(0,0) =  gyro_x;
 	tf_gyro_value(1,0) =  gyro_y;
 	tf_gyro_value(2,0) =  gyro_z;
-
 	tf_gyro_value = (robotis_framework::getRotationZ(-M_PI/2)*robotis_framework::getRotationY(-M_PI))*tf_gyro_value;
+}
+void UpperBodyModule::navRotationTransformation(double nav_z, double nav_y, double nav_x)
+{
+	tf_position_value(0,0) = nav_x;
+	tf_position_value(1,0) = nav_y;
+	tf_position_value(2,0) = nav_z;
+	tf_position_value = (robotis_framework::getRotationZ(-M_PI/2)*robotis_framework::getRotationY(-M_PI))*tf_position_value;
 }
 void UpperBodyModule::quaternionToAngle(double q_w, double q_x, double q_y, double q_z)
 {

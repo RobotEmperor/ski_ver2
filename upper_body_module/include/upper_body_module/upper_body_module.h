@@ -33,6 +33,7 @@
 #include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/String.h>
 #include <std_msgs/Bool.h>
+#include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/PointStamped.h>
 #include <sensor_msgs/Imu.h>
@@ -70,11 +71,13 @@ public:
 
 	ros::Publisher  current_flag_position1_pub;
 	ros::Publisher  current_flag_position2_pub;
+	ros::Publisher  top_view_robot_pub;
 
 	// Subscriber
 	ros::Subscriber head_test;
 	ros::Subscriber waist_test;
 	ros::Subscriber get_imu_data_sub_;
+	ros::Subscriber get_nav_data_sub_;
 	ros::Subscriber balance_param_waist_sub;
 	ros::Subscriber head_balance_sub;
 	ros::Subscriber flag_position_get_sub;
@@ -91,6 +94,7 @@ public:
 
 	//sensor
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
+	void navDataMsgCallback(const nav_msgs::Odometry::ConstPtr& msg);
 	//pid gain value for gyro
 	void balanceParameterWaistMsgCallback(const diana_msgs::BalanceParamWaist::ConstPtr& msg);
 	void headBalanceMsgCallback(const std_msgs::Bool::ConstPtr& msg);
@@ -150,12 +154,15 @@ private:
 
 	// gyro
 	void gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x);
+	void navRotationTransformation(double nav_z, double nav_y, double nav_x);
 	void quaternionToAngle(double q_w, double q_x, double q_y, double q_z);
 	void updateBalanceGyroParameter();
 	void headFollowFlag(double x , double y);
 	double currentGyroX,currentGyroY,currentGyroZ;
+	double currentPositionX,currentPositionY,currentPositionZ;
 	double currentGyroOrientationW, currentGyroOrientationX,currentGyroOrientationY,currentGyroOrientationZ;
 	double tf_current_gyro_x, tf_current_gyro_y, tf_current_gyro_z;
+	double tf_current_position_x, tf_current_position_y, tf_current_position_z;
 	double tf_current_gyro_orientation_x, tf_current_gyro_orientation_y, tf_current_gyro_orientation_z;
 	heroehs_math::FifthOrderTrajectory *gain_roll_p_adjustment;
 	heroehs_math::FifthOrderTrajectory *gain_roll_d_adjustment;
@@ -169,6 +176,7 @@ private:
 	double gyro_yaw_p_gain;
 	double gyro_yaw_d_gain;
 	Eigen::MatrixXd tf_gyro_value;
+	Eigen::MatrixXd tf_position_value;
 	double initial_tf_current_gyro_orientation_z;
 
 	//flag
@@ -191,6 +199,8 @@ private:
 	double result_head_enable;
 	double head_enable_time;
 
+    //robot xyz
+	geometry_msgs::Vector3 top_view_robot_msg;
 
 
 
