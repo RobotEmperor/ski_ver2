@@ -77,7 +77,7 @@ public:
 	ros::Subscriber head_test;
 	ros::Subscriber waist_test;
 	ros::Subscriber get_imu_data_sub_;
-	ros::Subscriber get_nav_data_sub_;
+	//ros::Subscriber get_nav_data_sub_;
 	ros::Subscriber balance_param_waist_sub;
 	ros::Subscriber head_balance_sub;
 	ros::Subscriber flag_position_get_sub;
@@ -180,6 +180,7 @@ private:
 	double initial_tf_current_gyro_orientation_z;
 	double initial_tf_current_position_x;
 	double initial_tf_current_position_y;
+	double initial_tf_current_position_z;
 
 	//flag
 	geometry_msgs::Vector3 current_flag_position1_msg;

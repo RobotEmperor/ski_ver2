@@ -132,6 +132,10 @@ UpperBodyModule::UpperBodyModule()
 	check_detection_2 = false;
 	flag_length = 0;
 
+	initial_tf_current_position_x = 0;
+	initial_tf_current_position_y = 0;
+	initial_tf_current_position_z = 0;
+
 }
 UpperBodyModule::~UpperBodyModule()
 {
@@ -152,7 +156,7 @@ void UpperBodyModule::queueThread()
 	// subscribe topics
 	flag_position_get_sub = ros_node.subscribe("/gate_watcher/flag_data", 100, &UpperBodyModule::flagPositionGetMsgCallback, this);
 	get_imu_data_sub_ = ros_node.subscribe("/imu/data", 100, &UpperBodyModule::imuDataMsgCallback, this);
-	get_nav_data_sub_ = ros_node.subscribe("/nav/odom", 100, &UpperBodyModule::navDataMsgCallback, this);
+//	get_nav_data_sub_ = ros_node.subscribe("/nav_odom", 100, &UpperBodyModule::navDataMsgCallback, this);
 
 	balance_param_waist_sub = ros_node.subscribe("/diana/balance_parameter_waist", 5, &UpperBodyModule::balanceParameterWaistMsgCallback, this);
 	head_balance_sub = ros_node.subscribe("/head_balance", 5, &UpperBodyModule::headBalanceMsgCallback, this);
@@ -221,7 +225,7 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 }
 /////////////////////////////////////////////////////
 // sensor data get///////////////////////////////////
-void UpperBodyModule::navDataMsgCallback(const nav_msgs::Odometry::ConstPtr& msg) // gyro data get
+/*void UpperBodyModule::navDataMsgCallback(const nav_msgs::Odometry::ConstPtr& msg) // gyro data get
 {
 	currentPositionX = (double) msg->pose.pose.position.x;
 	currentPositionY = (double) msg->pose.pose.position.y;
@@ -230,7 +234,7 @@ void UpperBodyModule::navDataMsgCallback(const nav_msgs::Odometry::ConstPtr& msg
 	tf_current_position_x = tf_position_value(0,0);
 	tf_current_position_y = tf_position_value(1,0);
     tf_current_position_z = tf_position_value(2,0);
-}
+}*/
 void UpperBodyModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) // gyro data get
 {
 	currentGyroX = (double) msg->angular_velocity.x;

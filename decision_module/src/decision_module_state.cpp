@@ -75,11 +75,13 @@ DecisionModule::DecisionModule()
 		flag_out_data[i][1] = 0;
 	}
 	init_complete_check = false;
-	flag_count = 0;
 	data_in_check_1 = false;
 	data_in_check_2 = false;
 	init_flag_check = false;
 	pre_flag_top_veiw_x = 0;
+
+	//neutral check
+	neutral_check = false;
 
 }
 DecisionModule::~DecisionModule()
@@ -161,7 +163,7 @@ void DecisionModule::classification_function(double flag0[3], double flag1[3], b
 		true_flag_1[0] = flag_out_data[flag_sequence][0];
 		true_flag_1[1] = flag_out_data[flag_sequence][1];
 
-		printf("%d ::  %f \n\n", flag_sequence, flag_in_data[flag_sequence][0]);
+		//printf("%d ::  %f \n\n", flag_sequence, flag_in_data[flag_sequence][0]);
 	}
 	if(check_1 == true &&  check_2 == true) // 기문 둘다 들어올 경우
 	{
@@ -254,9 +256,8 @@ void DecisionModule::classification_function(double flag0[3], double flag1[3], b
 		printf("One Flag Data   X :: %f , Y :: %f \n", true_flag_0[0], true_flag_0[1]);
 	}
 
-	if(fabs(pre_temp_flag_0[0] - true_flag_0[0]) > 6)
+	if(pre_flag_sequence != flag_sequence && flag_sequence != 0)
 	{
-		flag_sequence ++;
 		flag_direction = -flag_direction;
 		flag_in_data[flag_sequence][0]  = true_flag_0[0];
 		flag_in_data[flag_sequence][1]  = true_flag_0[1];
@@ -265,18 +266,18 @@ void DecisionModule::classification_function(double flag0[3], double flag1[3], b
 
 		printf("Flag Changed");
 	}
-
-	//	printf("2222222   final   X :: %f , Y :: %f \n \n", true_flag_0[0], true_flag_0[1]);
-	//	printf("11111111  final   X :: %f , Y :: %f \n \n", true_flag_1[0], true_flag_1[1]);
-
 	pre_temp_flag_0[0] = true_flag_0[0];
 	pre_temp_flag_0[1] = true_flag_0[1];
 	pre_temp_flag_1[0] = true_flag_1[0];
 	pre_temp_flag_1[1] = true_flag_1[1];
-
 }
 void DecisionModule::decision_function(double flag0[3], double flag1[3])
 {
+	if(neutral_check == 1)
+	{
+		turn_direction = "center";
+		return;
+	}
 	if(is_moving_check == false)
 	{
 		if(flag0[0]*flag0[1] < 0) // right turn
@@ -303,11 +304,8 @@ void DecisionModule::decision_function(double flag0[3], double flag1[3])
 		else
 		{
 			turn_direction = "center";
-			return;
 		}
 	}
-	if(flag_check == 1)
-		turn_direction = "center";
 
 }
 void DecisionModule::parseMotionData()

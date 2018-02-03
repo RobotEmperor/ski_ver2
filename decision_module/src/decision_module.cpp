@@ -47,7 +47,7 @@ void initialize()
 
 	remote_update = 0;
 
-	for(int i = 0; i<20 ; i++)
+	for(int i = 0; i<30 ; i++)
 	{
 		remote_command[i][0] = 0; // 시간
 		remote_command[i][1] = 0; // right turn -1  netural 0  left turn 1
@@ -58,8 +58,39 @@ void initialize()
 
 	init_check = false;
 
+	for(int i = 0; i < 6; i++)
+	{
+		time_neutral[i] = 0;
+	}
 
+	neutral_time_count = 0;
+	flag_count = 0;
+	lidar_check = false;
+	pre_lidar_check = false;
+	time_check = false;
 }
+void neutralParseMotionData()
+{
+	YAML::Node doc; // YAML file class 선언!
+	std::string path_ = ros::package::getPath("ski_main_manager") + "/data/turn/time_variables_neutral.yaml";// 로스 패키지에서 YAML파일의 경로를 읽어온다.
+	try
+	{
+		// load yaml
+		doc = YAML::LoadFile(path_.c_str()); // 파일 경로를 입력하여 파일을 로드 한다.
+	}catch(const std::exception& e) // 에러 점검
+	{
+		ROS_ERROR("Fail to load yaml file!");
+		return;
+	}
+	//margin load //
+
+	time_neutral[1] = doc["time_1"].as<double>();
+	time_neutral[2] = doc["time_2"].as<double>();
+	time_neutral[3] = doc["time_3"].as<double>();
+	time_neutral[4] = doc["time_4"].as<double>();
+	time_neutral[5] = doc["time_5"].as<double>();
+}
+
 void remoteTimeMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 {
 	remote_update = msg->data;
@@ -75,7 +106,8 @@ void remoteTimeMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 		YAML::Emitter yaml_out;
 		std::map<double, double> offset;
 
-		for(int i=0; i<20 ; i++)
+
+		for(int i=0; i<30 ; i++)
 		{
 			offset[remote_command[i][0]] = remote_command[i][1];
 		}
@@ -88,8 +120,8 @@ void remoteTimeMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 		std::ofstream fout(offset_file_path.c_str());
 		fout << yaml_out.c_str();  // dump it back into the file
 	}
-
 }
+
 void readyCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 {
 	ready_check = msg->data;
@@ -99,6 +131,16 @@ void initCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 {
 	init_check = msg->data;
 }
+void lidarCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
+{
+	lidar_check = msg->data;
+	if(pre_lidar_check != lidar_check)
+	{
+		if(lidar_check == true)
+			flag_count++;
+	}
+	pre_lidar_check = lidar_check;
+}
 void currentflagPosition1MsgCallback(const geometry_msgs::Vector3& msg)
 {
 
@@ -107,8 +149,6 @@ void currentflagPosition1MsgCallback(const geometry_msgs::Vector3& msg)
 	decision_algorithm ->temp_flag0[2]  = msg.z;
 
 	decision_algorithm -> data_in_check_1 = true;
-
-	printf("1111111111111111");
 }
 void currentflagPosition2MsgCallback(const geometry_msgs::Vector3& msg)
 {
@@ -130,7 +170,7 @@ void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& ms
 
 	if(change_value_center == 0)
 	{
-		if(remote_count > 0 && remote_count < 20)
+		if(remote_count > 0 && remote_count < 30)
 		{
 			remote_count ++;
 			remote_command[remote_count][0] = remote_count_time;
@@ -156,6 +196,8 @@ void updateMsgCallback(const std_msgs::Bool::ConstPtr& msg)
 
 	change_value_center = 0;
 	decision_algorithm->parseMotionData();
+	neutralParseMotionData();
+
 }
 void modeChangeMsgCallback(const std_msgs::Bool::ConstPtr& msg)
 {
@@ -185,7 +227,6 @@ int main(int argc, char **argv)
 
 	desired_pose_all_pub  = ros_node.advertise<diana_msgs::DesiredPoseCommand>("/desired_pose_all",1);
 
-
 	// subcriber
 	ros::Subscriber ready_check_sub = ros_node.subscribe("/ready_check", 5, readyCheckMsgCallBack);
 
@@ -201,6 +242,9 @@ int main(int argc, char **argv)
 	ros::Subscriber remote_time_sub = ros_node.subscribe("/remote_time", 5, remoteTimeMsgCallBack);
 
 	ros::Subscriber mode_change_sub = ros_node.subscribe("/mode_change", 5, modeChangeMsgCallback);
+
+	//lidar check
+	ros::Subscriber lidar_check_sub = ros_node.subscribe("/gate_switch", 5, lidarCheckMsgCallBack);
 	ros::Timer timer = ros_node.createTimer(ros::Duration(0.006), control_loop);
 
 	ros::Rate loop_rate(1000);
@@ -242,6 +286,8 @@ void control_loop(const ros::TimerEvent&)
 
 		if(!mode.compare("auto"))
 		{
+			decision_algorithm -> flag_sequence = flag_count;
+			//emergency stop neutral
 			if(!turn_type.compare("carving_turn") && change_value_center == 5)
 			{
 				decision_algorithm->turn_direction = "center";
@@ -249,9 +295,10 @@ void control_loop(const ros::TimerEvent&)
 				pre_command = decision_algorithm->turn_direction;
 				return;
 			}
-
-
+			//
+			neutral_check_function(lidar_check);
 			decision_algorithm->process();
+
 
 			if(pre_command.compare(decision_algorithm->turn_direction) != 0 && decision_algorithm->turn_direction.compare("center") != 0)
 			{
@@ -265,9 +312,11 @@ void control_loop(const ros::TimerEvent&)
 			}
 			if(!decision_algorithm->turn_direction.compare("center"))
 			{
-				decision_algorithm->turn_direction = "center";
-				motion_center(entire_motion_number_carving); //remote control
-				pre_command = decision_algorithm->turn_direction;
+				if(pre_command.compare(decision_algorithm->turn_direction) != 0)
+				{
+					motion_seq = 0;
+					motion_time_count_carving = 0;
+				}
 			}
 
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("left_turn"))
@@ -277,7 +326,7 @@ void control_loop(const ros::TimerEvent&)
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("center"))
 				motion_center(entire_motion_number_carving);
 
-			/*			desired_pose_head_msg.data.clear();
+			/*desired_pose_head_msg.data.clear();
 			desired_pose_head_msg.data.push_back(0);
 			desired_pose_head_msg.data.push_back(-10*DEGREE2RADIAN);
 			desired_pose_head_msg.data.push_back(0);
@@ -323,42 +372,32 @@ void control_loop(const ros::TimerEvent&)
 
 		pre_command = decision_algorithm->turn_direction;
 
-		/*	if(decision_algorithm->flag_sequence > -1 && decision_algorithm->flag_sequence < 5)
-		{
-			flag_position[decision_algorithm->flag_sequence][0] = decision_algorithm->top_view_flag_position.x;
-			flag_position[decision_algorithm->flag_sequence][1] = decision_algorithm->top_view_flag_position.y;
-		}
-		else
-		{
-			//ROS_INFO("Error algorithm!!!!\n");
-			return;
-		}*/
-
 		top_view_robot_msg.x =  decision_algorithm->top_view_robot_position.x;
 		top_view_robot_msg.y =  decision_algorithm->top_view_robot_position.y;
 		top_view_robot_pub.publish(top_view_robot_msg);
-		/*
-		 * top_view_msg vector3
-		top_view_msg.length = 5;
-		for(int i = 0; i < 5; i++)
-		{
-			diana_msgs::FlagData temp;
-			temp.position.x = flag_position[i][0];
-			temp.position.y = flag_position[i][1];
-
-			top_view_msg.data.push_back(temp);
-		}
-		top_view_pub.publish(top_view_msg);
-		top_view_msg.data.clear();
-
-
-		top_view_robot_msg.x =  decision_algorithm->top_view_robot_position.x;
-		top_view_robot_msg.y =  decision_algorithm->top_view_robot_position.y;
-		top_view_robot_pub.publish(top_view_robot_msg);*/
-
 	}
 	else
 		return;
+}
+void neutral_check_function(bool check)
+{
+	if(check == true)
+	{
+		time_check = true;
+	}
+	if(time_check)
+	{
+		neutral_time_count = neutral_time_count + 0.006;
+
+		if(neutral_time_count > time_neutral[flag_count])
+		{
+			decision_algorithm->neutral_check = 1;
+			neutral_time_count = 0;
+			time_check = false;
+		}
+	}
+	else
+		decision_algorithm->neutral_check = 0;
 }
 void motion_left(int motion_number)
 {
@@ -368,7 +407,7 @@ void motion_left(int motion_number)
 	if(motion_seq == 0)
 	{
 
-		if(remote_count > -1 && remote_count < 20)
+		if(remote_count > -1 && remote_count < 30)
 		{
 			remote_count ++;
 			remote_command[remote_count][0] = remote_count_time;
@@ -453,7 +492,7 @@ void motion_right(int motion_number)
 
 	if(motion_seq == 0)
 	{
-		if(remote_count > -1 && remote_count < 20)
+		if(remote_count > -1 && remote_count < 30)
 		{
 			remote_count ++;
 			remote_command[remote_count][0] = remote_count_time;

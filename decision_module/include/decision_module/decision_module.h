@@ -86,6 +86,9 @@ void currentFlagPosition2MsgCallback(const geometry_msgs::Vector3::ConstPtr& msg
 
 void modeChangeMsgCallback(const std_msgs::Bool::ConstPtr& msg);
 void remoteTimeMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
+void lidarCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
+void neutralParseMotionData();
+void neutral_check_function(bool check);
 
 //control
 void control_loop(const ros::TimerEvent&);
@@ -137,9 +140,17 @@ double robot_position[10][2];
 double remote_count_time;
 int remote_count;
 bool remote_update;
-double remote_command[20][2];
+double remote_command[30][2];
 
 std::string pre_direction_command;
+
+//neutral check variables
+double time_neutral[6];
+bool lidar_check;
+bool pre_lidar_check;
+bool time_check;
+double neutral_time_count;
+int flag_count;
 
 
 

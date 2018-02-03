@@ -92,9 +92,13 @@ public:
 	double flag_out_data[5][2];
 	std_msgs::Float64MultiArray init_top_view_msg;
 
+	// neutral check
+	bool neutral_check;
+
 private:
 	void classification_function(double flag0[3], double flag1[3], bool check_1, bool check_2);
 	void decision_function(double flag0[3], double flag1[3]);
+	void neutral_check_function(bool lidar_check);
 
 	//map
 	void top_view(double flag_position[3]);
@@ -108,7 +112,6 @@ private:
 	bool init_flag_check;
 
 	//classification function
-	int flag_count;
 	double pre_temp_flag_0[3], pre_temp_flag_1[3]; // head
 	double true_flag_0[3], true_flag_1[3];  // head
 	double final_in_flag[3];  // head
