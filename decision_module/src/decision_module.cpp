@@ -34,7 +34,7 @@ void initialize()
 	motion_break_seq = 0;
 	motion_time_count_break = 0;
 	entire_motion_number_pflug = 4;
-	entire_motion_number_carving = 4;
+	entire_motion_number_carving = 3;
 	entire_motion_number_break = 4;
 
 	pre_command = "center";
