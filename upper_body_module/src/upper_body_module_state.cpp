@@ -181,6 +181,7 @@ void UpperBodyModule::initCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 {
 	init_check = msg->data;
 	initial_tf_current_gyro_orientation_z = tf_current_gyro_orientation_z;
+	printf("gyro  init!!! \n");
 }
 // TEST /////////////////////////////////////////////
 void UpperBodyModule::desiredPoseWaistMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg)

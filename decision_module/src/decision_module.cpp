@@ -207,7 +207,7 @@ void updateMsgCallback(const std_msgs::Bool::ConstPtr& msg)
 	if(!turn_type.compare("pflug_bogen"))
 		motion->parseMotionData("pflug_bogen_ver2");
 
-	motion_break->parseMotionData("break");
+	//motion_break->parseMotionData("break");
 
 	change_value_center = 0;
 	decision_algorithm->parseMotionData();
@@ -318,7 +318,7 @@ void control_loop(const ros::TimerEvent&)
 				decision_algorithm -> flag_sequence = flag_count;
 			}
 
-			if(flag_count == 5)
+			/*if(flag_count == 5)
 			{
 				time_count_break = time_count_break + 0.006;
 				if(time_count_break > time_break)
@@ -326,7 +326,7 @@ void control_loop(const ros::TimerEvent&)
 					motion_break_fun(entire_motion_number_break);
 					return;
 				}
-			}
+			}*/
 			//emergency stop neutral
 			if(!turn_type.compare("carving_turn") && change_value_center == 5)
 			{
