@@ -135,6 +135,7 @@ UpperBodyModule::UpperBodyModule()
 	initial_tf_current_position_x = 0;
 	initial_tf_current_position_y = 0;
 	initial_tf_current_position_z = 0;
+	init_check = false;
 
 }
 UpperBodyModule::~UpperBodyModule()
@@ -156,6 +157,7 @@ void UpperBodyModule::queueThread()
 	// subscribe topics
 	flag_position_get_sub = ros_node.subscribe("/gate_watcher/flag_data", 100, &UpperBodyModule::flagPositionGetMsgCallback, this);
 	get_imu_data_sub_ = ros_node.subscribe("/imu/data", 100, &UpperBodyModule::imuDataMsgCallback, this);
+	init_check_sub = ros_node.subscribe("/init_check", 5, &UpperBodyModule::initCheckMsgCallBack, this);
 //	get_nav_data_sub_ = ros_node.subscribe("/nav_odom", 100, &UpperBodyModule::navDataMsgCallback, this);
 
 	balance_param_waist_sub = ros_node.subscribe("/diana/balance_parameter_waist", 5, &UpperBodyModule::balanceParameterWaistMsgCallback, this);
@@ -174,6 +176,11 @@ void UpperBodyModule::queueThread()
 	while(ros_node.ok())
 		callback_queue.callAvailable(duration);
 
+}
+void UpperBodyModule::initCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
+{
+	init_check = msg->data;
+	initial_tf_current_gyro_orientation_z = tf_current_gyro_orientation_z;
 }
 // TEST /////////////////////////////////////////////
 void UpperBodyModule::desiredPoseWaistMsgCallbackTEST(const std_msgs::Float64MultiArray::ConstPtr& msg)

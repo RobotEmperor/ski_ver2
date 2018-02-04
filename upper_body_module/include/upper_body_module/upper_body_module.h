@@ -78,6 +78,8 @@ public:
 	ros::Subscriber waist_test;
 	ros::Subscriber get_imu_data_sub_;
 	//ros::Subscriber get_nav_data_sub_;
+	ros::Subscriber init_check_sub;
+
 	ros::Subscriber balance_param_waist_sub;
 	ros::Subscriber head_balance_sub;
 	ros::Subscriber flag_position_get_sub;
@@ -95,6 +97,7 @@ public:
 	//sensor
 	void imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg);
 	void navDataMsgCallback(const nav_msgs::Odometry::ConstPtr& msg);
+	void initCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
 	//pid gain value for gyro
 	void balanceParameterWaistMsgCallback(const diana_msgs::BalanceParamWaist::ConstPtr& msg);
 	void headBalanceMsgCallback(const std_msgs::Bool::ConstPtr& msg);
@@ -205,6 +208,7 @@ private:
     //robot xyz
 	geometry_msgs::Vector3 top_view_robot_msg;
 
+	bool init_check;
 
 
 
