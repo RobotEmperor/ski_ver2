@@ -6,3 +6,8 @@ left_y_max: 10
 right_x: 5
 right_y_min: -10
 right_y_max: 0
+
+x: 5
+y_min: 0
+y_max: 10
+initial_turn: 1

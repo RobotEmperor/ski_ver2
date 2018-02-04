@@ -83,6 +83,14 @@ DecisionModule::DecisionModule()
 	//neutral check
 	neutral_check = false;
 
+	x_detect_margin = 0;
+	y_detect_margin_min = 0;
+	y_detect_margin_max = 0;
+
+	initial_turn = 0;
+
+	pre_turn_direction = "basic";
+
 }
 DecisionModule::~DecisionModule()
 {
@@ -158,10 +166,10 @@ void DecisionModule::classification_function(double flag0[3], double flag1[3], b
 	//if(pre_temp_flag_0[0] == flag0[0] && pre_temp_flag_1[0] == flag1[0] && pre_temp_flag_0[1] == flag0[1] && pre_temp_flag_1[1] == flag1[1] && check == false) // 기문 둘다 안들어올 경우
 	if(check_1 == false &&  check_2 == false)
 	{
-		true_flag_0[0] = flag_in_data[flag_sequence][0];
+		/*		true_flag_0[0] = flag_in_data[flag_sequence][0];
 		true_flag_0[1] = flag_in_data[flag_sequence][1];
 		true_flag_1[0] = flag_out_data[flag_sequence][0];
-		true_flag_1[1] = flag_out_data[flag_sequence][1];
+		true_flag_1[1] = flag_out_data[flag_sequence][1];*/
 
 		//printf("%d ::  %f \n\n", flag_sequence, flag_in_data[flag_sequence][0]);
 	}
@@ -181,7 +189,7 @@ void DecisionModule::classification_function(double flag0[3], double flag1[3], b
 		true_flag_0[0] = flag0[0];
 		true_flag_0[1] = flag0[1];
 
-		true_flag_1[0] = flag0[0];
+		/*		true_flag_1[0] = flag0[0];
 
 		if(flag_in_data[0][1] > 0)
 		{
@@ -197,7 +205,7 @@ void DecisionModule::classification_function(double flag0[3], double flag1[3], b
 			else
 				true_flag_1[1] = flag0[1] - 5;
 		}
-		printf("in! flag!!! \n ");
+		printf("in! flag!!! \n ");*/
 		//}
 		/*if(flag_sequence > 0)
 		{
@@ -280,7 +288,7 @@ void DecisionModule::decision_function(double flag0[3], double flag1[3])
 	}
 	if(is_moving_check == false)
 	{
-		if(flag0[0]*flag0[1] < 0) // right turn
+		/*if(flag0[0]*flag0[1] < 0) // right turn
 		{
 			if(flag0[0] < right_x_detect_margin  && right_y_detect_margin_min < flag0[1] && right_y_detect_margin_max > flag0[1])
 			{
@@ -304,6 +312,36 @@ void DecisionModule::decision_function(double flag0[3], double flag1[3])
 		else
 		{
 			turn_direction = "center";
+		}*/
+		if(fabs(flag0[0]) < x_detect_margin  && y_detect_margin_min < fabs(flag0[1]) && y_detect_margin_max > fabs(flag0[1])) // dectect flag
+		{
+			if(flag_sequence == 0)
+			{
+				direction_command = initial_turn;
+				if(initial_turn == -1)
+					turn_direction = "right_turn";
+				if(initial_turn == 1)
+					turn_direction = "left_turn";
+
+				pre_turn_direction = turn_direction;
+			}
+			else
+			{
+				if(!pre_turn_direction.compare("left_turn") || !pre_turn_direction.compare("right_turn"))
+				{
+					if(!pre_turn_direction.compare("left_turn"))
+					{
+						turn_direction = "right_turn";
+					}
+					if(!pre_turn_direction.compare("right_turn"))
+					{
+						turn_direction = "left_turn";
+					}
+					pre_turn_direction = turn_direction;
+				}
+
+				printf("command ::::  %s   \n",pre_turn_direction.c_str());
+			}
 		}
 	}
 
@@ -329,6 +367,12 @@ void DecisionModule::parseMotionData()
 	right_x_detect_margin = doc["right_x"].as<double>();
 	right_y_detect_margin_min = doc["right_y_min"].as<double>();
 	right_y_detect_margin_max = doc["right_y_max"].as<double>();
+
+	x_detect_margin = doc["x"].as<double>();;
+	y_detect_margin_min = doc["y_min"].as<double>();;
+	y_detect_margin_max = doc["y_max"].as<double>();
+
+	initial_turn = doc["initial_turn"].as<double>();
 }
 // head
 void DecisionModule::headFollowFlag(double x , double y)

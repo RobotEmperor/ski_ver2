@@ -95,6 +95,7 @@ void control_loop(const ros::TimerEvent&);
 void motion_left(int motion_number);
 void motion_right(int motion_number);
 void motion_center(int motion_number);
+void motion_break_fun(int motion_number);
 
 //init check
 bool init_check;
@@ -120,9 +121,14 @@ bool center_change_moving_check;
 //carving
 double motion_time_count_carving;
 int motion_seq;
+int motion_break_seq;
+double motion_time_count_break;
 int entire_motion_number_pflug;
 int entire_motion_number_carving;
+int entire_motion_number_break;
+
 MotionChange *motion;
+MotionChange *motion_break;
 
 //decision module
 DecisionModule *decision_algorithm;
@@ -153,6 +159,10 @@ bool pre_lidar_check;
 bool time_check;
 double neutral_time_count;
 int flag_count;
+
+//time break
+double time_break;
+double time_count_break;
 
 
 

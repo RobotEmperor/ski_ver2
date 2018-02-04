@@ -10,6 +10,7 @@
 void initialize()
 {
 	motion      = new MotionChange;
+	motion_break = new MotionChange;
 	decision_algorithm = new DecisionModule;
 
 	turn_type = "basic";
@@ -30,8 +31,11 @@ void initialize()
 
 	//motion
 	motion_seq = 0;
+	motion_break_seq = 0;
+	motion_time_count_break = 0;
 	entire_motion_number_pflug = 4;
 	entire_motion_number_carving = 4;
+	entire_motion_number_break = 4;
 
 	pre_command = "center";
 	pre_direction_command = "center";
@@ -62,6 +66,8 @@ void initialize()
 	{
 		time_neutral[i] = 0;
 	}
+	time_break = 0;
+	time_count_break = 0;
 
 	neutral_time_count = 0;
 	flag_count = 0;
@@ -89,6 +95,7 @@ void neutralParseMotionData()
 	time_neutral[3] = doc["time_3"].as<double>();
 	time_neutral[4] = doc["time_4"].as<double>();
 	time_neutral[5] = doc["time_5"].as<double>();
+	time_break = doc["time_break"].as<double>();
 }
 
 void remoteTimeMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
@@ -136,16 +143,20 @@ void lidarCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 {
 	if(decision_algorithm->is_moving_check == true)
 	{
-		lidar_check = msg->data;
-/*		if(pre_lidar_check != lidar_check)
+		if(pre_lidar_check != msg->data)
 		{
+			lidar_check = msg->data;
 		}
-		pre_lidar_check = lidar_check;*/
+		else
+		{
+			lidar_check = false;
+		}
 	}
 	else
 	{
 		lidar_check = false;
 	}
+	pre_lidar_check = msg->data;
 }
 void currentflagPosition1MsgCallback(const geometry_msgs::Vector3& msg)
 {
@@ -196,10 +207,18 @@ void updateMsgCallback(const std_msgs::Bool::ConstPtr& msg)
 	if(!turn_type.compare("pflug_bogen"))
 		motion->parseMotionData("pflug_bogen_ver2");
 
+	motion_break->parseMotionData("break");
+
 	change_value_center = 0;
 	decision_algorithm->parseMotionData();
 	neutralParseMotionData();
-
+	//init
+	flag_count = 0;
+	pre_command = "center";
+	pre_direction_command = "center";
+	decision_algorithm->turn_direction = "center";
+	motion_break_seq = 0;
+	motion_time_count_break = 0;
 }
 void modeChangeMsgCallback(const std_msgs::Bool::ConstPtr& msg)
 {
@@ -263,6 +282,7 @@ int main(int argc, char **argv)
 }
 void control_loop(const ros::TimerEvent&)
 {
+
 	if(ready_check)
 	{
 		//////////////////// initialize function
@@ -288,7 +308,25 @@ void control_loop(const ros::TimerEvent&)
 
 		if(!mode.compare("auto"))
 		{
-			decision_algorithm -> flag_sequence = flag_count;
+			if(flag_count > 6)
+			{
+				flag_count = 6;
+				decision_algorithm -> flag_sequence = flag_count;
+			}
+			else
+			{
+				decision_algorithm -> flag_sequence = flag_count;
+			}
+
+			if(flag_count == 5)
+			{
+				time_count_break = time_count_break + 0.006;
+				if(time_count_break > time_break)
+				{
+					motion_break_fun(entire_motion_number_break);
+					return;
+				}
+			}
 			//emergency stop neutral
 			if(!turn_type.compare("carving_turn") && change_value_center == 5)
 			{
@@ -316,7 +354,7 @@ void control_loop(const ros::TimerEvent&)
 			{
 				if(pre_command.compare(decision_algorithm->turn_direction) != 0)
 				{
-					motion_seq = 0;
+					motion_seq = -1;
 					motion_time_count_carving = 0;
 				}
 			}
@@ -341,17 +379,17 @@ void control_loop(const ros::TimerEvent&)
 
 			if(decision_algorithm -> flag_check == 1)
 			{
-				for(int num = 0; num < 5; num ++)
-				{
-					init_top_view_msg.flag_in_data_m_x[decision_algorithm ->flag_sequence] = decision_algorithm ->top_view_flag_position.x;
-					init_top_view_msg.flag_in_data_m_y[decision_algorithm ->flag_sequence] = decision_algorithm ->top_view_flag_position.y;
-					init_top_view_msg.flag_out_data_m_x[decision_algorithm ->flag_sequence] = decision_algorithm ->top_view_flag_position.x;
-					init_top_view_msg.flag_out_data_m_y[decision_algorithm ->flag_sequence] = decision_algorithm ->top_view_flag_position.y + (decision_algorithm ->flag_direction)*5;
+				init_top_view_msg.flag_in_data_m_x[decision_algorithm ->flag_sequence] = decision_algorithm ->top_view_flag_position.x;
+				init_top_view_msg.flag_in_data_m_y[decision_algorithm ->flag_sequence] = decision_algorithm ->top_view_flag_position.y;
+				init_top_view_msg.flag_out_data_m_x[decision_algorithm ->flag_sequence] = decision_algorithm ->top_view_flag_position.x;
+				init_top_view_msg.flag_out_data_m_y[decision_algorithm ->flag_sequence] = decision_algorithm ->top_view_flag_position.y + (decision_algorithm ->flag_direction)*5;
 
-				}
 				init_top_view_pub.publish(init_top_view_msg);
 				decision_algorithm -> flag_check = 0;
 			}
+
+			printf("flag_ count ::  %d  \n", flag_count);
+			printf("moving check ::  %d  \n", decision_algorithm->is_moving_check);
 		}
 		if(!mode.compare("remote"))
 		{
@@ -400,6 +438,8 @@ void neutral_check_function(bool check)
 	}
 	else
 		decision_algorithm->neutral_check = 0;
+
+	printf("neutral_check  ::  %d  \n", decision_algorithm->neutral_check);
 }
 void motion_left(int motion_number)
 {
@@ -410,8 +450,11 @@ void motion_left(int motion_number)
 	{
 		flag_count++;
 
-		remote_time_.push_back(remote_count_time);
-		remote_command_.push_back(1);
+		if(!mode.compare("remote"))
+		{
+			remote_time_.push_back(remote_count_time);
+			remote_command_.push_back(1);
+		}
 
 		for(int var = 0; var < 12 ; var++)
 		{
@@ -492,9 +535,12 @@ void motion_right(int motion_number)
 	if(motion_seq == 0)
 	{
 		flag_count++;
-		remote_time_.push_back(remote_count_time);
-		remote_command_.push_back(-1);
 
+		if(!mode.compare("remote"))
+		{
+			remote_time_.push_back(remote_count_time);
+			remote_command_.push_back(-1);
+		}
 		for(int var = 0; var < 12 ; var++)
 		{
 			desired_pose_all_msg.leg_final_position[var] = motion->motion_right_position[0][var];
@@ -605,6 +651,91 @@ void motion_center(int motion_number)
 	}
 }
 
+void motion_break_fun(int motion_number)
+{
+	motion_break->calculate_init_final_velocity(motion_number);
+	motion_time_count_break = motion_time_count_break + 0.006;
+
+	if(motion_break_seq == 0)
+	{
+		if(!mode.compare("remote"))
+		{
+			remote_time_.push_back(remote_count_time);
+			remote_command_.push_back(2);
+		}
+
+		for(int var = 0; var < 12 ; var++)
+		{
+			desired_pose_all_msg.leg_final_position[var] = motion_break->motion_left_position[0][var];
+			desired_pose_all_msg.leg_init_vel[var]       = motion_break->motion_init_leg_left_vel[0][var];
+			desired_pose_all_msg.leg_final_vel[var]      = motion_break->motion_final_leg_left_vel[0][var];
+		}
+		for(int var = 0; var < 2 ; var++)
+		{
+			desired_pose_all_msg.waist_final_position[var] = motion_break->motion_waist_left_position[0][var];
+			desired_pose_all_msg.waist_init_vel[var]       = motion_break->motion_init_waist_left_vel[0][var];
+			desired_pose_all_msg.waist_final_vel[var]      = motion_break->motion_final_waist_left_vel[0][var];
+
+		}
+		for(int var = 0; var < 6 ; var++)
+		{
+			desired_pose_all_msg.arm_final_position[var] = motion_break->motion_arm_left_position[0][var];
+			desired_pose_all_msg.arm_init_vel[var]       = motion_break->motion_init_arm_left_vel[0][var];
+			desired_pose_all_msg.arm_final_vel[var]      = motion_break->motion_final_arm_left_vel[0][var];
+		}
+		desired_pose_all_msg.time_leg = motion_break->motion_time[0];
+		desired_pose_all_msg.time_waist = motion_break->motion_time[0];
+		desired_pose_all_msg.time_arm = motion_break->motion_time[0];
+		desired_pose_all_pub.publish(desired_pose_all_msg);
+		motion_break_seq ++;
+		motion_time_count_break = 0;
+		decision_algorithm->is_moving_check = true;
+		//decision_algorithm->turn_direction = "left_turn";
+	}
+
+	for(int motion_num = 1; motion_num < motion_number; motion_num++)
+	{
+		if(motion_time_count_break > motion_break->motion_time[motion_num-1] && motion_break_seq == motion_num)
+		{
+			for(int var = 0; var <12 ; var++)
+			{
+				desired_pose_all_msg.leg_final_position[var] = motion_break->motion_left_position[motion_num][var];
+				desired_pose_all_msg.leg_init_vel[var]       = motion_break->motion_init_leg_left_vel[motion_num][var];
+				desired_pose_all_msg.leg_final_vel[var]      = motion_break->motion_final_leg_left_vel[motion_num][var];
+			}
+
+			for(int var = 0; var < 2 ; var++)
+			{
+				desired_pose_all_msg.waist_final_position[var] = motion_break->motion_waist_left_position[motion_num][var];
+				desired_pose_all_msg.waist_init_vel[var]       = motion_break->motion_init_waist_left_vel[motion_num][var];
+				desired_pose_all_msg.waist_final_vel[var]      = motion_break->motion_final_waist_left_vel[motion_num][var];
+
+			}
+			for(int var = 0; var < 6 ; var++)
+			{
+				desired_pose_all_msg.arm_final_position[var] = motion_break->motion_arm_left_position[motion_num][var];
+				desired_pose_all_msg.arm_init_vel[var]       = motion_break->motion_init_arm_left_vel[motion_num][var];
+				desired_pose_all_msg.arm_final_vel[var]      = motion_break->motion_final_arm_left_vel[motion_num][var];
+			}
+			desired_pose_all_msg.time_leg = motion_break->motion_time[motion_num];
+			desired_pose_all_msg.time_waist = motion_break->motion_time[motion_num];
+			desired_pose_all_msg.time_arm = motion_break->motion_time[motion_num];
+			motion_break_seq ++;
+			motion_time_count_break = 0;
+			desired_pose_all_pub.publish(desired_pose_all_msg);
+			decision_algorithm->is_moving_check = true;
+			//decision_algorithm->turn_direction = "left_turn";
+		}
+	}
+
+	if(motion_time_count_break > motion_break->motion_time[motion_number-1] && motion_break_seq == motion_number)
+	{
+		motion_break_seq ++;
+		flag_count ++;
+		decision_algorithm->is_moving_check = false;
+	}
+
+}
 
 
 

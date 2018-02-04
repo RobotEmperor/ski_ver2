@@ -362,8 +362,8 @@ void MotionChange::parseMotionData(std::string trun_type)
 	motion_time[6] = doc["motion_time_6"].as<double>();// YAML 에 string "motion"을 읽어온다.
 	motion_time[7] = doc["motion_time_7"].as<double>();// YAML 에 string "motion"을 읽어온다.
 	motion_time[8] = doc["motion_time_8"].as<double>();// YAML 에 string "motion"을 읽어온다.
-	motion_time[9] = doc["motion_back_9"].as<double>();// YAML 에 string "motion"을 읽어온다.
-	motion_time[10] = doc["motion_back_10"].as<double>();// YAML 에 string "motion"을 읽어온다.
+	motion_time[9] = doc["motion_time_9"].as<double>();// YAML 에 string "motion"을 읽어온다.
+	motion_time[10] = doc["motion_time_10"].as<double>();// YAML 에 string "motion"을 읽어온다.
 
 
 	YAML::Node motion_center_node = doc["motion_center"];

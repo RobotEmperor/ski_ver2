@@ -106,6 +106,9 @@ private:
 	double left_x_detect_margin, left_y_detect_margin_min, left_y_detect_margin_max;
 	double right_x_detect_margin, right_y_detect_margin_min, right_y_detect_margin_max;
 
+	double x_detect_margin, y_detect_margin_min, y_detect_margin_max;
+	int initial_turn;
+
 
 	//initialize function
 	double initialize_time_count;
@@ -120,6 +123,9 @@ private:
 
 	//top view
 	double pre_flag_top_veiw_x;
+
+	//
+	std::string pre_turn_direction;
 
 
 
