@@ -134,13 +134,18 @@ void initCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 }
 void lidarCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 {
-	lidar_check = msg->data;
-	if(pre_lidar_check != lidar_check)
+	if(decision_algorithm->is_moving_check == true)
 	{
-		if(lidar_check == true)
-			flag_count++;
+		lidar_check = msg->data;
+/*		if(pre_lidar_check != lidar_check)
+		{
+		}
+		pre_lidar_check = lidar_check;*/
 	}
-	pre_lidar_check = lidar_check;
+	else
+	{
+		lidar_check = false;
+	}
 }
 void currentflagPosition1MsgCallback(const geometry_msgs::Vector3& msg)
 {
@@ -403,6 +408,7 @@ void motion_left(int motion_number)
 
 	if(motion_seq == 0)
 	{
+		flag_count++;
 
 		remote_time_.push_back(remote_count_time);
 		remote_command_.push_back(1);
@@ -485,6 +491,7 @@ void motion_right(int motion_number)
 
 	if(motion_seq == 0)
 	{
+		flag_count++;
 		remote_time_.push_back(remote_count_time);
 		remote_command_.push_back(-1);
 
