@@ -88,8 +88,8 @@ public:
 	bool init_complete_check;
 	bool data_in_check_1;
 	bool data_in_check_2;
-	double flag_in_data[5][2];
-	double flag_out_data[5][2];
+	double flag_in_data[50][2];
+	double flag_out_data[50][2];
 	std_msgs::Float64MultiArray init_top_view_msg;
 
 	// neutral check

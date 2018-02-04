@@ -141,6 +141,8 @@ double remote_count_time;
 int remote_count;
 bool remote_update;
 double remote_command[30][2];
+vector<double> remote_time_;
+vector<double> remote_command_;
 
 std::string pre_direction_command;
 

@@ -97,7 +97,8 @@ void remoteTimeMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 
 	if(remote_update == 1)
 	{
-		remote_count = 0;
+		remote_time_.clear();
+		remote_command_.clear();
 	}
 	if(remote_update == 0)
 	{
@@ -107,9 +108,9 @@ void remoteTimeMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 		std::map<double, double> offset;
 
 
-		for(int i=0; i<30 ; i++)
+		for(int i=0; i< remote_time_.size() ; i++)
 		{
-			offset[remote_command[i][0]] = remote_command[i][1];
+			offset[remote_time_[i]] = remote_command_[i];
 		}
 
 		yaml_out << YAML::BeginMap;
@@ -170,12 +171,8 @@ void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& ms
 
 	if(change_value_center == 0)
 	{
-		if(remote_count > 0 && remote_count < 30)
-		{
-			remote_count ++;
-			remote_command[remote_count][0] = remote_count_time;
-			remote_command[remote_count][1] = 0;
-		}
+		remote_time_.push_back(remote_count_time);
+		remote_command_.push_back(0);
 	}
 
 	if(!mode.compare("remote"))
@@ -407,12 +404,8 @@ void motion_left(int motion_number)
 	if(motion_seq == 0)
 	{
 
-		if(remote_count > -1 && remote_count < 30)
-		{
-			remote_count ++;
-			remote_command[remote_count][0] = remote_count_time;
-			remote_command[remote_count][1] = 1;
-		}
+		remote_time_.push_back(remote_count_time);
+		remote_command_.push_back(1);
 
 		for(int var = 0; var < 12 ; var++)
 		{
@@ -492,12 +485,8 @@ void motion_right(int motion_number)
 
 	if(motion_seq == 0)
 	{
-		if(remote_count > -1 && remote_count < 30)
-		{
-			remote_count ++;
-			remote_command[remote_count][0] = remote_count_time;
-			remote_command[remote_count][1] = -1;
-		}
+		remote_time_.push_back(remote_count_time);
+		remote_command_.push_back(-1);
 
 		for(int var = 0; var < 12 ; var++)
 		{

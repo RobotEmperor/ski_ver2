@@ -67,7 +67,7 @@ DecisionModule::DecisionModule()
 
 	direction_command = 0;
 	initialize_time_count = 0;
-	for(int i = 0; i < 5 ; i++)
+	for(int i = 0; i < 50 ; i++)
 	{
 		flag_in_data[i][0] = 0;
 		flag_in_data[i][1] = 0;
