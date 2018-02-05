@@ -187,7 +187,7 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
 
 
-	temp_head_yaw   = limitCheck(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*((waist_kinematics_ -> xyz_euler_angle_z) +(filter_head->signFunction(tf_current_gyro_orientation_z))*(fabs(tf_current_gyro_orientation_z) - fabs(initial_tf_current_gyro_orientation_z))) ,60,-60);
+	temp_head_yaw   = limitCheck(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*((waist_kinematics_ -> xyz_euler_angle_z)) ,60,-60);
 	temp_head_pitch = limitCheck(head_kinematics_ -> zyx_euler_angle_y - result_head_enable*0,20,-20);
 	temp_head_roll  = limitCheck(head_kinematics_ -> zyx_euler_angle_x - result_head_enable*(0 + waist_kinematics_ -> xyz_euler_angle_x),20,-20);
 	//gazebo
