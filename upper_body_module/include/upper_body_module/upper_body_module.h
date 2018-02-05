@@ -163,8 +163,10 @@ private:
 	void gyroRotationTransformation(double gyro_z, double gyro_y, double gyro_x);
 	void navRotationTransformation(double nav_z, double nav_y, double nav_x);
 	void quaternionToAngle(double q_w, double q_x, double q_y, double q_z);
+	void quaternionToAngleNav(double q_w, double q_x, double q_y, double q_z);
 	void updateBalanceGyroParameter();
 	void headFollowFlag(double x , double y);
+	void orientationZLimitCheck();
 	double currentGyroX,currentGyroY,currentGyroZ;
 	double currentPositionX,currentPositionY,currentPositionZ;
 	double currentGyroOrientationW, currentGyroOrientationX,currentGyroOrientationY,currentGyroOrientationZ;
@@ -184,6 +186,7 @@ private:
 	double gyro_yaw_d_gain;
 	Eigen::MatrixXd tf_gyro_value;
 	Eigen::MatrixXd tf_position_value;
+	Eigen::MatrixXd tf_gyro_value_nav;
 	double initial_tf_current_gyro_orientation_z;
 	double initial_tf_current_position_x;
 	double initial_tf_current_position_y;
@@ -213,6 +216,12 @@ private:
 	geometry_msgs::Vector3 top_view_robot_msg;
 
 	bool init_check;
+
+
+	//orientation limit check
+	double pre_tf_current_gyro_orientation_z;
+	double final_tf_current_orientation_z;
+
 
 
 

@@ -84,6 +84,8 @@ UpperBodyModule::UpperBodyModule()
 	tf_gyro_value.fill(0);
 	tf_position_value.resize(3,1);
 	tf_position_value.fill(0);
+	tf_gyro_value_nav.resize(3,1);
+	tf_gyro_value_nav.fill(0);
 	gyro_roll_function = new control_function::PID_function(0.008,5*DEGREE2RADIAN,-5*DEGREE2RADIAN,0,0,0);
 	gyro_yaw_function  = new control_function::PID_function(0.008,5*DEGREE2RADIAN,-5*DEGREE2RADIAN,0,0,0);
 	gain_roll_p_adjustment = new heroehs_math::FifthOrderTrajectory;
@@ -137,6 +139,8 @@ UpperBodyModule::UpperBodyModule()
 	initial_tf_current_position_z = 0;
 	init_check = false;
 
+	pre_tf_current_gyro_orientation_z = 0;
+	final_tf_current_orientation_z = 0;
 }
 UpperBodyModule::~UpperBodyModule()
 {
@@ -159,7 +163,7 @@ void UpperBodyModule::queueThread()
 	flag_position_get_sub = ros_node.subscribe("/gate_watcher/flag_data", 100, &UpperBodyModule::flagPositionGetMsgCallback, this);
 	get_imu_data_sub_ = ros_node.subscribe("/imu/data", 100, &UpperBodyModule::imuDataMsgCallback, this);
 	init_check_sub = ros_node.subscribe("/init_check", 5, &UpperBodyModule::initCheckMsgCallBack, this);
-//	get_nav_data_sub_ = ros_node.subscribe("/nav_odom", 100, &UpperBodyModule::navDataMsgCallback, this);
+	//get_nav_data_sub_ = ros_node.subscribe("/nav/odom", 100, &UpperBodyModule::navDataMsgCallback, this);
 
 	balance_param_waist_sub = ros_node.subscribe("/diana/balance_parameter_waist", 5, &UpperBodyModule::balanceParameterWaistMsgCallback, this);
 	head_balance_sub = ros_node.subscribe("/head_balance", 5, &UpperBodyModule::headBalanceMsgCallback, this);
@@ -225,8 +229,8 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 		return;
 
 
-		check_detection_1 = true;
-		//check_detection_2 = true;
+	check_detection_1 = true;
+	//check_detection_2 = true;
 }
 /////////////////////////////////////////////////////
 // sensor data get///////////////////////////////////
@@ -238,7 +242,16 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 	navRotationTransformation(currentPositionZ, currentPositionY, currentPositionX);
 	tf_current_position_x = tf_position_value(0,0);
 	tf_current_position_y = tf_position_value(1,0);
-    tf_current_position_z = tf_position_value(2,0);
+	tf_current_position_z = tf_position_value(2,0);
+	currentGyroOrientationW = (double) msg->pose.pose.orientation.w;
+	currentGyroOrientationX = (double) msg->pose.pose.orientation.x;
+	currentGyroOrientationY = (double) msg->pose.pose.orientation.y;
+	currentGyroOrientationZ = (double) msg->pose.pose.orientation.z;
+	quaternionToAngle(currentGyroOrientationW, currentGyroOrientationX, currentGyroOrientationY, currentGyroOrientationZ);
+	gyroRotationTransformation(tf_gyro_value_nav(2,0), tf_gyro_value_nav(1,0), tf_gyro_value_nav(0,0));
+	tf_current_gyro_orientation_x = tf_gyro_value_nav(0,0);
+	tf_current_gyro_orientation_y = tf_gyro_value_nav(1,0);
+	tf_current_gyro_orientation_z = tf_gyro_value_nav(2,0);
 }*/
 void UpperBodyModule::imuDataMsgCallback(const sensor_msgs::Imu::ConstPtr& msg) // gyro data get
 {
@@ -290,6 +303,24 @@ void UpperBodyModule::quaternionToAngle(double q_w, double q_x, double q_y, doub
 	double siny = 2.0 * (q_w * q_z + q_x * q_y);
 	double cosy = 1.0 - 2.0 * (q_y * q_y + q_z * q_z);
 	tf_gyro_value(2,0) = atan2(siny, cosy);
+}
+void UpperBodyModule::quaternionToAngleNav(double q_w, double q_x, double q_y, double q_z)
+{
+	double sinr = 2.0 * (q_w * q_x + q_y * q_z);
+	double cosr = 1.0 - 2.0 * (q_x * q_x + q_y * q_y);
+	tf_gyro_value_nav(0,0) = atan2(sinr, cosr);
+
+	// pitch (y-axis rotation)
+	double sinp = 2.0 * (q_w * q_y - q_z * q_x);
+	if (fabs(sinp) >= 1)
+		tf_gyro_value_nav(1,0) = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+	else
+		tf_gyro_value_nav(1,0) = asin(sinp);
+
+	// yaw (z-axis rotation)
+	double siny = 2.0 * (q_w * q_z + q_x * q_y);
+	double cosy = 1.0 - 2.0 * (q_y * q_y + q_z * q_z);
+	tf_gyro_value_nav(2,0) = atan2(siny, cosy);
 }
 //////////////////////////////////////////////////////////////////////
 //balance message for gyro///////////////////////////////////

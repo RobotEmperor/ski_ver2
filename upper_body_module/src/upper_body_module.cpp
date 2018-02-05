@@ -136,7 +136,7 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
 		ROS_INFO("Upper Start");
 		initial_tf_current_gyro_orientation_z = tf_current_gyro_orientation_z;
-	/*	initial_tf_current_position_x = tf_current_position_x;
+		/*	initial_tf_current_position_x = tf_current_position_x;
 		initial_tf_current_position_y = tf_current_position_y;
 		initial_tf_current_position_z = tf_current_position_z;*/
 	}
@@ -186,10 +186,11 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	temp_head_roll  = limitCheckHead(head_kinematics_ -> zyx_euler_angle_x - result_head_enable*(tf_current_gyro_orientation_x + waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y),20,-20);*/
 
 
-//temp_head_yaw   = limitCheck(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*((waist_kinematics_ -> xyz_euler_angle_z) +(filter_head->signFunction(tf_current_gyro_orientation_z))*fabs((fabs(tf_current_gyro_orientation_z) - fabs(initial_tf_current_gyro_orientation_z)))) ,60,-60);
+	//temp_head_yaw   = limitCheck(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*((waist_kinematics_ -> xyz_euler_angle_z) +(filter_head->signFunction(tf_current_gyro_orientation_z))*fabs((fabs(tf_current_gyro_orientation_z) - fabs(initial_tf_current_gyro_orientation_z)))) ,60,-60);
 
+	orientationZLimitCheck();
 	//temp_head_yaw   = limitCheck(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*((waist_kinematics_ -> xyz_euler_angle_z)) ,60,-60);
-	temp_head_yaw   = limitCheck(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*((waist_kinematics_ -> xyz_euler_angle_z) +(filter_head->signFunction(tf_current_gyro_orientation_z))*fabs((fabs(tf_current_gyro_orientation_z) - fabs(initial_tf_current_gyro_orientation_z)))) ,60,-60);
+	temp_head_yaw   = limitCheck(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*((waist_kinematics_ -> xyz_euler_angle_z) - (initial_tf_current_gyro_orientation_z - final_tf_current_orientation_z)) ,60,-60);
 	temp_head_pitch = limitCheck(head_kinematics_ -> zyx_euler_angle_y - result_head_enable*0,20,-20);
 	temp_head_roll  = limitCheck(head_kinematics_ -> zyx_euler_angle_x - result_head_enable*(waist_kinematics_ -> xyz_euler_angle_x),20,-20);
 	//gazebo
@@ -226,7 +227,7 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 		current_flag_position2_msg.z = current_flag_position_z[1];
 		current_flag_position2_pub.publish(current_flag_position2_msg);
 	}
-/*	top_view_robot_msg.x =  (filter_head->signFunction(tf_current_position_x))*(fabs(tf_current_position_x) - fabs(initial_tf_current_position_x));
+	/*	top_view_robot_msg.x =  (filter_head->signFunction(tf_current_position_x))*(fabs(tf_current_position_x) - fabs(initial_tf_current_position_x));
 	top_view_robot_msg.y =  (filter_head->signFunction(tf_current_position_y))*(fabs(tf_current_position_y) - fabs(initial_tf_current_position_y));
 	top_view_robot_msg.y =  (filter_head->signFunction(tf_current_position_z))*(fabs(tf_current_position_z) - fabs(initial_tf_current_position_z));
 	top_view_robot_pub.publish(top_view_robot_msg);*/
@@ -236,6 +237,26 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
 	check_detection_1 = false;
 	check_detection_2 = false;
+}
+void UpperBodyModule::orientationZLimitCheck()
+{
+	if(fabs(tf_current_gyro_orientation_z - pre_tf_current_gyro_orientation_z) > 4)
+	{
+		if(pre_tf_current_gyro_orientation_z > 0)
+		{
+			final_tf_current_orientation_z = initial_tf_current_gyro_orientation_z + (M_PI - fabs(tf_current_gyro_orientation_z)) + (M_PI - fabs(initial_tf_current_gyro_orientation_z));
+		}
+		if(pre_tf_current_gyro_orientation_z < 0)
+		{
+			final_tf_current_orientation_z = initial_tf_current_gyro_orientation_z - (M_PI - fabs(tf_current_gyro_orientation_z)) + (M_PI - fabs(initial_tf_current_gyro_orientation_z));
+		}
+
+	}
+	else
+	{
+		final_tf_current_orientation_z = tf_current_gyro_orientation_z;
+	}
+	pre_tf_current_gyro_orientation_z = tf_current_gyro_orientation_z;
 }
 void UpperBodyModule::stop()
 {
