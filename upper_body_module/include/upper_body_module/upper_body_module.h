@@ -68,6 +68,7 @@ public:
 	double traj_time_test;
 	// publisher
 	ros::Publisher  current_waist_pose_pub;
+	ros::Publisher  current_orientation_z_pub;
 
 	ros::Publisher  current_flag_position1_pub;
 	ros::Publisher  current_flag_position2_pub;
@@ -110,6 +111,9 @@ public:
 
 	//flag position function
 	void currentFlagPositionFunction(double x, double y, double z);
+
+
+	std_msgs::Float64 current_orientation_z_msg;
 
 
 

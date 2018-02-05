@@ -106,7 +106,7 @@ private:
 	double left_x_detect_margin, left_y_detect_margin_min, left_y_detect_margin_max;
 	double right_x_detect_margin, right_y_detect_margin_min, right_y_detect_margin_max;
 
-	double x_detect_margin, y_detect_margin_min, y_detect_margin_max;
+	double x_detect_margin[10], y_detect_margin_min[10], y_detect_margin_max[10];
 	int initial_turn;
 
 

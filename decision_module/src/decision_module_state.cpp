@@ -83,10 +83,12 @@ DecisionModule::DecisionModule()
 	//neutral check
 	neutral_check = false;
 
-	x_detect_margin = 0;
-	y_detect_margin_min = 0;
-	y_detect_margin_max = 0;
-
+	for(int i = 0; i<10; i++)
+	{
+		x_detect_margin[i] = 0;
+		y_detect_margin_min[i] = 0;
+		y_detect_margin_max[i] = 0;
+	}
 	initial_turn = 0;
 
 	pre_turn_direction = "basic";
@@ -179,8 +181,6 @@ void DecisionModule::classification_function(double flag0[3], double flag1[3], b
 		true_flag_0[1] = flag0[1];
 		true_flag_1[0] = flag1[0];
 		true_flag_1[1] = flag1[1];
-
-		printf("Two Flag Data  X :: %f , Y :: %f \n", true_flag_0[0], true_flag_0[1]);
 	}
 	if(check_1 == true  ||  check_2 == true)// 한개의 기문만 들어올때
 	{
@@ -260,8 +260,6 @@ void DecisionModule::classification_function(double flag0[3], double flag1[3], b
 		flag_in_data[flag_sequence][1]  =  true_flag_0[1];
 		flag_out_data[flag_sequence][0] =  true_flag_1[0];
 		flag_out_data[flag_sequence][1] =  true_flag_1[1];
-
-		printf("One Flag Data   X :: %f , Y :: %f \n", true_flag_0[0], true_flag_0[1]);
 	}
 
 	if(pre_flag_sequence != flag_sequence && flag_sequence != 0)
@@ -313,7 +311,7 @@ void DecisionModule::decision_function(double flag0[3], double flag1[3])
 		{
 			turn_direction = "center";
 		}*/
-		if(fabs(flag0[0]) < x_detect_margin  && y_detect_margin_min < fabs(flag0[1]) && y_detect_margin_max > fabs(flag0[1])) // dectect flag
+		if(fabs(flag0[0]) < x_detect_margin[flag_sequence+1]  && y_detect_margin_min[flag_sequence+1] < fabs(flag0[1]) && y_detect_margin_max[flag_sequence+1] > fabs(flag0[1])) // dectect flag
 		{
 			if(flag_sequence == 0)
 			{
@@ -339,8 +337,6 @@ void DecisionModule::decision_function(double flag0[3], double flag1[3])
 					}
 					pre_turn_direction = turn_direction;
 				}
-
-				printf("command ::::  %s   \n",pre_turn_direction.c_str());
 			}
 		}
 	}
@@ -368,9 +364,25 @@ void DecisionModule::parseMotionData()
 	right_y_detect_margin_min = doc["right_y_min"].as<double>();
 	right_y_detect_margin_max = doc["right_y_max"].as<double>();
 
-	x_detect_margin = doc["x"].as<double>();;
-	y_detect_margin_min = doc["y_min"].as<double>();;
-	y_detect_margin_max = doc["y_max"].as<double>();
+	x_detect_margin[1] = doc["x_1"].as<double>();;
+	y_detect_margin_min[1] = doc["y_min_1"].as<double>();
+	y_detect_margin_max[1] = doc["y_max_1"].as<double>();
+
+	x_detect_margin[2] = doc["x_2"].as<double>();;
+	y_detect_margin_min[2] = doc["y_min_2"].as<double>();
+	y_detect_margin_max[2] = doc["y_max_2"].as<double>();
+
+	x_detect_margin[3] = doc["x_3"].as<double>();;
+	y_detect_margin_min[3] = doc["y_min_3"].as<double>();
+	y_detect_margin_max[3] = doc["y_max_3"].as<double>();
+
+	x_detect_margin[4] = doc["x_4"].as<double>();;
+	y_detect_margin_min[4] = doc["y_min_4"].as<double>();
+	y_detect_margin_max[4] = doc["y_max_4"].as<double>();
+
+	x_detect_margin[5] = doc["x_5"].as<double>();;
+	y_detect_margin_min[5] = doc["y_min_5"].as<double>();
+	y_detect_margin_max[5] = doc["y_max_5"].as<double>();
 
 	initial_turn = doc["initial_turn"].as<double>();
 }
@@ -430,7 +442,7 @@ void DecisionModule::top_view(double flag_position[3])
 		top_view_flag_position.y = pre_top_view_robot_position.y + flag_position[1]; // 고정된값
 		flag_check = 1; // flag change
 
-		printf("Flag update :: X :: %f , X :: %f \n", top_view_flag_position.x, top_view_flag_position.y);
+		//printf("Flag update :: X :: %f , X :: %f \n", top_view_flag_position.x, top_view_flag_position.y);
 	}
 
 

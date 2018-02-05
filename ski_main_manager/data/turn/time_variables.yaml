@@ -7,7 +7,24 @@ right_x: 5
 right_y_min: -10
 right_y_max: 0
 
-x: 6
-y_min: 0
-y_max: 10
+x_1: 6
+y_min_1: 1
+y_max_1: 10
+
+x_2: 6
+y_min_2: 1
+y_max_2: 10
+
+x_3: 6
+y_min_3: 1
+y_max_3: 10
+
+x_4: 6
+y_min_4: 1
+y_max_4: 10
+
+x_5: 6
+y_min_5: 1
+y_max_5: 10
+
 initial_turn: 1

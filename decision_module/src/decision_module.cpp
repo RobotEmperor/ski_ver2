@@ -214,6 +214,7 @@ void updateMsgCallback(const std_msgs::Bool::ConstPtr& msg)
 	neutralParseMotionData();
 	//init
 	flag_count = 0;
+	decision_algorithm->flag_sequence = flag_count;
 	pre_command = "center";
 	pre_direction_command = "center";
 	decision_algorithm->turn_direction = "center";
@@ -241,6 +242,7 @@ int main(int argc, char **argv)
 	desired_pose_leg_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/desired_pose_leg",1);
 	desired_pose_waist_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/desired_pose_waist",1);
 	desired_pose_head_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/desired_pose_head",1);
+	turn_command_pub = ros_node.advertise<std_msgs::String>("/turn_command",1);
 
 	//map top view
 	init_top_view_pub = ros_node.advertise<diana_msgs::FlagDataTop>("/init_top_view",1);
@@ -312,22 +314,13 @@ void control_loop(const ros::TimerEvent&)
 			{
 				flag_count = 6;
 				decision_algorithm -> flag_sequence = flag_count;
+				return;
 			}
 			else
 			{
 				decision_algorithm -> flag_sequence = flag_count;
 			}
 
-			/*if(flag_count == 5)
-			{
-				time_count_break = time_count_break + 0.006;
-				if(time_count_break > time_break)
-				{
-					motion_break_fun(entire_motion_number_break);
-					return;
-				}
-			}*/
-			//emergency stop neutral
 			if(!turn_type.compare("carving_turn") && change_value_center == 5)
 			{
 				decision_algorithm->turn_direction = "center";
@@ -388,8 +381,10 @@ void control_loop(const ros::TimerEvent&)
 				decision_algorithm -> flag_check = 0;
 			}
 
-			printf("flag_ count ::  %d  \n", flag_count);
-			printf("moving check ::  %d  \n", decision_algorithm->is_moving_check);
+			turn_command_msg.data = decision_algorithm->turn_direction;
+			turn_command_pub.publish(turn_command_msg);
+
+			//printf("flag_count ::  %d  \n", flag_count);
 		}
 		if(!mode.compare("remote"))
 		{
@@ -439,7 +434,7 @@ void neutral_check_function(bool check)
 	else
 		decision_algorithm->neutral_check = 0;
 
-	printf("neutral_check  ::  %d  \n", decision_algorithm->neutral_check);
+	//printf("neutral_check  ::  %d  \n", decision_algorithm->neutral_check);
 }
 void motion_left(int motion_number)
 {

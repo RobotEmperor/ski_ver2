@@ -152,6 +152,7 @@ void UpperBodyModule::queueThread()
 	current_waist_pose_pub = ros_node.advertise<std_msgs::Float64MultiArray>("/current_waist_pose",100);
 	current_flag_position1_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position1",100);
 	current_flag_position2_pub = ros_node.advertise<geometry_msgs::Vector3>("/current_flag_position2",100);
+	current_orientation_z_pub = ros_node.advertise<std_msgs::Float64>("/current_orientation_z",10);
 	top_view_robot_pub = ros_node.advertise<geometry_msgs::Vector3>("/top_view_robot",1);
 
 	// subscribe topics
@@ -223,13 +224,9 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 	else
 		return;
 
-	if(msg.length == 1)
+
 		check_detection_1 = true;
-	if(msg.length == 2)
-	{
-		check_detection_1 = true;
-		check_detection_2 = true;
-	}
+		//check_detection_2 = true;
 }
 /////////////////////////////////////////////////////
 // sensor data get///////////////////////////////////

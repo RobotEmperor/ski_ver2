@@ -136,9 +136,9 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 		} // 등록된 다이나믹셀의 위치값을 읽어와서 goal position 으로 입력
 		ROS_INFO("Upper Start");
 		initial_tf_current_gyro_orientation_z = tf_current_gyro_orientation_z;
-		initial_tf_current_position_x = tf_current_position_x;
+	/*	initial_tf_current_position_x = tf_current_position_x;
 		initial_tf_current_position_y = tf_current_position_y;
-		initial_tf_current_position_z = tf_current_position_z;
+		initial_tf_current_position_z = tf_current_position_z;*/
 	}
 	if(is_moving_waist_ == false) // desired pose
 	{
@@ -186,15 +186,17 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	temp_head_roll  = limitCheckHead(head_kinematics_ -> zyx_euler_angle_x - result_head_enable*(tf_current_gyro_orientation_x + waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y),20,-20);*/
 
 
+//temp_head_yaw   = limitCheck(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*((waist_kinematics_ -> xyz_euler_angle_z) +(filter_head->signFunction(tf_current_gyro_orientation_z))*fabs((fabs(tf_current_gyro_orientation_z) - fabs(initial_tf_current_gyro_orientation_z)))) ,60,-60);
 
-	temp_head_yaw   = limitCheck(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*((waist_kinematics_ -> xyz_euler_angle_z)) ,60,-60);
+	//temp_head_yaw   = limitCheck(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*((waist_kinematics_ -> xyz_euler_angle_z)) ,60,-60);
+	temp_head_yaw   = limitCheck(head_kinematics_ -> zyx_euler_angle_z - result_head_enable*((waist_kinematics_ -> xyz_euler_angle_z) +(filter_head->signFunction(tf_current_gyro_orientation_z))*fabs((fabs(tf_current_gyro_orientation_z) - fabs(initial_tf_current_gyro_orientation_z)))) ,60,-60);
 	temp_head_pitch = limitCheck(head_kinematics_ -> zyx_euler_angle_y - result_head_enable*0,20,-20);
-	temp_head_roll  = limitCheck(head_kinematics_ -> zyx_euler_angle_x - result_head_enable*(0 + waist_kinematics_ -> xyz_euler_angle_x),20,-20);
+	temp_head_roll  = limitCheck(head_kinematics_ -> zyx_euler_angle_x - result_head_enable*(waist_kinematics_ -> xyz_euler_angle_x),20,-20);
 	//gazebo
 	result_[joint_id_to_name_[9]] -> goal_position_  = -(limitCheck(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z),50,-50)); // waist yaw
 	result_[joint_id_to_name_[10]]-> goal_position_  = -(limitCheck(waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y,40,-40)); // waist roll
 
-	result_[joint_id_to_name_[23]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_yaw, temp_pre_yaw, 0.3, 0.008);
+	result_[joint_id_to_name_[23]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_yaw, temp_pre_yaw, 0.2, 0.008);
 	result_[joint_id_to_name_[24]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_pitch, temp_pre_pitch, 0.8, 0.008);
 	result_[joint_id_to_name_[25]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_roll, temp_pre_roll, 0.8, 0.008);
 
@@ -218,9 +220,7 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 		current_flag_position1_msg.y = current_flag_position_y[0];
 		current_flag_position1_msg.z = current_flag_position_z[0];
 		current_flag_position1_pub.publish(current_flag_position1_msg);
-	}
-	if(check_detection_2 == true)
-	{
+
 		current_flag_position2_msg.x = current_flag_position_x[1];
 		current_flag_position2_msg.y = current_flag_position_y[1];
 		current_flag_position2_msg.z = current_flag_position_z[1];
@@ -231,6 +231,8 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	top_view_robot_msg.y =  (filter_head->signFunction(tf_current_position_z))*(fabs(tf_current_position_z) - fabs(initial_tf_current_position_z));
 	top_view_robot_pub.publish(top_view_robot_msg);*/
 
+	current_orientation_z_msg.data = tf_current_gyro_orientation_z;
+	current_orientation_z_pub.publish(current_orientation_z_msg);
 
 	check_detection_1 = false;
 	check_detection_2 = false;
