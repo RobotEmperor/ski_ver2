@@ -143,20 +143,9 @@ void lidarCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 {
 	if(decision_algorithm->is_moving_check == true)
 	{
-		if(pre_lidar_check != msg->data)
-		{
+		if(msg->data == true)
 			lidar_check = msg->data;
-		}
-		else
-		{
-			lidar_check = false;
-		}
 	}
-	else
-	{
-		lidar_check = false;
-	}
-	pre_lidar_check = msg->data;
 }
 void currentflagPosition1MsgCallback(const geometry_msgs::Vector3& msg)
 {
@@ -329,7 +318,7 @@ void control_loop(const ros::TimerEvent&)
 				return;
 			}
 			//
-			neutral_check_function(lidar_check);
+			neutral_check_function();
 			decision_algorithm->process();
 
 
@@ -414,11 +403,13 @@ void control_loop(const ros::TimerEvent&)
 	else
 		return;
 }
-void neutral_check_function(bool check)
+void neutral_check_function()
 {
-	if(check == true)
+	if(lidar_check == true)
 	{
 		time_check = true;
+		lidar_check = false;
+		neutral_time_count = 0;
 	}
 	if(time_check)
 	{
@@ -427,9 +418,7 @@ void neutral_check_function(bool check)
 		if(neutral_time_count > time_neutral[flag_count])
 		{
 			decision_algorithm->neutral_check = 1;
-			neutral_time_count = 0;
 			time_check = false;
-			lidar_check = false;
 		}
 	}
 	else

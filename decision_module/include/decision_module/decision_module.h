@@ -90,7 +90,7 @@ void modeChangeMsgCallback(const std_msgs::Bool::ConstPtr& msg);
 void remoteTimeMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
 void lidarCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg);
 void neutralParseMotionData();
-void neutral_check_function(bool check);
+void neutral_check_function();
 
 //control
 void control_loop(const ros::TimerEvent&);
