@@ -429,6 +429,7 @@ void neutral_check_function(bool check)
 			decision_algorithm->neutral_check = 1;
 			neutral_time_count = 0;
 			time_check = false;
+			lidar_check = false;
 		}
 	}
 	else
