@@ -214,20 +214,20 @@ void UpperBodyModule::desiredPoseHeadMsgCallbackTEST(const std_msgs::Float64Mult
 // flag position data get////////////////////////////
 void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray& msg)
 {
+	int length = 0;
+	length = msg.length;
 	// head point get
-	if(msg.length > 0 && msg.length < 3)
-	{
-		for(int num = 0; num < msg.length; num++)
-		{
-			currentFlagPositionFunction(msg.data[num].position.x, msg.data[num].position.y, msg.data[num].position.z);// 천유 좌표를 넣어야함
-			current_flag_position_x[num]  = head_point_kinematics_->head_point_on_origin_x*0.01;  // x
-			current_flag_position_y[num] = head_point_kinematics_->head_point_on_origin_y*0.01;  // y
-			current_flag_position_z[num]  = head_point_kinematics_->head_point_on_origin_z*0.01;  // z
-		}
-	}
-	else
-		return;
 
+	if( msg.length >= 3)
+		length = 2;
+
+	for(int num = 0; num < length; num++)
+	{
+		currentFlagPositionFunction(msg.data[num].position.x, msg.data[num].position.y, msg.data[num].position.z);// 천유 좌표를 넣어야함
+		current_flag_position_x[num]  = head_point_kinematics_->head_point_on_origin_x*0.01;  // x
+		current_flag_position_y[num] = head_point_kinematics_->head_point_on_origin_y*0.01;  // y
+		current_flag_position_z[num]  = head_point_kinematics_->head_point_on_origin_z*0.01;  // z
+	}
 
 	check_detection_1 = true;
 	//check_detection_2 = true;
