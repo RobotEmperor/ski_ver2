@@ -375,7 +375,7 @@ void control_loop(const ros::TimerEvent&)
 			if(flag_count == 0)// 첫번째 기문
 			{
 				desired_pose_head_msg.data.clear();
-				desired_pose_head_msg.data.push_back(20*DEGREE2RADIAN);
+				desired_pose_head_msg.data.push_back(0.3);
 				desired_pose_head_msg.data.push_back(-10*DEGREE2RADIAN);
 				desired_pose_head_msg.data.push_back(0);
 				desired_pose_head_msg.data.push_back(0.5);
