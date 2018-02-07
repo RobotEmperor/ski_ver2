@@ -213,10 +213,15 @@ void DecisionModule::decision_function(double flag0[3], double flag1[3])
 			if(flag_sequence == 0)
 			{
 				direction_command = initial_turn;
-				if(initial_turn == -1)
+				/*			if(initial_turn == -1)
 					turn_direction = "first_right_turn";
 				if(initial_turn == 1)
-					turn_direction = "first_left_turn";
+					turn_direction = "first_left_turn";*/
+				if(initial_turn == -1)
+					turn_direction = "right_turn";
+				if(initial_turn == 1)
+					turn_direction = "left_turn";
+
 
 				pre_turn_direction = turn_direction;
 			}
@@ -325,12 +330,12 @@ void DecisionModule::top_view(double flag_position[3])
 		top_view_flag_position.y = flag_position[1]; // 고정된값
 		init_flag_check = false;
 
-		pre_top_view_robot_position.x = top_view_flag_position.x;
-		pre_top_view_robot_position.y = top_view_flag_position.y;
+		pre_top_view_robot_position.x = 0;
+		pre_top_view_robot_position.y = 0;
 	}
 	else
 	{
-		//flag_check = 0; // flag change
+		flag_check = 0; // flag change
 	}
 
 	if(pre_flag_sequence != flag_sequence && flag_sequence != 0)
@@ -339,19 +344,23 @@ void DecisionModule::top_view(double flag_position[3])
 		top_view_flag_position.y = pre_top_view_robot_position.y + flag_position[1]; // 고정된값
 		flag_check = 1; // flag change
 
-		//printf("Flag update :: X :: %f , X :: %f \n", top_view_flag_position.x, top_view_flag_position.y);
+		//pre_top_view_flag_position.x = top_view_flag_position.x;
+		//pre_top_view_flag_position.y = top_view_flag_position.y;
+
+		printf("Flag update :: X :: %f , X :: %f \n", top_view_flag_position.x, top_view_flag_position.y);
+		printf("pre :: X :: %f , X :: %f \n", pre_top_view_robot_position.x, pre_top_view_robot_position.y);
 	}
 
 
 	top_view_robot_position.x = -flag_position[0] + top_view_flag_position.x;
 	top_view_robot_position.y = -flag_position[1] + top_view_flag_position.y;
 
-	//	printf("ROBOT     :: X :: %f , Y :: %f \n", top_view_robot_position.x , top_view_robot_position.y);
-	//	printf("Top View  :: X :: %f , Y :: %f \n", top_view_flag_position.x , top_view_flag_position.y);
+	printf("ROBOT     :: X :: %f , Y :: %f \n", top_view_robot_position.x , top_view_robot_position.y);
+		//printf("Top View  :: X :: %f , Y :: %f \n", top_view_flag_position.x , top_view_flag_position.y);
 
 	pre_flag_sequence = flag_sequence;
-	pre_top_view_flag_position.x = top_view_flag_position.x;
-	pre_top_view_flag_position.y = top_view_flag_position.y;
+	//pre_top_view_flag_position.x = top_view_flag_position.x;
+	//pre_top_view_flag_position.y = top_view_flag_position.y;
 
 	pre_top_view_robot_position.x = top_view_robot_position.x;
 	pre_top_view_robot_position.y = top_view_robot_position.y;
