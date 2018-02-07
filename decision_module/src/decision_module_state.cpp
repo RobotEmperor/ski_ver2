@@ -165,16 +165,6 @@ void DecisionModule::process()
 }
 void DecisionModule::classification_function(double flag0[3], double flag1[3], bool check_1, bool check_2)
 {
-	//if(pre_temp_flag_0[0] == flag0[0] && pre_temp_flag_1[0] == flag1[0] && pre_temp_flag_0[1] == flag0[1] && pre_temp_flag_1[1] == flag1[1] && check == false) // 기문 둘다 안들어올 경우
-	if(check_1 == false &&  check_2 == false)
-	{
-		/*		true_flag_0[0] = flag_in_data[flag_sequence][0];
-		true_flag_0[1] = flag_in_data[flag_sequence][1];
-		true_flag_1[0] = flag_out_data[flag_sequence][0];
-		true_flag_1[1] = flag_out_data[flag_sequence][1];*/
-
-		//printf("%d ::  %f \n\n", flag_sequence, flag_in_data[flag_sequence][0]);
-	}
 	if(check_1 == true &&  check_2 == true) // 기문 둘다 들어올 경우
 	{
 		true_flag_0[0] = flag0[0];
@@ -184,77 +174,9 @@ void DecisionModule::classification_function(double flag0[3], double flag1[3], b
 	}
 	if(check_1 == true  ||  check_2 == true)// 한개의 기문만 들어올때
 	{
-		/*if(flag_sequence == 0) //안쪽 기문
-		{*/
 		true_flag_0[0] = flag0[0];
 		true_flag_0[1] = flag0[1];
 
-		/*		true_flag_1[0] = flag0[0];
-
-		if(flag_in_data[0][1] > 0)
-		{
-			if(flag_sequence/2 == 0) // 우턴 시작
-				true_flag_1[1] = flag0[1] - 5; //y 값 추정
-			else
-				true_flag_1[1] = flag0[1] + 5;
-		}
-		if(flag_in_data[0][1] < 0)
-		{
-			if(flag_sequence/2 == 0) // 좌턴 시작
-				true_flag_1[1] = flag0[1] + 5;
-			else
-				true_flag_1[1] = flag0[1] - 5;
-		}
-		printf("in! flag!!! \n ");*/
-		//}
-		/*if(flag_sequence > 0)
-		{
-			if(fabs(flag_in_data[flag_sequence-1][1] - (flag0[1] + top_view_robot_position.y)) > 4)// 바깥 기문 인식.
-			{
-				true_flag_1[0] = flag0[0];
-				true_flag_1[1] = flag0[1];
-				// assume
-				true_flag_0[0] = flag0[0];
-				if(flag_in_data[0][1] > 0)
-				{
-					if(flag_sequence/2 == 0) // 우턴 시작
-						true_flag_0[1] = flag0[1] - 5; //y 값 추정
-					else
-						true_flag_0[1] = flag0[1] + 5;
-				}
-				if(flag_in_data[0][1] < 0)
-				{
-					if(flag_sequence/2 == 0) // 좌턴 시작
-						true_flag_0[1] = flag0[1] + 5;
-					else
-						true_flag_0[1] = flag0[1] - 5;
-				}
-				printf("out! flag!!! \n ");
-			}
-			else
-			{
-				true_flag_0[0] = flag0[0];
-				true_flag_0[1] = flag0[1];
-
-				true_flag_1[0] = flag0[0];
-
-				if(flag_in_data[0][1] > 0)
-				{
-					if(flag_sequence/2 == 0) // 우턴 시작
-						true_flag_1[1] = flag0[1] - 5; //y 값 추정
-					else
-						true_flag_1[1] = flag0[1] + 5;
-				}
-				if(flag_in_data[0][1] < 0)
-				{
-					if(flag_sequence/2 == 0) // 좌턴 시작
-						true_flag_1[1] = flag0[1] + 5;
-					else
-						true_flag_1[1] = flag0[1] - 5;
-				}
-				printf("in! flag!!! \n ");
-			}
-		}*/
 
 		flag_in_data[flag_sequence][0]  =  true_flag_0[0];
 		flag_in_data[flag_sequence][1]  =  true_flag_0[1];
@@ -286,52 +208,27 @@ void DecisionModule::decision_function(double flag0[3], double flag1[3])
 	}
 	if(is_moving_check == false)
 	{
-		/*if(flag0[0]*flag0[1] < 0) // right turn
-		{
-			if(flag0[0] < right_x_detect_margin  && right_y_detect_margin_min < flag0[1] && right_y_detect_margin_max > flag0[1])
-			{
-				direction_command = -1;
-				turn_direction = "right_turn";
-			}
-			else
-				turn_direction = "center";
-
-		}
-		else if(flag0[0]*flag0[1] > 0) // left turn
-		{
-			if(flag0[0] < left_x_detect_margin  && left_y_detect_margin_min < flag0[1] && left_y_detect_margin_max > flag0[1])
-			{
-				direction_command = 1;
-				turn_direction = "left_turn";
-			}
-			else
-				turn_direction = "center";
-		}
-		else
-		{
-			turn_direction = "center";
-		}*/
 		if(fabs(flag0[0]) < x_detect_margin[flag_sequence+1]  && y_detect_margin_min[flag_sequence+1] < fabs(flag0[1]) && y_detect_margin_max[flag_sequence+1] > fabs(flag0[1])) // dectect flag
 		{
 			if(flag_sequence == 0)
 			{
 				direction_command = initial_turn;
 				if(initial_turn == -1)
-					turn_direction = "right_turn";
+					turn_direction = "first_right_turn";
 				if(initial_turn == 1)
-					turn_direction = "left_turn";
+					turn_direction = "first_left_turn";
 
 				pre_turn_direction = turn_direction;
 			}
 			else
 			{
-				if(!pre_turn_direction.compare("left_turn") || !pre_turn_direction.compare("right_turn"))
+				if(!pre_turn_direction.compare("left_turn") || !pre_turn_direction.compare("right_turn") || !pre_turn_direction.compare("first_left_turn"))
 				{
-					if(!pre_turn_direction.compare("left_turn"))
+					if(!pre_turn_direction.compare("left_turn") || !pre_turn_direction.compare("first_left_turn"))
 					{
 						turn_direction = "right_turn";
 					}
-					if(!pre_turn_direction.compare("right_turn"))
+					if(!pre_turn_direction.compare("right_turn")  || !pre_turn_direction.compare("first_right_turn"))
 					{
 						turn_direction = "left_turn";
 					}

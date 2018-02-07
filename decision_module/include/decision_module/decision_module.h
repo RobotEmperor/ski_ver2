@@ -98,6 +98,8 @@ void motion_left(int motion_number);
 void motion_right(int motion_number);
 void motion_center(int motion_number);
 void motion_break_fun(int motion_number);
+void motion_first_turn_left_fun(int motion_number);
+//void motion_first_turn_right_fun(int motion_number);
 
 //init check
 bool init_check;
@@ -126,10 +128,12 @@ int motion_seq;
 int motion_break_seq;
 double motion_time_count_break;
 int entire_motion_number_pflug;
+int entire_motion_number_first;
 int entire_motion_number_carving;
 int entire_motion_number_break;
 
 MotionChange *motion;
+MotionChange *motion_first;
 MotionChange *motion_break;
 
 //decision module
@@ -153,6 +157,8 @@ vector<double> remote_time_;
 vector<double> remote_command_;
 
 std::string pre_direction_command;
+
+bool first_turn_check;
 
 //neutral check variables
 double time_neutral[6];

@@ -72,13 +72,6 @@ OffsetModule::OffsetModule()
 	result_["l_knee_pitch"]     = new robotis_framework::DynamixelState();  // joint 17
 	result_["r_knee_pitch"]     = new robotis_framework::DynamixelState();  // joint 18
 	 */
-
-
-
-
-
-
-
 	///////////////////////////
 	running_     = false;
 	gazebo_check = false;
@@ -164,20 +157,24 @@ void OffsetModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 				result_[joint_id_to_name_[dxl_info->id_]]->goal_position_ = change_joint_value_[joint_name_to_id_[joint_name]]; // 지정된 조인트에 목표 위치 입력
 			}
 		} // 등록된 다이나믹셀의 위치값을 읽어옴
-
 		new_count_ ++;
 	}
-	for(int i=1; i<7 ; i++)
+	/*	for(int i=1; i<7 ; i++)
 	{
-
-
-			read_joint_value_[i] = dxls[joint_id_to_name_[i]]->dxl_state_->present_position_;
-
+		read_joint_value_[i] = dxls[joint_id_to_name_[i]]->dxl_state_->present_position_;
 	}
 	for(int i=9; i<26 ; i++)
 	{
 		read_joint_value_[i] = dxls[joint_id_to_name_[i]]->dxl_state_->present_position_;
+	}*/
+	if(offset_start_ == true)
+	{
+		read_joint_value_[joint_select_] = dxls[joint_id_to_name_[joint_select_]]->dxl_state_->present_position_;
+
+		offset_start_ = false;
 	}
+
+	usleep(1000);
 
 	result_[joint_id_to_name_[joint_select_]]->goal_position_ = change_joint_value_[joint_select_]; // 지정된 조인트에 목표 위치 입력
 }
@@ -185,6 +182,7 @@ void OffsetModule::process(std::map<std::string, robotis_framework::Dynamixel *>
 void OffsetModule::joint_select_sub_function(const std_msgs::Int8::ConstPtr& msg)
 {
 	joint_select_= msg->data; // GUI 에서 조인트 번호를 받아옴
+	offset_start_ = true;
 }
 void OffsetModule::change_joint_value_sub_function(const std_msgs::Int16MultiArray::ConstPtr& msg)
 {
@@ -205,10 +203,10 @@ void OffsetModule::change_joint_value_sub_function(const std_msgs::Int16MultiArr
 	if(joint_select_< 7)
 		temp_ratio = 0.088/2.5;
 	if(joint_select_ == 3 || joint_select_ == 4)
-		temp_ratio = 0.088/2.25;
+		temp_ratio = 0.088/1.875;
 
 	change_joint_value_[joint_select_] = static_cast<double>(msg->data[0]*(temp_ratio)*DEGREE2RADIAN); // GUI에서 변경할 조인트의 값을 받아옴.
-	offset_start_ = true;
+	//offset_start_ = true;
 }
 void OffsetModule::offset_joint_value_sub_function(const std_msgs::Float64MultiArray::ConstPtr& msg)
 {
@@ -223,8 +221,10 @@ bool OffsetModule::read_joint_value_srv_function(offset_module::command::Request
 	//팔 리드 데이터
 	for(int i = 1; i<7; i++)
 	{
+		if(i == 3 || i == 4)
+			res.dxl_state[i] = static_cast<int16_t>(((read_joint_value_[i]*RADIAN2DEGREE))/(0.088/1.875)); // GUI 에서 요청한 모든 조인트의 위치값을 저장함.
 
-			res.dxl_state[i] = static_cast<int16_t>(((read_joint_value_[i]*RADIAN2DEGREE))/(0.088/2.5)); // GUI 에서 요청한 모든 조인트의 위치값을 저장함.
+		res.dxl_state[i] = static_cast<int16_t>(((read_joint_value_[i]*RADIAN2DEGREE))/(0.088/2.5)); // GUI 에서 요청한 모든 조인트의 위치값을 저장함.
 
 	}
 	// 다리 리드 데이터
@@ -255,7 +255,7 @@ void OffsetModule::save_onoff_sub_function(const std_msgs::Bool::ConstPtr& msg)
 		for(int i=1; i<7 ; i++)
 		{
 
-				offset[joint_id_to_name_[i]] = offset_joint_value_[i];
+			offset[joint_id_to_name_[i]] = offset_joint_value_[i];
 
 		}
 		for(int i=9; i<26 ; i++)

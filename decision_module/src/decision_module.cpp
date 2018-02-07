@@ -11,6 +11,7 @@ void initialize()
 {
 	motion      = new MotionChange;
 	motion_break = new MotionChange;
+	motion_first = new MotionChange;
 	decision_algorithm = new DecisionModule;
 
 	turn_type = "basic";
@@ -36,6 +37,9 @@ void initialize()
 	entire_motion_number_pflug = 4;
 	entire_motion_number_carving = 3;
 	entire_motion_number_break = 4;
+	entire_motion_number_first = 3;
+
+	first_turn_check = false;
 
 	pre_command = "center";
 	pre_direction_command = "center";
@@ -197,16 +201,20 @@ void updateMsgCallback(const std_msgs::Bool::ConstPtr& msg)
 		motion->parseMotionData("pflug_bogen_ver2");
 
 	//motion_break->parseMotionData("break");
-
-	change_value_center = 0;
+	motion_first->parseMotionData("first_carving");
 	decision_algorithm->parseMotionData();
 	neutralParseMotionData();
+
+	first_turn_check = false;
+
+	change_value_center = 0;
 	//init
 	flag_count = 0;
 	decision_algorithm->flag_sequence = flag_count;
 	pre_command = "center";
 	pre_direction_command = "center";
 	decision_algorithm->turn_direction = "center";
+
 	motion_break_seq = 0;
 	motion_time_count_break = 0;
 }
@@ -299,6 +307,14 @@ void control_loop(const ros::TimerEvent&)
 
 		if(!mode.compare("auto"))
 		{
+			if(!turn_type.compare("carving_turn") && change_value_center == 5)
+			{
+				decision_algorithm->turn_direction = "center";
+				motion_center(entire_motion_number_carving); //remote control
+				pre_command = decision_algorithm->turn_direction;
+				return;
+			}
+
 			if(flag_count > 6)
 			{
 				flag_count = 6;
@@ -310,17 +326,9 @@ void control_loop(const ros::TimerEvent&)
 				decision_algorithm -> flag_sequence = flag_count;
 			}
 
-			if(!turn_type.compare("carving_turn") && change_value_center == 5)
-			{
-				decision_algorithm->turn_direction = "center";
-				motion_center(entire_motion_number_carving); //remote control
-				pre_command = decision_algorithm->turn_direction;
-				return;
-			}
 			//
 			neutral_check_function();
 			decision_algorithm->process();
-
 
 			if(pre_command.compare(decision_algorithm->turn_direction) != 0 && decision_algorithm->turn_direction.compare("center") != 0)
 			{
@@ -341,20 +349,14 @@ void control_loop(const ros::TimerEvent&)
 				}
 			}
 
-			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("left_turn"))
+			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("first_left_turn"))
+				motion_first_turn_left_fun(entire_motion_number_first);
+			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("left_turn") && flag_count > 1)
 				motion_left(entire_motion_number_carving);
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("right_turn"))
 				motion_right(entire_motion_number_carving);
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("center"))
 				motion_center(entire_motion_number_carving);
-
-			/*desired_pose_head_msg.data.clear();
-			desired_pose_head_msg.data.push_back(0);
-			desired_pose_head_msg.data.push_back(-10*DEGREE2RADIAN);
-			desired_pose_head_msg.data.push_back(0);
-			desired_pose_head_msg.data.push_back(0.5);
-			desired_pose_head_pub.publish(desired_pose_head_msg);
-			desired_pose_head_msg.data.clear();*/
 
 			decision_algorithm -> data_in_check_1 = false;
 			decision_algorithm -> data_in_check_2 = false;
@@ -370,28 +372,44 @@ void control_loop(const ros::TimerEvent&)
 				decision_algorithm -> flag_check = 0;
 			}
 
+			if(flag_count == 0)// 첫번째 기문
+			{
+				desired_pose_head_msg.data.clear();
+				desired_pose_head_msg.data.push_back(20*DEGREE2RADIAN);
+				desired_pose_head_msg.data.push_back(-10*DEGREE2RADIAN);
+				desired_pose_head_msg.data.push_back(0);
+				desired_pose_head_msg.data.push_back(0.5);
+				desired_pose_head_pub.publish(desired_pose_head_msg);
+				desired_pose_head_msg.data.clear();
+			}
+			if(flag_count == 1)// 첫번째 기문
+			{
+				desired_pose_head_msg.data.clear();
+				desired_pose_head_msg.data.push_back(0);
+				desired_pose_head_msg.data.push_back(-10*DEGREE2RADIAN);
+				desired_pose_head_msg.data.push_back(0);
+				desired_pose_head_msg.data.push_back(0.5);
+				desired_pose_head_pub.publish(desired_pose_head_msg);
+				desired_pose_head_msg.data.clear();
+			}
+
 			turn_command_msg.data = decision_algorithm->turn_direction;
 			turn_command_pub.publish(turn_command_msg);
-
-			//printf("flag_count ::  %d  \n", flag_count);
 		}
 		if(!mode.compare("remote"))
 		{
 			remote_count_time = remote_count_time + 0.006;
 
-			if(!turn_type.compare("pflug_bogen") && change_value_center == -1)
-				motion_left(entire_motion_number_pflug);
-			if(!turn_type.compare("pflug_bogen") && change_value_center == 1)
-				motion_right(entire_motion_number_pflug);
-			if(!turn_type.compare("pflug_bogen") && change_value_center == 0)
-				motion_center(entire_motion_number_pflug);
-
-			if(!turn_type.compare("carving_turn") && change_value_center == 1)
+			if(!turn_type.compare("carving_turn") && change_value_center == 1 && flag_count > 1)
 				motion_left(entire_motion_number_carving);
+			if(!turn_type.compare("carving_turn") && change_value_center == 1 &&  first_turn_check == false)
+				motion_first_turn_left_fun(entire_motion_number_first);
 			if(!turn_type.compare("carving_turn") && change_value_center == -1)
 				motion_right(entire_motion_number_carving);
 			if(!turn_type.compare("carving_turn") && change_value_center == 0)
-				motion_center(entire_motion_number_carving); //remote control
+				motion_center(entire_motion_number_carving);
+			if(!turn_type.compare("carving_turn") && change_value_center == 2)
+				motion_break_fun(entire_motion_number_break);//remote control
 		}
 
 		pre_command = decision_algorithm->turn_direction;
@@ -426,6 +444,7 @@ void neutral_check_function()
 
 	//printf("neutral_check  ::  %d  \n", decision_algorithm->neutral_check);
 }
+
 void motion_left(int motion_number)
 {
 	motion->calculate_init_final_velocity(motion_number);
@@ -514,6 +533,8 @@ void motion_left(int motion_number)
 
 void motion_right(int motion_number)
 {
+	first_turn_check = true;
+
 	motion->calculate_init_final_velocity(motion_number);
 	motion_time_count_carving = motion_time_count_carving + 0.006;
 
@@ -717,6 +738,92 @@ void motion_break_fun(int motion_number)
 	{
 		motion_break_seq ++;
 		flag_count ++;
+		decision_algorithm->is_moving_check = false;
+	}
+
+}
+void motion_first_turn_left_fun(int motion_number)
+{
+	motion_first->calculate_init_final_velocity(motion_number);
+	motion_time_count = motion_time_count + 0.006;
+
+	if(motion_seq== 0)
+	{
+		flag_count ++;
+
+		if(!mode.compare("remote"))
+		{
+			remote_time_.push_back(remote_count_time);
+			remote_command_.push_back(2);
+		}
+
+		for(int var = 0; var < 12 ; var++)
+		{
+			desired_pose_all_msg.leg_final_position[var] = motion_first->motion_left_position[0][var];
+			desired_pose_all_msg.leg_init_vel[var]       = motion_first->motion_init_leg_left_vel[0][var];
+			desired_pose_all_msg.leg_final_vel[var]      = motion_first->motion_final_leg_left_vel[0][var];
+		}
+		for(int var = 0; var < 2 ; var++)
+		{
+			desired_pose_all_msg.waist_final_position[var] = motion_first->motion_waist_left_position[0][var];
+			desired_pose_all_msg.waist_init_vel[var]       = motion_first->motion_init_waist_left_vel[0][var];
+			desired_pose_all_msg.waist_final_vel[var]      = motion_first->motion_final_waist_left_vel[0][var];
+
+		}
+		for(int var = 0; var < 6 ; var++)
+		{
+			desired_pose_all_msg.arm_final_position[var] = motion_first->motion_arm_left_position[0][var];
+			desired_pose_all_msg.arm_init_vel[var]       = motion_first->motion_init_arm_left_vel[0][var];
+			desired_pose_all_msg.arm_final_vel[var]      = motion_first->motion_final_arm_left_vel[0][var];
+		}
+		desired_pose_all_msg.time_leg = motion_first->motion_time[0];
+		desired_pose_all_msg.time_waist = motion_first->motion_time[0];
+		desired_pose_all_msg.time_arm = motion_first->motion_time[0];
+		desired_pose_all_pub.publish(desired_pose_all_msg);
+		motion_seq ++;
+		motion_time_count = 0;
+		decision_algorithm->is_moving_check = true;
+		decision_algorithm->turn_direction = "first_left_turn";
+	}
+
+	for(int motion_num = 1; motion_num < motion_number; motion_num++)
+	{
+		if(motion_time_count > motion_first->motion_time[motion_num-1] && motion_seq == motion_num)
+		{
+			for(int var = 0; var <12 ; var++)
+			{
+				desired_pose_all_msg.leg_final_position[var] = motion_first->motion_left_position[motion_num][var];
+				desired_pose_all_msg.leg_init_vel[var]       = motion_first->motion_init_leg_left_vel[motion_num][var];
+				desired_pose_all_msg.leg_final_vel[var]      = motion_first->motion_final_leg_left_vel[motion_num][var];
+			}
+
+			for(int var = 0; var < 2 ; var++)
+			{
+				desired_pose_all_msg.waist_final_position[var] = motion_first->motion_waist_left_position[motion_num][var];
+				desired_pose_all_msg.waist_init_vel[var]       = motion_first->motion_init_waist_left_vel[motion_num][var];
+				desired_pose_all_msg.waist_final_vel[var]      = motion_first->motion_final_waist_left_vel[motion_num][var];
+
+			}
+			for(int var = 0; var < 6 ; var++)
+			{
+				desired_pose_all_msg.arm_final_position[var] = motion_first->motion_arm_left_position[motion_num][var];
+				desired_pose_all_msg.arm_init_vel[var]       = motion_first->motion_init_arm_left_vel[motion_num][var];
+				desired_pose_all_msg.arm_final_vel[var]      = motion_first->motion_final_arm_left_vel[motion_num][var];
+			}
+			desired_pose_all_msg.time_leg = motion_first->motion_time[motion_num];
+			desired_pose_all_msg.time_waist = motion_first->motion_time[motion_num];
+			desired_pose_all_msg.time_arm = motion_first->motion_time[motion_num];
+			motion_seq ++;
+			motion_time_count = 0;
+			desired_pose_all_pub.publish(desired_pose_all_msg);
+			decision_algorithm->is_moving_check = true;
+			decision_algorithm->turn_direction = "first_left_turn";
+		}
+	}
+
+	if(motion_time_count > motion_first->motion_time[motion_number-1] && motion_seq == motion_number)
+	{
+		motion_seq ++;
 		decision_algorithm->is_moving_check = false;
 	}
 
