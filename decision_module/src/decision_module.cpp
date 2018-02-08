@@ -349,11 +349,11 @@ void control_loop(const ros::TimerEvent&)
 				}
 			}
 
-				if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("first_left_turn"))
+			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("first_left_turn"))
 				motion_first_turn_left_fun(entire_motion_number_first);
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("left_turn") && flag_count > 1)
 				motion_left(entire_motion_number_carving);
-		/*	if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("left_turn"))
+			/*	if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("left_turn"))
 				motion_left(entire_motion_number_carving);*/
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("right_turn"))
 				motion_right(entire_motion_number_carving);
@@ -402,6 +402,7 @@ void control_loop(const ros::TimerEvent&)
 		{
 			remote_count_time = remote_count_time + 0.006;
 
+			/*
 			if(!turn_type.compare("carving_turn") && change_value_center == 1 && flag_count > 1)
 				motion_left(entire_motion_number_carving);
 			if(!turn_type.compare("carving_turn") && change_value_center == 1 &&  first_turn_check == false)
@@ -412,15 +413,16 @@ void control_loop(const ros::TimerEvent&)
 				motion_center(entire_motion_number_carving);
 			if(!turn_type.compare("carving_turn") && change_value_center == 2)
 				motion_break_fun(entire_motion_number_break);//remote control
+			 */
 
-	/*		if(!turn_type.compare("carving_turn") && change_value_center == 1)
+			if(!turn_type.compare("carving_turn") && change_value_center == 1)
 				motion_left(entire_motion_number_carving);
 			if(!turn_type.compare("carving_turn") && change_value_center == -1)
 				motion_right(entire_motion_number_carving);
 			if(!turn_type.compare("carving_turn") && change_value_center == 0)
 				motion_center(entire_motion_number_carving);
 			if(!turn_type.compare("carving_turn") && change_value_center == 2)
-				motion_break_fun(entire_motion_number_break);//remote control*/
+				motion_break_fun(entire_motion_number_break);//remote control
 		}
 
 		pre_command = decision_algorithm->turn_direction;
