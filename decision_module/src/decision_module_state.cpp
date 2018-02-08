@@ -213,14 +213,14 @@ void DecisionModule::decision_function(double flag0[3], double flag1[3])
 			if(flag_sequence == 0)
 			{
 				direction_command = initial_turn;
-				/*			if(initial_turn == -1)
+							if(initial_turn == -1)
 					turn_direction = "first_right_turn";
 				if(initial_turn == 1)
-					turn_direction = "first_left_turn";*/
-				if(initial_turn == -1)
+					turn_direction = "first_left_turn";
+	/*			if(initial_turn == -1)
 					turn_direction = "right_turn";
 				if(initial_turn == 1)
-					turn_direction = "left_turn";
+					turn_direction = "left_turn";*/
 
 
 				pre_turn_direction = turn_direction;
