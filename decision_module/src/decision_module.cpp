@@ -181,23 +181,6 @@ void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& ms
 	time_center_change  = msg->time_change;
 	time_edge_change    = msg->time_change_edge;
 
-	pre_center_change = change_value_center;
-
-	if(msg->center_change == 0)
-	{
-		change_value_center = msg->center_change;
-	}
-	if(decision_algorithm->is_moving_check == true && msg->center_change != 0 && center_check == false)
-	{
-		motion_seq = 0;
-		motion_time_count_carving = 0;
-		change_value_center = 0;
-	}
-	else
-	{
-		center_check = false;
-	}
-
 	if(!mode.compare("remote"))
 	{
 		motion_seq = 0;
@@ -434,12 +417,6 @@ void control_loop(const ros::TimerEvent&)
 				motion_break_fun(entire_motion_number_break);//remote control
 			 */
 
-			if(decision_algorithm->is_moving_check == false && center_check == false)
-			{
-				change_value_center = pre_center_change;
-			}
-
-
 			if(!turn_type.compare("carving_turn") && change_value_center == 1)
 				motion_left(entire_motion_number_carving);
 			if(!turn_type.compare("carving_turn") && change_value_center == -1)
@@ -448,6 +425,7 @@ void control_loop(const ros::TimerEvent&)
 				motion_center(entire_motion_number_carving);
 			if(!turn_type.compare("carving_turn") && change_value_center == 2)
 				motion_break_fun(entire_motion_number_break);//remote control
+
 		}
 
 		pre_command = decision_algorithm->turn_direction;
