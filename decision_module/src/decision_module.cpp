@@ -78,6 +78,9 @@ void initialize()
 	lidar_check = false;
 	pre_lidar_check = false;
 	time_check = false;
+
+	pre_center_change = 0;
+	center_check = false;
 }
 void neutralParseMotionData()
 {
@@ -178,10 +181,21 @@ void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& ms
 	time_center_change  = msg->time_change;
 	time_edge_change    = msg->time_change_edge;
 
-	if(change_value_center == 0)
+	pre_center_change = change_value_center;
+
+	if(msg->center_change == 0)
 	{
-		remote_time_.push_back(remote_count_time);
-		remote_command_.push_back(0);
+		change_value_center = msg->center_change;
+	}
+	if(decision_algorithm->is_moving_check == true && msg->center_change != 0 && center_check == false)
+	{
+		motion_seq = 0;
+		motion_time_count_carving = 0;
+		change_value_center = 0;
+	}
+	else
+	{
+		center_check = false;
 	}
 
 	if(!mode.compare("remote"))
@@ -192,6 +206,11 @@ void desiredCenterChangeMsgCallback(const diana_msgs::CenterChange::ConstPtr& ms
 	else
 		return;
 
+	if(change_value_center == 0)
+	{
+		remote_time_.push_back(remote_count_time);
+		remote_command_.push_back(0);
+	}
 }
 void updateMsgCallback(const std_msgs::Bool::ConstPtr& msg)
 {
@@ -377,7 +396,7 @@ void control_loop(const ros::TimerEvent&)
 			if(flag_count == 0)// 첫번째 기문
 			{
 				desired_pose_head_msg.data.clear();
-				desired_pose_head_msg.data.push_back(0.3);
+				desired_pose_head_msg.data.push_back(0.4);
 				desired_pose_head_msg.data.push_back(-10*DEGREE2RADIAN);
 				desired_pose_head_msg.data.push_back(0);
 				desired_pose_head_msg.data.push_back(0.5);
@@ -414,6 +433,12 @@ void control_loop(const ros::TimerEvent&)
 			if(!turn_type.compare("carving_turn") && change_value_center == 2)
 				motion_break_fun(entire_motion_number_break);//remote control
 			 */
+
+			if(decision_algorithm->is_moving_check == false && center_check == false)
+			{
+				change_value_center = pre_center_change;
+			}
+
 
 			if(!turn_type.compare("carving_turn") && change_value_center == 1)
 				motion_left(entire_motion_number_carving);
@@ -663,10 +688,12 @@ void motion_center(int motion_number)
 	if(motion_time_count_carving < motion->motion_time[motion_number-1])
 	{
 		decision_algorithm->is_moving_check = true;
+		center_check = true;
 	}
 	if(motion_time_count_carving > motion->motion_time[motion_number-1])
 	{
 		decision_algorithm->is_moving_check = false;
+		center_check = false;
 	}
 }
 

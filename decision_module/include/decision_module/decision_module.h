@@ -155,6 +155,8 @@ bool remote_update;
 double remote_command[30][2];
 vector<double> remote_time_;
 vector<double> remote_command_;
+int pre_center_change;
+bool center_check;
 
 std::string pre_direction_command;
 
