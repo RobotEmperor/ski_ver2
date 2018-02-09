@@ -108,7 +108,7 @@ bool init_check;
 std::string turn_type;
 std::string change_type;
 
-double change_value_center;
+int change_value_center;
 double time_center_change;
 double time_edge_change;
 
@@ -118,8 +118,6 @@ std::string temp_change_type;
 double temp_change_value_center;
 double temp_time_center_change;
 double temp_time_edge_change;
-
-double motion_time_count;
 bool center_change_moving_check;
 
 //carving
@@ -155,8 +153,11 @@ bool remote_update;
 double remote_command[30][2];
 vector<double> remote_time_;
 vector<double> remote_command_;
+int pre_direction_change;
 int pre_center_change;
+int direction_change;
 bool center_check;
+bool n_check;
 
 std::string pre_direction_command;
 

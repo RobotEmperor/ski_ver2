@@ -63,6 +63,7 @@ public:
 	bool is_moving_check;
 
 	std::string turn_direction;
+	int turn_command;
 
 	void parseMotionData();// update command
 	void headFollowFlag(double x , double y);
@@ -83,6 +84,7 @@ public:
 	int flag_direction;
 	int pre_flag_sequence;
 	int direction_command;
+	int status;
 
 	//initialize function
 	bool init_complete_check;
