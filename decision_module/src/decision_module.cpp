@@ -384,10 +384,10 @@ void control_loop(const ros::TimerEvent&)
 			if(flag_count == 0)// 첫번째 기문
 			{
 				desired_pose_head_msg.data.clear();
-				desired_pose_head_msg.data.push_back(0.4);
+				desired_pose_head_msg.data.push_back(0.5);
 				desired_pose_head_msg.data.push_back(-10*DEGREE2RADIAN);
 				desired_pose_head_msg.data.push_back(0);
-				desired_pose_head_msg.data.push_back(0.5);
+				desired_pose_head_msg.data.push_back(1);
 				desired_pose_head_pub.publish(desired_pose_head_msg);
 				desired_pose_head_msg.data.clear();
 			}
@@ -397,7 +397,7 @@ void control_loop(const ros::TimerEvent&)
 				desired_pose_head_msg.data.push_back(0);
 				desired_pose_head_msg.data.push_back(-10*DEGREE2RADIAN);
 				desired_pose_head_msg.data.push_back(0);
-				desired_pose_head_msg.data.push_back(0.5);
+				desired_pose_head_msg.data.push_back(1);
 				desired_pose_head_pub.publish(desired_pose_head_msg);
 				desired_pose_head_msg.data.clear();
 			}

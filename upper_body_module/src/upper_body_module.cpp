@@ -103,7 +103,7 @@ void UpperBodyModule::currentFlagPositionFunction(double x, double y, double z)
 	head_point_kinematics_->TransformationWaistToHead(0,0,0.352,
 			head_kinematics_ -> zyx_euler_angle_x,
 			head_kinematics_ -> zyx_euler_angle_y,
-			filter_head->lowPassFilter(temp_head_yaw, temp_pre_yaw, 0.01, 0.008));
+			filter_head->lowPassFilter(temp_head_yaw, temp_pre_yaw, 0.02, 0.008));
 
 	head_point_kinematics_->TransformateHeadPointOnOrigin(x,y,z);
 }
@@ -197,9 +197,9 @@ void UpperBodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 	result_[joint_id_to_name_[9]] -> goal_position_  = -(limitCheck(waist_kinematics_ -> xyz_euler_angle_z + gyro_yaw_function ->PID_calculate(0,tf_current_gyro_z),50,-50)); // waist yaw
 	result_[joint_id_to_name_[10]]-> goal_position_  = -(limitCheck(waist_kinematics_ -> xyz_euler_angle_x + gyro_roll_function->PID_calculate(0,tf_current_gyro_x) + cop_compensation_waist->control_value_Fz_y,40,-40)); // waist roll
 
-	result_[joint_id_to_name_[23]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_yaw, temp_pre_yaw, 0.01, 0.008);
-	result_[joint_id_to_name_[24]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_pitch, temp_pre_pitch, 0.01, 0.008);
-	result_[joint_id_to_name_[25]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_roll, temp_pre_roll, 0.01, 0.008);
+	result_[joint_id_to_name_[23]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_yaw, temp_pre_yaw, 0.02, 0.008);
+	result_[joint_id_to_name_[24]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_pitch, temp_pre_pitch, 0.02, 0.008);
+	result_[joint_id_to_name_[25]]-> goal_position_  = - filter_head->lowPassFilter(temp_head_roll, temp_pre_roll, 0.02, 0.008);
 
 	temp_pre_roll  = temp_head_roll;
 	temp_pre_pitch = temp_head_pitch;
