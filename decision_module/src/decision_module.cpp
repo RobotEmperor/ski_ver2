@@ -201,7 +201,7 @@ void updateMsgCallback(const std_msgs::Bool::ConstPtr& msg)
 	if(!turn_type.compare("pflug_bogen"))
 		motion->parseMotionData("pflug_bogen_ver2");
 
-	//motion_break->parseMotionData("break");
+	motion_break->parseMotionData("break");
 	motion_first->parseMotionData("first_carving");
 	decision_algorithm->parseMotionData();
 	neutralParseMotionData();
@@ -431,7 +431,7 @@ void control_loop(const ros::TimerEvent&)
 		{
 			if(!decision_algorithm -> is_moving_check)
 			{
-				if(change_value_center == 1 || change_value_center == -1 || change_value_center == 5 || change_value_center == -5)
+				if(change_value_center == 1 || change_value_center == -1 || change_value_center == 5 || change_value_center == -5 || change_value_center == 2)
 				{
 					status = change_value_center;
 					motion_time_count_carving = 0;
@@ -458,7 +458,16 @@ void control_loop(const ros::TimerEvent&)
 				}
 			}
 		}
-				decision_algorithm -> status = status;
+		else if(status == 2)
+		{
+			if(change_value_center != status)
+			{
+				status = 0;
+				motion_time_count_carving = 0;
+				motion_seq = 0;
+			}
+		}
+		decision_algorithm -> status = status;
 
 		if(!turn_type.compare("carving_turn") && status == 1)
 			motion_left(entire_motion_number_carving);
@@ -469,7 +478,7 @@ void control_loop(const ros::TimerEvent&)
 		else if(!turn_type.compare("carving_turn") && status == 0)
 			motion_center(entire_motion_number_carving);
 		else if(!turn_type.compare("carving_turn") && status == 2)
-			motion_break_fun(entire_motion_number_break);//remote control
+			motion_break_fun(1);//remote control
 
 		printf("is moving check :: %d  status ::  %d \n",decision_algorithm->is_moving_check, status);
 
@@ -714,85 +723,36 @@ void motion_center(int motion_number)
 
 void motion_break_fun(int motion_number)
 {
-	motion_break->calculate_init_final_velocity(motion_number);
-	motion_time_count_break = motion_time_count_break + 0.006;
+	motion->calculate_init_final_velocity(motion_number);
+	motion_time_count_carving = motion_time_count_carving + 0.006;
 
-	if(motion_break_seq == 0)
+	for(int var = 0; var <12 ; var++)
 	{
-		if(!mode.compare("remote"))
-		{
-			remote_time_.push_back(remote_count_time);
-			remote_command_.push_back(2);
-		}
-
-		for(int var = 0; var < 12 ; var++)
-		{
-			desired_pose_all_msg.leg_final_position[var] = motion_break->motion_left_position[0][var];
-			desired_pose_all_msg.leg_init_vel[var]       = motion_break->motion_init_leg_left_vel[0][var];
-			desired_pose_all_msg.leg_final_vel[var]      = motion_break->motion_final_leg_left_vel[0][var];
-		}
-		for(int var = 0; var < 2 ; var++)
-		{
-			desired_pose_all_msg.waist_final_position[var] = motion_break->motion_waist_left_position[0][var];
-			desired_pose_all_msg.waist_init_vel[var]       = motion_break->motion_init_waist_left_vel[0][var];
-			desired_pose_all_msg.waist_final_vel[var]      = motion_break->motion_final_waist_left_vel[0][var];
-
-		}
-		for(int var = 0; var < 6 ; var++)
-		{
-			desired_pose_all_msg.arm_final_position[var] = motion_break->motion_arm_left_position[0][var];
-			desired_pose_all_msg.arm_init_vel[var]       = motion_break->motion_init_arm_left_vel[0][var];
-			desired_pose_all_msg.arm_final_vel[var]      = motion_break->motion_final_arm_left_vel[0][var];
-		}
-		desired_pose_all_msg.time_leg = motion_break->motion_time[0];
-		desired_pose_all_msg.time_waist = motion_break->motion_time[0];
-		desired_pose_all_msg.time_arm = motion_break->motion_time[0];
-		desired_pose_all_pub.publish(desired_pose_all_msg);
-		motion_break_seq ++;
-		motion_time_count_break = 0;
-		decision_algorithm->is_moving_check = true;
-		//decision_algorithm->turn_direction = "left_turn";
+		desired_pose_all_msg.leg_final_position[var] = motion_break->motion_center_position[var];
+		desired_pose_all_msg.leg_init_vel[var]       = 0;
+		desired_pose_all_msg.leg_final_vel[var]      = 0;
 	}
-
-	for(int motion_num = 1; motion_num < motion_number; motion_num++)
+	for(int var = 0; var < 2 ; var++)
 	{
-		if(motion_time_count_break > motion_break->motion_time[motion_num-1] && motion_break_seq == motion_num)
-		{
-			for(int var = 0; var <12 ; var++)
-			{
-				desired_pose_all_msg.leg_final_position[var] = motion_break->motion_left_position[motion_num][var];
-				desired_pose_all_msg.leg_init_vel[var]       = motion_break->motion_init_leg_left_vel[motion_num][var];
-				desired_pose_all_msg.leg_final_vel[var]      = motion_break->motion_final_leg_left_vel[motion_num][var];
-			}
-
-			for(int var = 0; var < 2 ; var++)
-			{
-				desired_pose_all_msg.waist_final_position[var] = motion_break->motion_waist_left_position[motion_num][var];
-				desired_pose_all_msg.waist_init_vel[var]       = motion_break->motion_init_waist_left_vel[motion_num][var];
-				desired_pose_all_msg.waist_final_vel[var]      = motion_break->motion_final_waist_left_vel[motion_num][var];
-
-			}
-			for(int var = 0; var < 6 ; var++)
-			{
-				desired_pose_all_msg.arm_final_position[var] = motion_break->motion_arm_left_position[motion_num][var];
-				desired_pose_all_msg.arm_init_vel[var]       = motion_break->motion_init_arm_left_vel[motion_num][var];
-				desired_pose_all_msg.arm_final_vel[var]      = motion_break->motion_final_arm_left_vel[motion_num][var];
-			}
-			desired_pose_all_msg.time_leg = motion_break->motion_time[motion_num];
-			desired_pose_all_msg.time_waist = motion_break->motion_time[motion_num];
-			desired_pose_all_msg.time_arm = motion_break->motion_time[motion_num];
-			motion_break_seq ++;
-			motion_time_count_break = 0;
-			desired_pose_all_pub.publish(desired_pose_all_msg);
-			decision_algorithm->is_moving_check = true;
-			//decision_algorithm->turn_direction = "left_turn";
-		}
+		desired_pose_all_msg.waist_final_position[var] = motion_break->motion_waist_center_position[var];
+		desired_pose_all_msg.waist_init_vel[var]       = 0;
+		desired_pose_all_msg.waist_final_vel[var]      = 0;
 	}
-
-	if(motion_time_count_break > motion_break->motion_time[motion_number-1] && motion_break_seq == motion_number)
+	for(int var = 0; var < 6 ; var++)
 	{
-		motion_break_seq ++;
-		flag_count ++;
+		desired_pose_all_msg.arm_final_position[var] = motion_break->motion_arm_center_position[var];
+		desired_pose_all_msg.arm_init_vel[var]       = 0;
+		desired_pose_all_msg.arm_final_vel[var]      = 0;
+	}
+	desired_pose_all_msg.time_leg = motion_break->motion_time[motion_number-1];
+	desired_pose_all_msg.time_waist = motion_break->motion_time[motion_number-1];
+	desired_pose_all_msg.time_arm = motion_break->motion_time[motion_number-1];
+	desired_pose_all_pub.publish(desired_pose_all_msg);
+	center_check = true;
+	decision_algorithm->is_moving_check = true;
+
+	if(motion_time_count_carving > motion_break->motion_time[motion_number-1])
+	{
 		decision_algorithm->is_moving_check = false;
 	}
 
