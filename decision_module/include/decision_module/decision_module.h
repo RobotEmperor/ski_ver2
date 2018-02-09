@@ -158,6 +158,7 @@ int pre_center_change;
 int direction_change;
 bool center_check;
 bool n_check;
+bool lidar_ready;
 
 std::string pre_direction_command;
 

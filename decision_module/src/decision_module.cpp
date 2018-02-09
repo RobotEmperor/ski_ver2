@@ -9,6 +9,8 @@
 
 void initialize()
 {
+	lidar_ready = false;
+
 	motion      = new MotionChange;
 	motion_break = new MotionChange;
 	motion_first = new MotionChange;
@@ -151,10 +153,9 @@ void initCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 }
 void lidarCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 {
-	if(decision_algorithm->is_moving_check == true)
+	if(lidar_ready)
 	{
-		if(msg->data == true)
-			lidar_check = msg->data;
+		lidar_check = msg->data;
 	}
 }
 void currentflagPosition1MsgCallback(const geometry_msgs::Vector3& msg)
@@ -424,9 +425,6 @@ void control_loop(const ros::TimerEvent&)
 		 */
 		static int status = 0;
 
-		cout << decision_algorithm -> is_moving_check << endl;
-
-
 		if(status == 0)
 		{
 			if(!decision_algorithm -> is_moving_check)
@@ -443,6 +441,7 @@ void control_loop(const ros::TimerEvent&)
 		{
 			if(!decision_algorithm -> is_moving_check)
 			{
+				lidar_ready = false;
 				change_value_center = 0;
 				status = 0;
 				motion_time_count_carving = 0;
@@ -450,6 +449,7 @@ void control_loop(const ros::TimerEvent&)
 			}
 			else
 			{
+				lidar_ready = true;
 				if(change_value_center != status)
 				{
 					status = 0;
@@ -462,6 +462,7 @@ void control_loop(const ros::TimerEvent&)
 		{
 			if(change_value_center != status)
 			{
+				lidar_ready = false;
 				status = 0;
 				motion_time_count_carving = 0;
 				motion_seq = 0;
@@ -480,7 +481,7 @@ void control_loop(const ros::TimerEvent&)
 		else if(!turn_type.compare("carving_turn") && status == 2)
 			motion_break_fun(1);//remote control
 
-		printf("is moving check :: %d  status ::  %d \n",decision_algorithm->is_moving_check, status);
+		//printf("is moving check :: %d  status ::  %d \n",decision_algorithm->is_moving_check, status);
 
 		pre_command = decision_algorithm->turn_direction;
 
