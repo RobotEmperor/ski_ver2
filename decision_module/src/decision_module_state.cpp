@@ -95,6 +95,8 @@ DecisionModule::DecisionModule()
 	pre_turn_direction = "basic";
 
 	status = 0;
+	lidar_check = false;
+	is_moving_turn_check = false;
 
 }
 DecisionModule::~DecisionModule()
@@ -206,9 +208,9 @@ void DecisionModule::decision_function(double flag0[3], double flag1[3])
 		turn_command = 0;
 		return;
 	}
-	if(is_moving_check == false && status == 0)
+	if(is_moving_turn_check == false)
 	{
-		if(fabs(flag0[0]) < x_detect_margin[flag_sequence+1]  && y_detect_margin_min[flag_sequence+1] < fabs(flag0[1]) && y_detect_margin_max[flag_sequence+1] > fabs(flag0[1])) // dectect flag
+		if(fabs(flag0[0]) < x_detect_margin[flag_sequence]  && y_detect_margin_min[flag_sequence] < fabs(flag0[1]) && y_detect_margin_max[flag_sequence] > fabs(flag0[1])) // dectect flag
 		{
 			if(flag_sequence == 0)
 			{
@@ -269,25 +271,25 @@ void DecisionModule::parseMotionData()
 	right_y_detect_margin_min = doc["right_y_min"].as<double>();
 	right_y_detect_margin_max = doc["right_y_max"].as<double>();
 
-	x_detect_margin[1] = doc["x_1"].as<double>();;
-	y_detect_margin_min[1] = doc["y_min_1"].as<double>();
-	y_detect_margin_max[1] = doc["y_max_1"].as<double>();
+	x_detect_margin[0] = doc["x_1"].as<double>();;
+	y_detect_margin_min[0] = doc["y_min_1"].as<double>();
+	y_detect_margin_max[0] = doc["y_max_1"].as<double>();
 
-	x_detect_margin[2] = doc["x_2"].as<double>();;
-	y_detect_margin_min[2] = doc["y_min_2"].as<double>();
-	y_detect_margin_max[2] = doc["y_max_2"].as<double>();
+	x_detect_margin[1] = doc["x_2"].as<double>();;
+	y_detect_margin_min[1] = doc["y_min_2"].as<double>();
+	y_detect_margin_max[1] = doc["y_max_2"].as<double>();
 
-	x_detect_margin[3] = doc["x_3"].as<double>();;
-	y_detect_margin_min[3] = doc["y_min_3"].as<double>();
-	y_detect_margin_max[3] = doc["y_max_3"].as<double>();
+	x_detect_margin[2] = doc["x_3"].as<double>();;
+	y_detect_margin_min[2] = doc["y_min_3"].as<double>();
+	y_detect_margin_max[2] = doc["y_max_3"].as<double>();
 
-	x_detect_margin[4] = doc["x_4"].as<double>();;
-	y_detect_margin_min[4] = doc["y_min_4"].as<double>();
-	y_detect_margin_max[4] = doc["y_max_4"].as<double>();
+	x_detect_margin[3] = doc["x_4"].as<double>();;
+	y_detect_margin_min[3] = doc["y_min_4"].as<double>();
+	y_detect_margin_max[3] = doc["y_max_4"].as<double>();
 
-	x_detect_margin[5] = doc["x_5"].as<double>();;
-	y_detect_margin_min[5] = doc["y_min_5"].as<double>();
-	y_detect_margin_max[5] = doc["y_max_5"].as<double>();
+	x_detect_margin[4] = doc["x_5"].as<double>();;
+	y_detect_margin_min[4] = doc["y_min_5"].as<double>();
+	y_detect_margin_max[4] = doc["y_max_5"].as<double>();
 
 	initial_turn = doc["initial_turn"].as<double>();
 }

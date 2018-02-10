@@ -86,6 +86,7 @@ void initialize()
 	direction_change = 0;
 	center_check = false;
 	n_check = false;
+	break_check = false;
 }
 void neutralParseMotionData()
 {
@@ -153,7 +154,7 @@ void initCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 }
 void lidarCheckMsgCallBack(const std_msgs::Bool::ConstPtr& msg)
 {
-	if(lidar_ready)
+	if(decision_algorithm->is_moving_turn_check == true)
 	{
 		lidar_check = msg->data;
 	}
@@ -217,6 +218,8 @@ void updateMsgCallback(const std_msgs::Bool::ConstPtr& msg)
 	pre_direction_command = "center";
 	decision_algorithm->turn_direction = "center";
 
+	break_check = false;
+	time_count_break = 0;
 	motion_break_seq = 0;
 	motion_time_count_break = 0;
 }
@@ -309,19 +312,12 @@ void control_loop(const ros::TimerEvent&)
 
 		if(!mode.compare("auto"))
 		{
-			if(!turn_type.compare("carving_turn") && change_value_center == 7)
-			{
-				decision_algorithm->turn_direction = "center";
-				motion_center(entire_motion_number_carving); //remote control
-				pre_command = decision_algorithm->turn_direction;
-				return;
-			}
+			static int status = 0;
 
-			if(flag_count > 6)
+			if(flag_count > 5)
 			{
-				flag_count = 6;
+				flag_count = 5;
 				decision_algorithm -> flag_sequence = flag_count;
-				return;
 			}
 			else
 			{
@@ -332,8 +328,17 @@ void control_loop(const ros::TimerEvent&)
 			neutral_check_function();
 			decision_algorithm->process();
 
-
-
+			/*
+			static int pre_command = 0;
+			if(decision_algorithm->turn_command != pre_command)
+			{
+				motion_seq = 0;
+				motion_time_count_carving = 0;
+				change_value_center = decision_algorithm->turn_command;
+				pre_command = change_value_center;
+			}
+			pre_direction_command = decision_algorithm->turn_direction; // left right
+			 */
 			if(pre_command.compare(decision_algorithm->turn_direction) != 0 && decision_algorithm->turn_direction.compare("center") != 0)
 			{
 				if(decision_algorithm->is_moving_check == false && pre_direction_command.compare(decision_algorithm->turn_direction) != 0)
@@ -341,9 +346,18 @@ void control_loop(const ros::TimerEvent&)
 					motion_seq = 0;
 					motion_time_count_carving = 0;
 
-					change_value_center = decision_algorithm->turn_command;
+					status = decision_algorithm->turn_command;
 				}
 			}
+			if(pre_command.compare(decision_algorithm->turn_direction) == 0 && decision_algorithm->is_moving_turn_check == false)
+			{
+				status = 0;
+			}
+			if(decision_algorithm->is_moving_turn_check == true)
+			{
+				status = decision_algorithm->turn_command;
+			}
+
 			pre_direction_command = decision_algorithm->turn_direction; // left right
 
 			if(!decision_algorithm->turn_direction.compare("center"))
@@ -353,9 +367,38 @@ void control_loop(const ros::TimerEvent&)
 					motion_seq = -1;
 					motion_time_count_carving = 0;
 
-					change_value_center = decision_algorithm->turn_command;
+					status = decision_algorithm->turn_command;
 				}
 			}
+			if(flag_count == 5)
+			{
+				time_count_break = time_count_break + 0.006;
+
+				if(time_count_break > time_break && break_check == false)
+				{
+					motion_time_count_carving = 0;
+					break_check = true;
+				}
+				if(break_check == true)
+				{
+					status = 2;
+				}
+			}
+
+			printf("value  :: %d \n", status);
+
+
+			if(!turn_type.compare("carving_turn") && status == 1)
+				motion_left(entire_motion_number_carving);
+			else if(!turn_type.compare("carving_turn") && status == 5)
+				motion_first_turn_left_fun(entire_motion_number_first);
+			else if(!turn_type.compare("carving_turn") && status == -1)
+				motion_right(entire_motion_number_carving);
+			else if(!turn_type.compare("carving_turn") && status == 0)
+				motion_center(entire_motion_number_carving);
+			else if(!turn_type.compare("carving_turn") && status == 2)
+				motion_break_fun(1);//remote control
+
 			decision_algorithm -> data_in_check_1 = false;
 			decision_algorithm -> data_in_check_2 = false;
 
@@ -398,48 +441,51 @@ void control_loop(const ros::TimerEvent&)
 		if(!mode.compare("remote"))
 		{
 			remote_count_time = remote_count_time + 0.006;
-		}
-		static int status = 0;
+			static int status = 0;
 
-		switch(status)
-		{
-		case -5:
-		case -1:
-		case 1:
-		case 2:
-		case 5:
-			if(!decision_algorithm -> is_moving_check)
+			switch(status)
 			{
-				lidar_ready = false;
-				change_value_center = 0;
-				status = 0;
-				motion_time_count_carving = 0;
-				motion_seq = 0;
+			case -5:
+			case -1:
+			case 1:
+			case 2:
+			case 5:
+				if(!decision_algorithm -> is_moving_check)
+				{
+					lidar_ready = false;
+					change_value_center = 0;
+					status = 0;
+					motion_time_count_carving = 0;
+					motion_seq = 0;
+				}
+			case 0:
+				if(change_value_center != status)
+				{
+					lidar_ready = true;
+					status = change_value_center;
+					motion_time_count_carving = 0;
+					motion_seq = 0;
+				}
+				break;
+			default:
+				break;
 			}
-		case 0:
-			if(change_value_center != status)
-			{
-				lidar_ready = true;
-				status = change_value_center;
-				motion_time_count_carving = 0;
-				motion_seq = 0;
-			}
-			break;
-		default:
-			break;
-		}
-		decision_algorithm -> status = status;
+			decision_algorithm -> status = status;
 
-		if(!turn_type.compare("carving_turn") && status == 1)
-			motion_left(entire_motion_number_carving);
-		else if(!turn_type.compare("carving_turn") && status == 5)
-			motion_first_turn_left_fun(entire_motion_number_first);
-		else if(!turn_type.compare("carving_turn") && status == -1)
-			motion_right(entire_motion_number_carving);
-		else if(!turn_type.compare("carving_turn") && status == 0)
-			motion_center(entire_motion_number_carving);
-		else if(!turn_type.compare("carving_turn") && status == 2)
-			motion_break_fun(1);//remote control
+			printf("status Value :: %d \n", status);
+
+			if(!turn_type.compare("carving_turn") && status == 1)
+				motion_left(entire_motion_number_carving);
+			else if(!turn_type.compare("carving_turn") && status == 5)
+				motion_first_turn_left_fun(entire_motion_number_first);
+			else if(!turn_type.compare("carving_turn") && status == -1)
+				motion_right(entire_motion_number_carving);
+			else if(!turn_type.compare("carving_turn") && status == 0)
+				motion_center(entire_motion_number_carving);
+			else if(!turn_type.compare("carving_turn") && status == 2)
+				motion_break_fun(1);//remote control
+		}
+
 
 		pre_command = decision_algorithm->turn_direction;
 
@@ -463,6 +509,7 @@ void neutral_check_function()
 		if(neutral_time_count > time_neutral[flag_count])
 		{
 			decision_algorithm->neutral_check = 1;
+			//neutral_time_count = 0;
 			time_check = false;
 		}
 	}
@@ -511,6 +558,7 @@ void motion_left(int motion_number)
 		motion_seq ++;
 		motion_time_count_carving = 0;
 		decision_algorithm->is_moving_check = true;
+		decision_algorithm->is_moving_turn_check = true;
 		decision_algorithm->turn_direction = "left_turn";
 	}
 
@@ -545,6 +593,7 @@ void motion_left(int motion_number)
 			motion_time_count_carving = 0;
 			desired_pose_all_pub.publish(desired_pose_all_msg);
 			decision_algorithm->is_moving_check = true;
+			decision_algorithm->is_moving_turn_check = true;
 			decision_algorithm->turn_direction = "left_turn";
 		}
 	}
@@ -553,6 +602,7 @@ void motion_left(int motion_number)
 	{
 		motion_seq ++;
 		decision_algorithm->is_moving_check = false;
+		decision_algorithm->is_moving_turn_check = false;
 	}
 }
 
@@ -598,6 +648,7 @@ void motion_right(int motion_number)
 		motion_seq ++;
 		motion_time_count_carving = 0;
 		decision_algorithm->is_moving_check = true;
+		decision_algorithm->is_moving_turn_check = true;
 		decision_algorithm->turn_direction = "right_turn";
 	}
 
@@ -632,6 +683,7 @@ void motion_right(int motion_number)
 			motion_time_count_carving = 0;
 			desired_pose_all_pub.publish(desired_pose_all_msg);
 			decision_algorithm->is_moving_check = true;
+			decision_algorithm->is_moving_turn_check = true;
 			decision_algorithm->turn_direction = "right_turn";
 
 		}
@@ -640,11 +692,13 @@ void motion_right(int motion_number)
 	if(motion_time_count_carving > motion->motion_time[motion_number-1] && motion_seq == motion_number)
 	{
 		motion_seq ++;
+		decision_algorithm->is_moving_turn_check = false;
 		decision_algorithm->is_moving_check = false;
 	}
 }
 void motion_center(int motion_number)
 {
+	decision_algorithm->is_moving_turn_check = false;
 	motion->calculate_init_final_velocity(motion_number);
 	motion_time_count_carving = motion_time_count_carving + 0.006;
 
@@ -757,6 +811,7 @@ void motion_first_turn_left_fun(int motion_number)
 		motion_seq ++;
 		motion_time_count_carving = 0;
 		decision_algorithm->is_moving_check = true;
+		decision_algorithm->is_moving_turn_check = true;
 		decision_algorithm->turn_direction = "first_left_turn";
 	}
 
@@ -791,6 +846,7 @@ void motion_first_turn_left_fun(int motion_number)
 			motion_time_count_carving = 0;
 			desired_pose_all_pub.publish(desired_pose_all_msg);
 			decision_algorithm->is_moving_check = true;
+			decision_algorithm->is_moving_turn_check = true;
 			decision_algorithm->turn_direction = "first_left_turn";
 		}
 	}
@@ -798,6 +854,7 @@ void motion_first_turn_left_fun(int motion_number)
 	if(motion_time_count_carving > motion_first->motion_time[motion_number-1] && motion_seq == motion_number)
 	{
 		motion_seq ++;
+		decision_algorithm->is_moving_turn_check = false;
 		decision_algorithm->is_moving_check = false;
 	}
 

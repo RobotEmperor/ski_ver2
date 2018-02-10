@@ -175,6 +175,7 @@ int flag_count;
 //time break
 double time_break;
 double time_count_break;
+bool break_check;
 
 
 
