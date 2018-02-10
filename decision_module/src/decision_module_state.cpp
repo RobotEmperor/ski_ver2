@@ -209,7 +209,7 @@ void DecisionModule::decision_function(double flag0[3], double flag1[3])
 	if(is_moving_check == false && status == 0)
 	{
 		if(fabs(flag0[0]) < x_detect_margin[flag_sequence+1]  && y_detect_margin_min[flag_sequence+1] < fabs(flag0[1]) && y_detect_margin_max[flag_sequence+1] > fabs(flag0[1])) // dectect flag
-		{
+		{ ROS_INFO("!!!!!!!!!!!!!!!!!!!!\n");
 			if(flag_sequence == 0)
 			{
 				direction_command = initial_turn;

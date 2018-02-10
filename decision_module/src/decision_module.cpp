@@ -470,6 +470,8 @@ void control_loop(const ros::TimerEvent&)
 		}
 		decision_algorithm -> status = status;
 
+                ROS_INFO("command ::  %d, \n", status);
+
 		if(!turn_type.compare("carving_turn") && status == 1)
 			motion_left(entire_motion_number_carving);
 		else if(!turn_type.compare("carving_turn") && status == 5)
