@@ -209,7 +209,7 @@ void DecisionModule::decision_function(double flag0[3], double flag1[3])
 	if(is_moving_check == false && status == 0)
 	{
 		if(fabs(flag0[0]) < x_detect_margin[flag_sequence+1]  && y_detect_margin_min[flag_sequence+1] < fabs(flag0[1]) && y_detect_margin_max[flag_sequence+1] > fabs(flag0[1])) // dectect flag
-		{ ROS_INFO("!!!!!!!!!!!!!!!!!!!!\n");
+		{
 			if(flag_sequence == 0)
 			{
 				direction_command = initial_turn;
@@ -347,30 +347,21 @@ void DecisionModule::top_view(double flag_position[3])
 		top_view_flag_position.y = pre_top_view_robot_position.y + flag_position[1]; // 고정된값
 		flag_check = 1; // flag change
 
-		//pre_top_view_flag_position.x = top_view_flag_position.x;
-		//pre_top_view_flag_position.y = top_view_flag_position.y;
 
-		//printf("Flag update :: X :: %f , X :: %f \n", top_view_flag_position.x, top_view_flag_position.y);
-		//printf("pre :: X :: %f , X :: %f \n", pre_top_view_robot_position.x, pre_top_view_robot_position.y);
 	}
 
 
 	top_view_robot_position.x = -flag_position[0] + top_view_flag_position.x;
 	top_view_robot_position.y = -flag_position[1] + top_view_flag_position.y;
 
-	//printf("ROBOT     :: X :: %f , Y :: %f \n", top_view_robot_position.x , top_view_robot_position.y);
-	//printf("Top View  :: X :: %f , Y :: %f \n", top_view_flag_position.x , top_view_flag_position.y);
+
 
 	pre_flag_sequence = flag_sequence;
-	//pre_top_view_flag_position.x = top_view_flag_position.x;
-	//pre_top_view_flag_position.y = top_view_flag_position.y;
+
 
 	pre_top_view_robot_position.x = top_view_robot_position.x;
 	pre_top_view_robot_position.y = top_view_robot_position.y;
 
-	//printf("flag  ::  X:: %f    Y :: %f \n", top_view_flag_position.x, top_view_flag_position.y);
-	//printf("flag  ::  X:: %f    Y :: %f \n", top_view_robot_position.x, top_view_robot_position.y);
-	//printf("flag_sequence ::  %d \n", flag_sequence);
 }
 
 

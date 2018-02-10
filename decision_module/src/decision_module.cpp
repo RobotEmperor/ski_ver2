@@ -356,18 +356,6 @@ void control_loop(const ros::TimerEvent&)
 					change_value_center = decision_algorithm->turn_command;
 				}
 			}
-
-			/*if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("first_left_turn"))
-				motion_first_turn_left_fun(entire_motion_number_first);
-			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("left_turn") && flag_count > 1)
-				motion_left(entire_motion_number_carving);
-			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("right_turn"))
-				motion_right(entire_motion_number_carving);
-			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("center"))
-				motion_center(entire_motion_number_carving);*/
-
-
-
 			decision_algorithm -> data_in_check_1 = false;
 			decision_algorithm -> data_in_check_2 = false;
 
@@ -398,7 +386,7 @@ void control_loop(const ros::TimerEvent&)
 				desired_pose_head_msg.data.push_back(0);
 				desired_pose_head_msg.data.push_back(-10*DEGREE2RADIAN);
 				desired_pose_head_msg.data.push_back(0);
-				desired_pose_head_msg.data.push_back(1);
+				desired_pose_head_msg.data.push_back(2);
 				desired_pose_head_pub.publish(desired_pose_head_msg);
 				desired_pose_head_msg.data.clear();
 			}
@@ -411,34 +399,15 @@ void control_loop(const ros::TimerEvent&)
 		{
 			remote_count_time = remote_count_time + 0.006;
 		}
-		/*
-			if(!turn_type.compare("carving_turn") && change_value_center == 1 && flag_count > 1)
-				motion_left(entire_motion_number_carving);
-			if(!turn_type.compare("carving_turn") && change_value_center == 1 &&  first_turn_check == false)
-				motion_first_turn_left_fun(entire_motion_number_first);
-			if(!turn_type.compare("carving_turn") && change_value_center == -1)
-				motion_right(entire_motion_number_carving);
-			if(!turn_type.compare("carving_turn") && change_value_center == 0)
-				motion_center(entire_motion_number_carving);
-			if(!turn_type.compare("carving_turn") && change_value_center == 2)
-				motion_break_fun(entire_motion_number_break);//remote control
-		 */
 		static int status = 0;
 
-		if(status == 0)
+		switch(status)
 		{
-			if(!decision_algorithm -> is_moving_check)
-			{
-				if(change_value_center == 1 || change_value_center == -1 || change_value_center == 5 || change_value_center == -5 || change_value_center == 2)
-				{
-					status = change_value_center;
-					motion_time_count_carving = 0;
-					motion_seq = 0;
-				}
-			}
-		}
-		else if(status == 1 || status == -1 || status == 5 || status == -5)
-		{
+		case -5:
+		case -1:
+		case 1:
+		case 2:
+		case 5:
 			if(!decision_algorithm -> is_moving_check)
 			{
 				lidar_ready = false;
@@ -447,30 +416,19 @@ void control_loop(const ros::TimerEvent&)
 				motion_time_count_carving = 0;
 				motion_seq = 0;
 			}
-			else
-			{
-				lidar_ready = true;
-				if(change_value_center != status)
-				{
-					status = 0;
-					motion_time_count_carving = 0;
-					motion_seq = 0;
-				}
-			}
-		}
-		else if(status == 2)
-		{
+		case 0:
 			if(change_value_center != status)
 			{
-				lidar_ready = false;
-				status = 0;
+				lidar_ready = true;
+				status = change_value_center;
 				motion_time_count_carving = 0;
 				motion_seq = 0;
 			}
+			break;
+		default:
+			break;
 		}
 		decision_algorithm -> status = status;
-
-                ROS_INFO("command ::  %d, \n", status);
 
 		if(!turn_type.compare("carving_turn") && status == 1)
 			motion_left(entire_motion_number_carving);
@@ -482,8 +440,6 @@ void control_loop(const ros::TimerEvent&)
 			motion_center(entire_motion_number_carving);
 		else if(!turn_type.compare("carving_turn") && status == 2)
 			motion_break_fun(1);//remote control
-
-		//printf("is moving check :: %d  status ::  %d \n",decision_algorithm->is_moving_check, status);
 
 		pre_command = decision_algorithm->turn_direction;
 
