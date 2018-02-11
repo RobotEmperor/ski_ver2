@@ -204,6 +204,7 @@ void DecisionModule::decision_function(double flag0[3], double flag1[3])
 	if(neutral_check == 1)
 	{
 		turn_direction = "center";
+		neutral_check = 0;
 		return;
 	}
 	if(is_moving_check == false)
@@ -217,11 +218,6 @@ void DecisionModule::decision_function(double flag0[3], double flag1[3])
 					turn_direction = "first_right_turn";
 				if(initial_turn == 1)
 					turn_direction = "first_left_turn";
-				/*			if(initial_turn == -1)
-					turn_direction = "right_turn";
-				if(initial_turn == 1)
-					turn_direction = "left_turn";*/
-
 
 				pre_turn_direction = turn_direction;
 			}

@@ -177,6 +177,7 @@ int flag_count;
 double time_break;
 double time_count_break;
 
+bool neutral_check;
 
 
 #endif /* SKI_VER2_DECISION_MODULE_INCLUDE_DECISION_MODULE_DECISION_MODULE_H_ */

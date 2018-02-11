@@ -35,7 +35,7 @@ void initialize()
 	motion_break_seq = 0;
 	motion_time_count_break = 0;
 	entire_motion_number_pflug = 4;
-	entire_motion_number_carving = 3;
+	entire_motion_number_carving = 2;
 	entire_motion_number_break = 4;
 	entire_motion_number_first = 3;
 
@@ -84,6 +84,7 @@ void initialize()
 	direction_change = 0;
 	center_check = false;
 	n_check = false;
+	neutral_check = false;
 }
 void neutralParseMotionData()
 {
@@ -220,6 +221,9 @@ void updateMsgCallback(const std_msgs::Bool::ConstPtr& msg)
 
 	motion_break_seq = 0;
 	motion_time_count_break = 0;
+
+	neutral_check = false;
+	time_count_break = 0;
 }
 void modeChangeMsgCallback(const std_msgs::Bool::ConstPtr& msg)
 {
@@ -318,17 +322,15 @@ void control_loop(const ros::TimerEvent&)
 				return;
 			}
 
-			if(flag_count > 6)
+			if(flag_count > 5)
 			{
 				flag_count = 5;
 				decision_algorithm -> flag_sequence = flag_count;
-				return;
 			}
 			else
 			{
 				decision_algorithm -> flag_sequence = flag_count;
 			}
-
 			//
 			neutral_check_function();
 			decision_algorithm->process();
@@ -351,6 +353,22 @@ void control_loop(const ros::TimerEvent&)
 					motion_time_count_carving = 0;
 				}
 			}
+
+			if(flag_count == 5)
+			{
+				time_count_break = time_count_break + 0.006;
+
+				if(time_count_break > time_break && neutral_check == false)
+				{
+					motion_time_count_carving = 0;
+					neutral_check = true;
+				}
+				if(neutral_check == true)
+				{
+					decision_algorithm->turn_direction = "center";
+				}
+			}
+			printf("flag count ::  %d \n", flag_count);
 
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("first_left_turn"))
 				motion_first_turn_left_fun(entire_motion_number_first);
@@ -387,7 +405,7 @@ void control_loop(const ros::TimerEvent&)
 				desired_pose_head_pub.publish(desired_pose_head_msg);
 				desired_pose_head_msg.data.clear();
 			}
-			if(flag_count == 1)// 첫번째 기문
+			else if(flag_count == 1)// 첫번째 기문
 			{
 				desired_pose_head_msg.data.clear();
 				desired_pose_head_msg.data.push_back(0);
@@ -449,20 +467,27 @@ void neutral_check_function()
 		time_check = true;
 		lidar_check = false;
 		neutral_time_count = 0;
+		decision_algorithm->neutral_check = 0;
 	}
 	if(time_check)
 	{
-		neutral_time_count = neutral_time_count + 0.006;
-
-		if(neutral_time_count > time_neutral[flag_count])
+		if(flag_count == 1)
 		{
-			decision_algorithm->neutral_check = 1;
+			neutral_time_count = neutral_time_count + 0.006;
+
+			if(neutral_time_count > time_neutral[flag_count])
+			{
+				decision_algorithm->neutral_check = 1;
+				decision_algorithm->is_moving_check = false;
+				time_check = false;
+			}
+		}
+		else
+		{
 			decision_algorithm->is_moving_check = false;
 			time_check = false;
 		}
 	}
-	else
-		decision_algorithm->neutral_check = 0;
 }
 
 void motion_left(int motion_number)
