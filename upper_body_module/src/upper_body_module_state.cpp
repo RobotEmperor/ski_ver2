@@ -228,6 +228,12 @@ void UpperBodyModule::flagPositionGetMsgCallback(const diana_msgs::FlagDataArray
 		current_flag_position_y[num] = head_point_kinematics_->head_point_on_origin_y*0.01;  // y
 		current_flag_position_z[num]  = head_point_kinematics_->head_point_on_origin_z*0.01;  // z
 	}
+	if( msg.length == 0)
+	{
+		current_flag_position_x[0]  = 0;  // x
+		current_flag_position_y[0]  = 0;  // y
+		current_flag_position_z[0]  = 0;  // z
+	}
 
 	check_detection_1 = true;
 	//check_detection_2 = true;
