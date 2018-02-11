@@ -341,7 +341,7 @@ void control_loop(const ros::TimerEvent&)
 			 */
 			if(pre_command.compare(decision_algorithm->turn_direction) != 0 && decision_algorithm->turn_direction.compare("center") != 0)
 			{
-				if(decision_algorithm->is_moving_check == false && pre_direction_command.compare(decision_algorithm->turn_direction) != 0)
+				if(decision_algorithm->is_moving_turn_check == false && pre_direction_command.compare(decision_algorithm->turn_direction) != 0)
 				{
 					motion_seq = 0;
 					motion_time_count_carving = 0;
@@ -523,7 +523,7 @@ void motion_left(int motion_number)
 	motion_time_count_carving = motion_time_count_carving + 0.006;
 
 	if(motion_seq == 0)
-	{
+	{       decision_algorithm -> is_moving_check = false;
 		flag_count++;
 
 		if(!mode.compare("remote"))
@@ -614,7 +614,7 @@ void motion_right(int motion_number)
 	motion_time_count_carving = motion_time_count_carving + 0.006;
 
 	if(motion_seq == 0)
-	{
+	{       decision_algorithm -> is_moving_check = false;
 		flag_count++;
 
 		if(!mode.compare("remote"))
@@ -777,6 +777,7 @@ void motion_first_turn_left_fun(int motion_number)
 
 	if(motion_seq== 0)
 	{
+               decision_algorithm -> is_moving_check = false;
 		flag_count ++;
 
 		if(!mode.compare("remote"))

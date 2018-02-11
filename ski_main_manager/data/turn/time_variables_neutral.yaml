@@ -1,6 +1,6 @@
-time_1: 0.01  # 0.3
-time_2: 0.01
-time_3: 0.01
-time_4: 0.01
-time_5: 0.01
-time_break: 5
+time_1: 0.3  # 0.3
+time_2: 0.4
+time_3: 0.5
+time_4: 0.5
+time_5: 0.2
+time_break: 4

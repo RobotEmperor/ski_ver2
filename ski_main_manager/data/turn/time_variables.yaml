@@ -7,19 +7,19 @@ right_x: 5
 right_y_min: -10
 right_y_max: 0
 
-x_1: 7.8
+x_1: 8.0
 y_min_1: 0.5
 y_max_1: 10
 
-x_2: 10
+x_2: 8.2
 y_min_2: 0.5
 y_max_2: 10
 
-x_3: 12
+x_3: 9.0
 y_min_3: 0.5
 y_max_3: 10
 
-x_4: 11
+x_4: 9.0
 y_min_4: 0.5
 y_max_4: 10
 
