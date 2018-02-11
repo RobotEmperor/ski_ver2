@@ -368,8 +368,6 @@ void control_loop(const ros::TimerEvent&)
 					decision_algorithm->turn_direction = "center";
 				}
 			}
-			printf("flag count ::  %d \n", flag_count);
-
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("first_left_turn"))
 				motion_first_turn_left_fun(entire_motion_number_first);
 			if(!turn_type.compare("carving_turn") && !decision_algorithm->turn_direction.compare("left_turn") && flag_count > 1)
