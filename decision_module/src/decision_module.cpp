@@ -457,6 +457,7 @@ void neutral_check_function()
 		if(neutral_time_count > time_neutral[flag_count])
 		{
 			decision_algorithm->neutral_check = 1;
+			decision_algorithm->is_moving_check = false;
 			time_check = false;
 		}
 	}
