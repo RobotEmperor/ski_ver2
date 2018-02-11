@@ -118,6 +118,8 @@ std::string temp_change_type;
 double temp_change_value_center;
 double temp_time_center_change;
 double temp_time_edge_change;
+
+double motion_time_count;
 bool center_change_moving_check;
 
 //carving
@@ -158,7 +160,6 @@ int pre_center_change;
 int direction_change;
 bool center_check;
 bool n_check;
-bool lidar_ready;
 
 std::string pre_direction_command;
 
@@ -175,7 +176,6 @@ int flag_count;
 //time break
 double time_break;
 double time_count_break;
-bool break_check;
 
 
 

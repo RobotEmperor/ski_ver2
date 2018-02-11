@@ -61,10 +61,8 @@ public:
 
 
 	bool is_moving_check;
-	bool is_moving_turn_check;
 
 	std::string turn_direction;
-	int turn_command;
 
 	void parseMotionData();// update command
 	void headFollowFlag(double x , double y);
@@ -85,7 +83,6 @@ public:
 	int flag_direction;
 	int pre_flag_sequence;
 	int direction_command;
-	int status;
 
 	//initialize function
 	bool init_complete_check;
@@ -95,10 +92,8 @@ public:
 	double flag_out_data[50][2];
 	std_msgs::Float64MultiArray init_top_view_msg;
 
-
 	// neutral check
 	bool neutral_check;
-	bool lidar_check;
 
 private:
 	void classification_function(double flag0[3], double flag1[3], bool check_1, bool check_2);
@@ -131,7 +126,6 @@ private:
 
 	//
 	std::string pre_turn_direction;
-
 
 
 

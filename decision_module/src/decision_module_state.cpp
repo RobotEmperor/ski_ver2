@@ -30,7 +30,6 @@ DecisionModule::DecisionModule()
 
 	is_moving_check = false;
 	turn_direction = "center";
-	turn_command = 0;
 
 	left_x_detect_margin = 0;
 	left_y_detect_margin_min = 0;
@@ -93,10 +92,6 @@ DecisionModule::DecisionModule()
 	initial_turn = 0;
 
 	pre_turn_direction = "basic";
-
-	status = 0;
-	lidar_check = false;
-	is_moving_turn_check = false;
 
 }
 DecisionModule::~DecisionModule()
@@ -162,7 +157,11 @@ void DecisionModule::process()
 {
 	classification_function(temp_flag0, temp_flag1, data_in_check_1, data_in_check_2);
 	top_view(true_flag_0);
+
 	decision_function(true_flag_0, true_flag_1);
+
+	//headFollowFlag(temp_flag0[0] , temp_flag0[1]);
+	//top_view(temp_flag0);
 }
 void DecisionModule::classification_function(double flag0[3], double flag1[3], bool check_1, bool check_2)
 {
@@ -205,10 +204,9 @@ void DecisionModule::decision_function(double flag0[3], double flag1[3])
 	if(neutral_check == 1)
 	{
 		turn_direction = "center";
-		turn_command = 0;
 		return;
 	}
-	if(is_moving_turn_check == false)
+	if(is_moving_check == false)
 	{
 		if(fabs(flag0[0]) < x_detect_margin[flag_sequence]  && y_detect_margin_min[flag_sequence] < fabs(flag0[1]) && y_detect_margin_max[flag_sequence] > fabs(flag0[1])) // dectect flag
 		{
@@ -216,16 +214,15 @@ void DecisionModule::decision_function(double flag0[3], double flag1[3])
 			{
 				direction_command = initial_turn;
 				if(initial_turn == -1)
-				{
-					turn_command = -5;
 					turn_direction = "first_right_turn";
-
-				}
 				if(initial_turn == 1)
-				{
-					turn_command = 5;
 					turn_direction = "first_left_turn";
-				}
+				/*			if(initial_turn == -1)
+					turn_direction = "right_turn";
+				if(initial_turn == 1)
+					turn_direction = "left_turn";*/
+
+
 				pre_turn_direction = turn_direction;
 			}
 			else
@@ -234,13 +231,11 @@ void DecisionModule::decision_function(double flag0[3], double flag1[3])
 				{
 					if(!pre_turn_direction.compare("left_turn") || !pre_turn_direction.compare("first_left_turn"))
 					{
-						turn_command = -1;
 						turn_direction = "right_turn";
 					}
 					if(!pre_turn_direction.compare("right_turn")  || !pre_turn_direction.compare("first_right_turn"))
 					{
 						turn_direction = "left_turn";
-						turn_command = 1;
 					}
 					pre_turn_direction = turn_direction;
 				}
@@ -349,21 +344,30 @@ void DecisionModule::top_view(double flag_position[3])
 		top_view_flag_position.y = pre_top_view_robot_position.y + flag_position[1]; // 고정된값
 		flag_check = 1; // flag change
 
+		//pre_top_view_flag_position.x = top_view_flag_position.x;
+		//pre_top_view_flag_position.y = top_view_flag_position.y;
 
+		//printf("Flag update :: X :: %f , X :: %f \n", top_view_flag_position.x, top_view_flag_position.y);
+		//printf("pre :: X :: %f , X :: %f \n", pre_top_view_robot_position.x, pre_top_view_robot_position.y);
 	}
 
 
 	top_view_robot_position.x = -flag_position[0] + top_view_flag_position.x;
 	top_view_robot_position.y = -flag_position[1] + top_view_flag_position.y;
 
-
+	//printf("ROBOT     :: X :: %f , Y :: %f \n", top_view_robot_position.x , top_view_robot_position.y);
+	//printf("Top View  :: X :: %f , Y :: %f \n", top_view_flag_position.x , top_view_flag_position.y);
 
 	pre_flag_sequence = flag_sequence;
-
+	//pre_top_view_flag_position.x = top_view_flag_position.x;
+	//pre_top_view_flag_position.y = top_view_flag_position.y;
 
 	pre_top_view_robot_position.x = top_view_robot_position.x;
 	pre_top_view_robot_position.y = top_view_robot_position.y;
 
+	//printf("flag  ::  X:: %f    Y :: %f \n", top_view_flag_position.x, top_view_flag_position.y);
+	//printf("flag  ::  X:: %f    Y :: %f \n", top_view_robot_position.x, top_view_robot_position.y);
+	//printf("flag_sequence ::  %d \n", flag_sequence);
 }
 
 
